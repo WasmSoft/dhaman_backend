@@ -1,0 +1,37 @@
+enum MilestoneStatus {
+  DRAFT
+  ACTIVE
+  IN_REVIEW
+  ACCEPTED
+  CHANGES_REQUESTED
+  CANCELLED
+}
+
+model Milestone {
+  id                 String          @id @default(uuid())
+  agreementId        String
+  title              String
+  description        String?
+  amount             Decimal         @db.Decimal(12, 2)
+  currency           String
+  dueDate            DateTime?
+  order              Int
+  status             MilestoneStatus
+  paymentStatus      PaymentStatus
+  deliveryStatus     DeliveryStatus
+  acceptanceCriteria Json
+  revisionLimit      Int
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  agreement      Agreement       @relation(fields: [agreementId], references: [id])
+  payments       Payment[]
+  deliveries     Delivery[]
+  aiReviews      AIReview[]
+  changeRequests ChangeRequest[]
+  timelineEvents TimelineEvent[]
+
+  @@unique([agreementId, order])
+  @@index([agreementId])
+  @@index([status])
+}

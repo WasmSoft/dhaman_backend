@@ -1,0 +1,37 @@
+enum TimelineEventType {
+  AGREEMENT_CREATED
+  AGREEMENT_SENT
+  AGREEMENT_APPROVED
+  MILESTONE_CREATED
+  PAYMENT_RESERVED
+  PAYMENT_RELEASED
+  DELIVERY_SUBMITTED
+  CHANGE_REQUEST_CREATED
+  CHANGE_REQUEST_APPROVED
+  CHANGE_REQUEST_DECLINED
+  AI_REVIEW_REQUESTED
+  AI_REVIEW_COMPLETED
+  EMAIL_SENT
+}
+
+model TimelineEvent {
+  id          String            @id @default(uuid())
+  agreementId String
+  milestoneId String?
+  actorRole   TimelineActorRole
+  actorId     String?
+  type        TimelineEventType
+  title       String
+  description String
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+
+  agreement Agreement  @relation(fields: [agreementId], references: [id])
+  milestone Milestone? @relation(fields: [milestoneId], references: [id])
+  actor     User?      @relation("TimelineActor", fields: [actorId], references: [id])
+
+  @@index([agreementId])
+  @@index([milestoneId])
+  @@index([actorId])
+  @@index([type])
+}

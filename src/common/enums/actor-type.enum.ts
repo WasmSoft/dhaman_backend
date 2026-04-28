@@ -1,0 +1,7 @@
+export enum ActorType {
+  FREELANCER = 'FREELANCER',
+  CLIENT_PORTAL = 'CLIENT_PORTAL',
+  SYSTEM = 'SYSTEM',
+  AI = 'AI',
+  UNKNOWN = 'UNKNOWN',
+}

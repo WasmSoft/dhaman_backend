@@ -1,0 +1,25 @@
+model Delivery {
+  id            String         @id @default(uuid())
+  agreementId   String
+  milestoneId   String
+  submittedById String
+  deliveryUrl   String?
+  fileUrl       String?
+  fileName      String?
+  fileType      String?
+  summary       String
+  notes         String?
+  status        DeliveryStatus
+  submittedAt   DateTime
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  agreement   Agreement  @relation(fields: [agreementId], references: [id])
+  milestone   Milestone  @relation(fields: [milestoneId], references: [id])
+  submittedBy User       @relation("SubmittedDeliveries", fields: [submittedById], references: [id])
+  aiReviews   AIReview[]
+
+  @@index([agreementId])
+  @@index([milestoneId])
+  @@index([submittedById])
+}

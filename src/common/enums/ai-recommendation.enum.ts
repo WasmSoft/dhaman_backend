@@ -1,0 +1,6 @@
+export enum AIRecommendation {
+  ACCEPT = 'ACCEPT',
+  REJECT = 'REJECT',
+  PARTIAL = 'PARTIAL',
+  NEEDS_HUMAN_REVIEW = 'NEEDS_HUMAN_REVIEW',
+}

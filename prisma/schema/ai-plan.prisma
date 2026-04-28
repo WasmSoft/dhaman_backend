@@ -1,0 +1,11 @@
+model AiPlanDraft {
+  id          String   @id @default(uuid())
+  userId      String?
+  input       Json
+  output      Json
+  rawResponse Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}

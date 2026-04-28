@@ -1,0 +1,41 @@
+enum AIReviewStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum AIRecommendation {
+  ACCEPT
+  REJECT
+  PARTIAL
+  NEEDS_HUMAN_REVIEW
+}
+
+model AIReview {
+  id                String            @id @default(uuid())
+  agreementId       String
+  milestoneId       String
+  deliveryId        String?
+  requestedByRole   TimelineActorRole
+  objection         String
+  relatedCriteria   Json?
+  status            AIReviewStatus
+  matchScore        Float?
+  recommendation    AIRecommendation
+  reasoning         String?
+  completedCriteria Json?
+  missingCriteria   Json?
+  outOfScopeItems   Json?
+  rawResponse       Json?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  agreement Agreement @relation(fields: [agreementId], references: [id])
+  milestone Milestone @relation(fields: [milestoneId], references: [id])
+  delivery  Delivery? @relation(fields: [deliveryId], references: [id])
+
+  @@index([agreementId])
+  @@index([milestoneId])
+  @@index([status])
+}

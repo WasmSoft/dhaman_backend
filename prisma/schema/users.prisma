@@ -1,0 +1,24 @@
+enum UserRole {
+  FREELANCER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String?
+  role         UserRole
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clients             Client[]        @relation("FreelancerClients")
+  agreements          Agreement[]     @relation("FreelancerAgreements")
+  submittedDeliveries Delivery[]      @relation("SubmittedDeliveries")
+  settings            UserSettings?
+  auditLogs           AuditLog[]      @relation("AuditActor")
+  timelineEvents      TimelineEvent[] @relation("TimelineActor")
+
+  @@index([role])
+}

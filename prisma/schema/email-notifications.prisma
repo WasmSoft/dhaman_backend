@@ -1,0 +1,34 @@
+enum NotificationType {
+  AGREEMENT_INVITE
+  AGREEMENT_APPROVED
+  PAYMENT_RESERVED
+  PAYMENT_RELEASED
+  DELIVERY_SUBMITTED
+  CHANGE_REQUEST_CREATED
+  AI_REVIEW_READY
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model EmailNotification {
+  id                String             @id @default(uuid())
+  agreementId       String?
+  recipientEmail    String
+  type              NotificationType
+  subject           String
+  status            NotificationStatus
+  providerMessageId String?
+  errorMessage      String?
+  sentAt            DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  agreement Agreement? @relation(fields: [agreementId], references: [id])
+
+  @@index([agreementId])
+  @@index([status])
+}

@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentStatus {
+  WAITING
+  RESERVED
+  CLIENT_REVIEW
+  AI_REVIEW
+  READY_TO_RELEASE
+  RELEASED
+  ON_HOLD
+  FAILED
+  REFUNDED
+  NOT_REQUIRED
+}
+
+enum DeliveryStatus {
+  NOT_SUBMITTED
+  SUBMITTED
+  IN_REVIEW
+  ACCEPTED
+  CHANGES_REQUESTED
+}
+
+enum TimelineActorRole {
+  FREELANCER
+  CLIENT
+  SYSTEM
+  AI
+}
