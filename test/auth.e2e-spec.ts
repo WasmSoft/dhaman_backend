@@ -404,5 +404,29 @@ describe('Auth endpoints (e2e)', () => {
 
       expectErrorCode(response, ErrorCode.UNAUTHORIZED);
     });
+
+    it('returns AUTH_TOKEN_INVALID when logout receives a malformed token', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/auth/logout')
+        .set('Authorization', 'Bearer not-a-valid-token')
+        .expect(401);
+
+      expectErrorCode(response, ErrorCode.AUTH_TOKEN_INVALID);
+    });
+
+    it('returns AUTH_TOKEN_EXPIRED when logout receives an expired token', async () => {
+      const user = await seedUser({ id: 'expired-logout-user' });
+      const expiredToken = jwtService.sign(
+        { role: user.role, sub: user.id },
+        { expiresIn: '-1s' },
+      );
+
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/auth/logout')
+        .set('Authorization', `Bearer ${expiredToken}`)
+        .expect(401);
+
+      expectErrorCode(response, ErrorCode.AUTH_TOKEN_EXPIRED);
+    });
   });
 });
