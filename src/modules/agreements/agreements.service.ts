@@ -1,33 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import {
-  AgreementActionDto,
-  CreateAgreementDto,
-  UpdateAgreementDto,
-} from './dto/agreements.dto';
 
 /**
- * Module responsibility:
- * - Manage agreement lifecycle from draft to approval/change workflow.
- * Main entities touched:
- * - Agreement, AgreementPolicy, TimelineEvent, EmailNotification.
- * Expected endpoints:
- * - GET /agreements
- * - POST /agreements
- * - GET /agreements/:id
- * - PATCH /agreements/:id
- * - POST /agreements/:id/send-invite
- * - POST /agreements/:id/approve
- * - POST /agreements/:id/request-change
- * Business rules:
- * - Require client ownership and valid totals.
- * - Lock edits after specific lifecycle transitions.
- * - Emit timeline and notification side effects.
- * Implementation phases:
- * - Phase 2.
- * Error cases to document:
- * - AGREEMENT_NOT_FOUND, AGREEMENT_ALREADY_SENT, AGREEMENT_ALREADY_APPROVED.
- * Testing cases to cover:
- * - draft creation, update restrictions, invite sending, approval transitions.
+ * Phase 1 scope: scaffold and DTO contracts only.
+ * No lifecycle transitions, invitations, activation, archival, persistence,
+ * emails, or payments are implemented in this phase.
+ *
+ * All methods return placeholder responses indicating "not-implemented" status.
  */
 @Injectable()
 export class AgreementsService {
@@ -35,7 +13,7 @@ export class AgreementsService {
     return this.placeholder('list');
   }
 
-  create(dto: CreateAgreementDto) {
+  create(dto: unknown) {
     return this.placeholder('create', { dto });
   }
 
@@ -43,20 +21,12 @@ export class AgreementsService {
     return this.placeholder('getById', { id });
   }
 
-  update(id: string, dto: UpdateAgreementDto) {
+  update(id: string, dto: unknown) {
     return this.placeholder('update', { id, dto });
   }
 
   sendInvite(id: string) {
     return this.placeholder('sendInvite', { id });
-  }
-
-  approve(id: string) {
-    return this.placeholder('approve', { id });
-  }
-
-  requestChange(id: string, dto: AgreementActionDto) {
-    return this.placeholder('requestChange', { id, dto });
   }
 
   private placeholder(action: string, details?: Record<string, unknown>) {

@@ -1,11 +1,16 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { ParseUuidPipe } from '../../common/pipes/parse-uuid.pipe';
 import {
-  AgreementActionDto,
-  CreateAgreementDto,
-  UpdateAgreementDto,
-} from './dto/agreements.dto';
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { AgreementQueryDto } from './dto/agreement-query.dto';
+import { CreateAgreementDto } from './dto/create-agreement.dto';
+import { UpdateAgreementDto } from './dto/update-agreement.dto';
 import { AgreementsService } from './agreements.service';
 
 @ApiTags('Agreements')
@@ -14,7 +19,7 @@ export class AgreementsController {
   constructor(private readonly agreementsService: AgreementsService) {}
 
   @Get()
-  list() {
+  list(@Query() query: AgreementQueryDto) {
     return this.agreementsService.list();
   }
 
@@ -24,33 +29,17 @@ export class AgreementsController {
   }
 
   @Get(':id')
-  getById(@Param('id', ParseUuidPipe) id: string) {
+  getById(@Param('id') id: string) {
     return this.agreementsService.getById(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id', ParseUuidPipe) id: string,
-    @Body() dto: UpdateAgreementDto,
-  ) {
+  update(@Param('id') id: string, @Body() dto: UpdateAgreementDto) {
     return this.agreementsService.update(id, dto);
   }
 
   @Post(':id/send-invite')
-  sendInvite(@Param('id', ParseUuidPipe) id: string) {
+  sendInvite(@Param('id') id: string) {
     return this.agreementsService.sendInvite(id);
-  }
-
-  @Post(':id/approve')
-  approve(@Param('id', ParseUuidPipe) id: string) {
-    return this.agreementsService.approve(id);
-  }
-
-  @Post(':id/request-change')
-  requestChange(
-    @Param('id', ParseUuidPipe) id: string,
-    @Body() dto: AgreementActionDto,
-  ) {
-    return this.agreementsService.requestChange(id, dto);
   }
 }
