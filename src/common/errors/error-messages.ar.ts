@@ -16,6 +16,8 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.CLIENT_NOT_FOUND]: 'تعذر العثور على العميل',
   [ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS]:
     'البريد الإلكتروني للعميل مستخدم بالفعل',
+  [ErrorCode.CLIENT_SUMMARY_MIXED_CURRENCY]:
+    'ملخص العميل يحتوي على اتفاقيات بعملات مختلفة',
   [ErrorCode.AGREEMENT_NOT_FOUND]: 'لم يتم العثور على الاتفاق',
   [ErrorCode.AGREEMENT_NOT_DRAFT]: 'الاتفاق ليس في حالة مسودة',
   [ErrorCode.AGREEMENT_ALREADY_SENT]: 'تم إرسال الاتفاق مسبقاً',
