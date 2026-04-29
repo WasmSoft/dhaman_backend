@@ -41,6 +41,8 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.PAYMENT_INVALID_AMOUNT]: 'Invalid payment amount',
   [ErrorCode.PAYMENT_DEMO_MODE_ONLY]:
     'Operation is available in demo mode only',
+  [ErrorCode.PAYMENT_INVALID_TRANSITION]:
+    'Invalid payment state transition',
   [ErrorCode.PAYMENT_MILESTONE_REQUIRED]:
     'Milestone is required for this payment operation',
   [ErrorCode.DELIVERY_NOT_FOUND]: 'Delivery not found',

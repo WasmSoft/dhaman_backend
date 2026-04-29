@@ -6,6 +6,11 @@ The purpose of this file is to keep the backend architecture clean, modular, sca
 
 This backend rules file is adapted from the existing frontend `AGENTS.md` style, but it is specific to NestJS, Prisma, PostgreSQL, Swagger, CLS/request context, and backend module delivery.
 
+The project constitution at `.specify/memory/constitution.md` is authoritative for
+module boundaries, payment state, demo-money safety, audit evidence, access control,
+testing, and phase workflow. If this file conflicts with the constitution, follow the
+constitution and update this file before coding.
+
 ---
 
 ## 1. Core Backend Architecture
@@ -654,25 +659,26 @@ Rules:
 
 ## 14. Payment MVP Rules
 
-Payments are simulation-only in this MVP.
+Payments are simulation-only in this MVP. `PaymentsService` owns the complete payment
+state machine and must be treated as the trust boundary for protected payments.
 
 Rules:
 
 1. Do not integrate Stripe, PayPal, bank APIs, or real payment providers unless explicitly requested.
 2. Keep `PAYMENT_MODE=demo`.
-3. Use clear demo fields such as `demoMode`.
-4. Do not imply legal escrow.
-5. Payment statuses must follow Dhaman product states:
-   - Waiting
-   - Reserved
-   - Client Review
-   - AI Review
-   - Ready to Release
-   - Released
-   - On Hold
-6. Every payment state transition must create a timeline event.
-7. Every release decision must be traceable.
-8. Change Request payments must be separate from original milestone payments.
+3. Set `demoMode` to `true` for every MVP payment record.
+4. Do not imply legal escrow or live money movement.
+5. Store money as Prisma `Decimal` and validate API money input as Decimal-safe data, not unsafe floats.
+6. Never update `Payment.status` directly outside `PaymentsService` transition methods.
+7. Every payment status change must call `validateTransition` before persistence.
+8. Payment statuses must follow the documented state machine: `WAITING`, `RESERVED`, `CLIENT_REVIEW`, `AI_REVIEW`, `READY_TO_RELEASE`, `RELEASED`, and `ON_HOLD`.
+9. Funding must generate unique `receiptNumber` and `transactionReference` values with database uniqueness and collision retry.
+10. Receipt and transaction references are generated only during funding in the MVP. Release sets `releasedAt` and creates timeline evidence.
+11. Payment status, linked milestone payment status, milestone terminal updates, and timeline events must be written in one transaction.
+12. Every payment state transition must create a timeline event with payment, agreement, previous status, new status, actor, role, and reason/notes when relevant.
+13. JWT endpoints must use freelancer ownership scoping from CLS; portal endpoints must use `PortalTokenGuard` and token agreement scope.
+14. Change Request payments must be separate from original milestone payments.
+15. Tests must cover the full transition matrix, invalid transitions, funding, release, portal scoping, timeline evidence, and receipt/reference uniqueness.
 
 ---
 
