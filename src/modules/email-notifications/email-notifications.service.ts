@@ -85,6 +85,46 @@ export class EmailNotificationsService {
     });
   }
 
+  async enqueueAgreementActivatedForClient(input: {
+    agreementId: string;
+    recipientEmail: string;
+    agreementTitle: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        type: NotificationType.AGREEMENT_ACTIVATED,
+        subject: `Agreement activated: ${input.agreementTitle}`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  async enqueueAgreementCancelledForClient(input: {
+    agreementId: string;
+    recipientEmail: string;
+    agreementTitle: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        type: NotificationType.AGREEMENT_CANCELLED,
+        subject: `Agreement cancelled: ${input.agreementTitle}`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
   // EN: Creates a PENDING notification record for the client agreement invite.
   // AR: ينشئ سجل إشعار معلق لدعوة العميل لمراجعة الاتفاقية.
   async enqueueAgreementInvite(input: {

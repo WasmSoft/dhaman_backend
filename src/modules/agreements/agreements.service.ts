@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, TimelineActorRole, TimelineEventType } from '@prisma/client';
+import { Prisma, TimelineActorRole, TimelineEventType, MilestoneStatus as PrismaMilestoneStatus, PaymentStatus as PrismaPaymentStatus, AgreementStatus as PrismaAgreementStatus } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 import { ClsService } from '../../common/cls/cls.service';
 import { ErrorCode } from '../../common/enums/error-code.enum';
@@ -359,6 +359,209 @@ export class AgreementsService {
         `[AgreementsService.sendInvite] Failed to enqueue invite email for agreement ${id}:`,
         emailError,
       );
+    }
+
+    return this.mapToResponse(updated);
+  }
+
+  async activate(id: string): Promise<AgreementResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    const agreement = await this.prisma.agreement.findFirst({
+      where: { id, freelancerId },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    if (!agreement) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    if (agreement.status !== PrismaAgreementStatus.APPROVED) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED });
+    }
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const updatedAgreement = await tx.agreement.update({
+        where: { id },
+        data: { status: PrismaAgreementStatus.ACTIVE },
+        include: {
+          client: true,
+          milestones: { orderBy: { order: 'asc' } },
+          policy: true,
+        },
+      });
+
+      const firstDraftMilestone = await tx.milestone.findFirst({
+        where: { agreementId: id, status: PrismaMilestoneStatus.DRAFT },
+        orderBy: { order: 'asc' },
+      });
+
+      if (firstDraftMilestone) {
+        await tx.milestone.update({
+          where: { id: firstDraftMilestone.id },
+          data: { status: PrismaMilestoneStatus.ACTIVE },
+        });
+      }
+
+      await this.timelineEvents.createEvent(
+        {
+          agreementId: id,
+          type: TimelineEventType.AGREEMENT_ACTIVATED,
+          actorRole: TimelineActorRole.FREELANCER,
+          actorId: freelancerId,
+          title: 'Agreement activated',
+          description: 'Agreement activated; work begins.',
+          metadata: {
+            titleEn: 'Agreement activated',
+            titleAr: 'تم تفعيل الاتفاقية',
+            descriptionEn: 'Agreement activated; work begins.',
+            descriptionAr: 'تم تفعيل الاتفاقية وبدأ العمل.',
+          },
+        },
+        tx,
+      );
+
+      return updatedAgreement;
+    });
+
+    try {
+      if (agreement.client?.email) {
+        await this.emailNotifications.enqueueAgreementActivatedForClient({
+          agreementId: id,
+          recipientEmail: agreement.client.email,
+          agreementTitle: agreement.title,
+        });
+      }
+    } catch (emailError) {
+      console.error(
+        `[AgreementsService.activate] Failed to enqueue activation email for agreement ${id}:`,
+        emailError,
+      );
+    }
+
+    return this.mapToResponse(updated);
+  }
+
+  async archive(id: string): Promise<AgreementResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    const agreement = await this.prisma.agreement.findFirst({
+      where: { id, freelancerId },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    if (!agreement) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    if (agreement.status === PrismaAgreementStatus.COMPLETED) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED });
+    }
+
+    const preArchiveStatus = agreement.status;
+
+    const isVisibleForNotification =
+      preArchiveStatus !== PrismaAgreementStatus.DRAFT;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const cancelledAgreement = await tx.agreement.update({
+        where: { id },
+        data: { status: PrismaAgreementStatus.CANCELLED },
+        include: {
+          client: true,
+          milestones: { orderBy: { order: 'asc' } },
+          policy: true,
+        },
+      });
+
+      await tx.milestone.updateMany({
+        where: {
+          agreementId: id,
+          status: { not: PrismaMilestoneStatus.ACCEPTED },
+        },
+        data: { status: PrismaMilestoneStatus.CANCELLED },
+      });
+
+      if (preArchiveStatus === PrismaAgreementStatus.ACTIVE) {
+        const unfinishedMilestoneIds = agreement.milestones
+          .filter((m) => m.status !== PrismaMilestoneStatus.ACCEPTED)
+          .map((m) => m.id);
+
+        if (unfinishedMilestoneIds.length > 0) {
+          await tx.payment.updateMany({
+            where: {
+              agreementId: id,
+              milestoneId: { in: unfinishedMilestoneIds },
+              status: {
+                in: [PrismaPaymentStatus.WAITING, PrismaPaymentStatus.FAILED],
+              },
+            },
+            data: { status: PrismaPaymentStatus.NOT_REQUIRED },
+          });
+
+          await tx.payment.updateMany({
+            where: {
+              agreementId: id,
+              milestoneId: { in: unfinishedMilestoneIds },
+              status: {
+                in: [
+                  PrismaPaymentStatus.RESERVED,
+                  PrismaPaymentStatus.CLIENT_REVIEW,
+                  PrismaPaymentStatus.AI_REVIEW,
+                  PrismaPaymentStatus.READY_TO_RELEASE,
+                  PrismaPaymentStatus.ON_HOLD,
+                ],
+              },
+            },
+            data: { status: PrismaPaymentStatus.REFUNDED },
+          });
+        }
+      }
+
+      await this.timelineEvents.createEvent(
+        {
+          agreementId: id,
+          type: TimelineEventType.AGREEMENT_CANCELLED,
+          actorRole: TimelineActorRole.FREELANCER,
+          actorId: freelancerId,
+          title: 'Agreement cancelled',
+          description: 'Agreement cancelled; unfinished work stopped.',
+          metadata: {
+            titleEn: 'Agreement cancelled',
+            titleAr: 'تم إلغاء الاتفاقية',
+            descriptionEn: 'Agreement cancelled; unfinished work stopped.',
+            descriptionAr: 'تم إلغاء الاتفاقية وإيقاف العمل غير المكتمل.',
+          },
+        },
+        tx,
+      );
+
+      return cancelledAgreement;
+    });
+
+    if (isVisibleForNotification) {
+      try {
+        if (agreement.client?.email) {
+          await this.emailNotifications.enqueueAgreementCancelledForClient({
+            agreementId: id,
+            recipientEmail: agreement.client.email,
+            agreementTitle: agreement.title,
+          });
+        }
+      } catch (emailError) {
+        console.error(
+          `[AgreementsService.archive] Failed to enqueue cancellation email for agreement ${id}:`,
+          emailError,
+        );
+      }
     }
 
     return this.mapToResponse(updated);

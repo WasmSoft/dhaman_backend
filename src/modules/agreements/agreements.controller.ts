@@ -86,4 +86,79 @@ export class AgreementsController {
   sendInvite(@Param('id') id: string) {
     return this.agreementsService.sendInvite(id);
   }
+
+  @Post(':id/activate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Activate an approved agreement',
+    description:
+      'Transitions a freelancer-owned agreement from APPROVED to ACTIVE, starts ' +
+      'the first DRAFT milestone when present, records a bilingual lifecycle ' +
+      'history event, and enqueues a client activation notification after the ' +
+      'database transaction commits.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Agreement ID owned by the authenticated freelancer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Agreement activated successfully.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT (UNAUTHORIZED)',
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'Agreement not found or not owned by requester (AGREEMENT_NOT_FOUND)',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Agreement is not in APPROVED status (AGREEMENT_CANNOT_BE_MODIFIED)',
+  })
+  activate(@Param('id') id: string) {
+    return this.agreementsService.activate(id);
+  }
+
+  @Post(':id/archive')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Archive a non-completed agreement',
+    description:
+      'Transitions a freelancer-owned non-COMPLETED agreement to CANCELLED, ' +
+      'cancels all non-ACCEPTED milestones, cascades unreleased unfinished-work ' +
+      'payments only when the pre-archive status was ACTIVE, records a bilingual ' +
+      'lifecycle history event, and enqueues a client cancellation notification ' +
+      'after commit when the client had prior visibility.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Agreement ID owned by the authenticated freelancer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Agreement archived successfully.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT (UNAUTHORIZED)',
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'Agreement not found or not owned by requester (AGREEMENT_NOT_FOUND)',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Agreement is COMPLETED and cannot be archived (AGREEMENT_CANNOT_BE_MODIFIED)',
+  })
+  archive(@Param('id') id: string) {
+    return this.agreementsService.archive(id);
+  }
 }

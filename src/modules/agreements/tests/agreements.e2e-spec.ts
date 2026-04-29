@@ -183,3 +183,271 @@ describe('POST /agreements/:id/send-invite (e2e)', () => {
     );
   });
 });
+
+describe('POST /agreements/:id/activate (e2e)', () => {
+  let app: INestApplication;
+  let freelancerJwt: string;
+  let otherFreelancerJwt: string;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
+    await app.init();
+
+    const r1 = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .send({
+        email: `fa1+${Date.now()}@test.com`,
+        password: 'Test1234!',
+        name: 'Freelancer Activate',
+      });
+    freelancerJwt = r1.body.data?.accessToken ?? r1.body.accessToken;
+
+    const r2 = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .send({
+        email: `fa2+${Date.now()}@test.com`,
+        password: 'Test1234!',
+        name: 'Freelancer Activate 2',
+      });
+    otherFreelancerJwt = r2.body.data?.accessToken ?? r2.body.accessToken;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  async function createApprovedAgreement(): Promise<string> {
+    const clientRes = await request(app.getHttpServer())
+      .post('/api/v1/clients')
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ name: 'Activate Client', email: `client+${Date.now()}@test.com` });
+    const clientId = clientRes.body.data?.id ?? clientRes.body.id;
+
+    const agreementRes = await request(app.getHttpServer())
+      .post('/api/v1/agreements')
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ title: 'Activate Agreement', clientId, currency: 'SAR' });
+    const agreementId = agreementRes.body.data?.id ?? agreementRes.body.id;
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/milestones`)
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ title: 'M1', amount: 500, currency: 'SAR', order: 1 });
+    await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/milestones`)
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ title: 'M2', amount: 500, currency: 'SAR', order: 2 });
+
+    await request(app.getHttpServer())
+      .patch(`/api/v1/agreements/${agreementId}`)
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ totalAmount: 1000 });
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/policy`)
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({
+        cancellationPolicy: 'No cancellations.',
+        delayPolicy: 'Delays incur fees.',
+        extraRequestPolicy: 'Extra work billed separately.',
+        reviewPolicy: '3 review rounds included.',
+        clientReviewPeriodDays: 3,
+        freelancerDelayGraceDays: 2,
+      });
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/send-invite`)
+      .set('Authorization', `Bearer ${freelancerJwt}`);
+
+    // approve via portal
+    const inviteRes = await request(app.getHttpServer())
+      .get(`/api/v1/agreements/${agreementId}`)
+      .set('Authorization', `Bearer ${freelancerJwt}`);
+    const inviteToken = (inviteRes.body.data?.inviteToken ?? inviteRes.body.inviteToken) as string;
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/portal/approve/${inviteToken}`)
+      .send({ clientName: 'Activate Client', clientEmail: `client+${Date.now()}@test.com` });
+
+    return agreementId;
+  }
+
+  async function createDraftAgreementWithMilestone(): Promise<string> {
+    const clientRes = await request(app.getHttpServer())
+      .post('/api/v1/clients')
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ name: 'Draft Client', email: `draft+${Date.now()}@test.com` });
+    const clientId = clientRes.body.data?.id ?? clientRes.body.id;
+
+    const agreementRes = await request(app.getHttpServer())
+      .post('/api/v1/agreements')
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ title: 'Draft Agreement', clientId, currency: 'SAR' });
+    const agreementId = agreementRes.body.data?.id ?? agreementRes.body.id;
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/milestones`)
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ title: 'M1', amount: 500, currency: 'SAR', order: 1 });
+
+    return agreementId;
+  }
+
+  it('returns 401 when JWT is missing', async () => {
+    const res = await request(app.getHttpServer()).post(
+      '/api/v1/agreements/nonexistent/activate',
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 404 when agreement does not exist', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/agreements/does-not-exist/activate')
+      .set('Authorization', `Bearer ${freelancerJwt}`);
+    expect(res.status).toBe(404);
+    expect(res.body.code ?? res.body.error?.code).toBe('AGREEMENT_NOT_FOUND');
+  });
+
+  it('returns 404 for an agreement owned by another freelancer', async () => {
+    const agreementId = await createDraftAgreementWithMilestone();
+    const res = await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/activate`)
+      .set('Authorization', `Bearer ${otherFreelancerJwt}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 409 when agreement is not APPROVED', async () => {
+    const agreementId = await createDraftAgreementWithMilestone();
+    const res = await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/activate`)
+      .set('Authorization', `Bearer ${freelancerJwt}`);
+    expect(res.status).toBe(409);
+    expect(res.body.code ?? res.body.error?.code).toBe(
+      'AGREEMENT_CANNOT_BE_MODIFIED',
+    );
+  });
+
+  it('returns 200 with ACTIVE status and first DRAFT milestone set to ACTIVE', async () => {
+    const agreementId = await createApprovedAgreement();
+
+    const res = await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/activate`)
+      .set('Authorization', `Bearer ${freelancerJwt}`);
+
+    expect(res.status).toBe(200);
+    const body = res.body.data ?? res.body;
+    expect(body.status).toBe('ACTIVE');
+
+    const milestones = body.milestones as Array<{ id: string; status: string; order: number }>;
+    expect(milestones.length).toBeGreaterThanOrEqual(1);
+    const firstMilestone = milestones.find((m) => m.order === 1);
+    expect(firstMilestone?.status).toBe('ACTIVE');
+  });
+});
+
+describe('POST /agreements/:id/archive (e2e)', () => {
+  let app: INestApplication;
+  let freelancerJwt: string;
+  let otherFreelancerJwt: string;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
+    await app.init();
+
+    const r1 = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .send({
+        email: `far1+${Date.now()}@test.com`,
+        password: 'Test1234!',
+        name: 'Freelancer Archive',
+      });
+    freelancerJwt = r1.body.data?.accessToken ?? r1.body.accessToken;
+
+    const r2 = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .send({
+        email: `far2+${Date.now()}@test.com`,
+        password: 'Test1234!',
+        name: 'Freelancer Archive 2',
+      });
+    otherFreelancerJwt = r2.body.data?.accessToken ?? r2.body.accessToken;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  async function createDraftAgreementWithClient(): Promise<string> {
+    const clientRes = await request(app.getHttpServer())
+      .post('/api/v1/clients')
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ name: 'Archive Client', email: `archive+${Date.now()}@test.com` });
+    const clientId = clientRes.body.data?.id ?? clientRes.body.id;
+
+    const agreementRes = await request(app.getHttpServer())
+      .post('/api/v1/agreements')
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ title: 'Archive Agreement', clientId, currency: 'SAR' });
+    const agreementId = agreementRes.body.data?.id ?? agreementRes.body.id;
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/milestones`)
+      .set('Authorization', `Bearer ${freelancerJwt}`)
+      .send({ title: 'M1', amount: 500, currency: 'SAR', order: 1 });
+
+    return agreementId;
+  }
+
+  it('returns 401 when JWT is missing', async () => {
+    const res = await request(app.getHttpServer()).post(
+      '/api/v1/agreements/nonexistent/archive',
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 404 when agreement does not exist', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/agreements/does-not-exist/archive')
+      .set('Authorization', `Bearer ${freelancerJwt}`);
+    expect(res.status).toBe(404);
+    expect(res.body.code ?? res.body.error?.code).toBe('AGREEMENT_NOT_FOUND');
+  });
+
+  it('returns 404 for an agreement owned by another freelancer', async () => {
+    const agreementId = await createDraftAgreementWithClient();
+    const res = await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/archive`)
+      .set('Authorization', `Bearer ${otherFreelancerJwt}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 200 with CANCELLED status for a DRAFT agreement', async () => {
+    const agreementId = await createDraftAgreementWithClient();
+
+    const res = await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/archive`)
+      .set('Authorization', `Bearer ${freelancerJwt}`);
+
+    expect(res.status).toBe(200);
+    const body = res.body.data ?? res.body;
+    expect(body.status).toBe('CANCELLED');
+    const milestones = body.milestones as Array<{ id: string; status: string; order: number }>;
+    for (const m of milestones) {
+      expect(m.status).toBe('CANCELLED');
+    }
+  });
+});
