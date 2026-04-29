@@ -1,0 +1,9 @@
+export const DASHBOARD_ERROR_CODES = [
+  'DASHBOARD_RANGE_INVALID',
+  'DASHBOARD_AGGREGATION_FAILED',
+  'AGREEMENT_NOT_FOUND',
+  'VALIDATION_ERROR',
+  'UNAUTHORIZED',
+] as const;
+
+export type DashboardErrorCode = (typeof DASHBOARD_ERROR_CODES)[number];

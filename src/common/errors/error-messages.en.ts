@@ -69,4 +69,7 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.EMAIL_RECIPIENT_REQUIRED]: 'Recipient email is required',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'Settings not found',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'Settings value is invalid',
+  [ErrorCode.DASHBOARD_RANGE_INVALID]: 'Dashboard date range is invalid.',
+  [ErrorCode.DASHBOARD_AGGREGATION_FAILED]:
+    'Dashboard analytics could not be calculated.',
 };

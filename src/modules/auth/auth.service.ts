@@ -41,7 +41,9 @@ export class AuthService {
   // EN: Creates a freelancer account and returns an auth response with a safe profile.
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
     const email = this.normalizeEmail(dto.email);
-    const existingUser = await this.prisma.user.findUnique({ where: { email } });
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
     if (existingUser) {
       throw this.authException(ErrorCode.AUTH_EMAIL_ALREADY_EXISTS);
@@ -85,7 +87,10 @@ export class AuthService {
       throw this.authException(ErrorCode.AUTH_INVALID_CREDENTIALS);
     }
 
-    const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash);
+    const passwordMatches = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
 
     if (!passwordMatches) {
       throw this.authException(ErrorCode.AUTH_INVALID_CREDENTIALS);

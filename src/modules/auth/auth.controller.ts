@@ -101,7 +101,8 @@ export class AuthController {
     summary: 'Logout current authenticated session',
   })
   @ApiResponse({
-    description: 'Logout confirmed. No server-side token revocation is created.',
+    description:
+      'Logout confirmed. No server-side token revocation is created.',
     schema: {
       example: { message: 'Logged out' },
       properties: {
