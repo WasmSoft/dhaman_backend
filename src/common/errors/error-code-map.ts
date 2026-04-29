@@ -16,6 +16,7 @@ export const ERROR_CODE_HTTP_STATUS: Record<ErrorCode, HttpStatus> = {
   [ErrorCode.AUTH_USER_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ErrorCode.CLIENT_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS]: HttpStatus.CONFLICT,
+  [ErrorCode.CLIENT_SUMMARY_MIXED_CURRENCY]: HttpStatus.CONFLICT,
   [ErrorCode.AGREEMENT_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ErrorCode.AGREEMENT_NOT_DRAFT]: HttpStatus.CONFLICT,
   [ErrorCode.AGREEMENT_ALREADY_SENT]: HttpStatus.CONFLICT,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Client, Prisma } from '@prisma/client';
+import { AgreementStatus, Client, Prisma } from '@prisma/client';
 import { ClsService } from '../../common/cls/cls.service';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { AppException } from '../../common/errors/app-exception';
@@ -8,7 +8,9 @@ import {
   ClientListResponseDto,
   ClientQueryDto,
   ClientResponseDto,
+  ClientSummaryResponseDto,
   CreateClientDto,
+  ResolveClientDto,
   UpdateClientDto,
 } from './dto/clients.dto';
 
@@ -154,6 +156,121 @@ export class ClientsService {
     }
   }
 
+  async findOneOrCreateByEmail(
+    dto: ResolveClientDto,
+  ): Promise<ClientResponseDto> {
+    const freelancerId = this.getFreelancerId();
+    const normalizedEmail = this.normalizeEmail(dto.email);
+
+    const existingClient = await this.prisma.client.findFirst({
+      where: { freelancerId, email: normalizedEmail },
+    });
+
+    if (existingClient) {
+      return this.toClientResponse(existingClient);
+    }
+
+    try {
+      const client = await this.prisma.client.create({
+        data: {
+          freelancerId,
+          name: dto.name,
+          email: normalizedEmail,
+          phone: dto.phone,
+          companyName: dto.companyName,
+        },
+      });
+
+      return this.toClientResponse(client);
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
+        const retriedClient = await this.prisma.client.findFirst({
+          where: { freelancerId, email: normalizedEmail },
+        });
+
+        if (retriedClient) {
+          return this.toClientResponse(retriedClient);
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  async getSummary(id: string): Promise<ClientSummaryResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    const client = await this.prisma.client.findFirst({
+      where: { id, freelancerId },
+    });
+
+    if (!client) {
+      this.throwClientNotFound();
+    }
+
+    const agreements = await this.prisma.agreement.findMany({
+      where: { clientId: id, freelancerId },
+      include: { milestones: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const statusCounts: Record<AgreementStatus, number> = {
+      DRAFT: 0,
+      SENT: 0,
+      APPROVED: 0,
+      ACTIVE: 0,
+      COMPLETED: 0,
+      CANCELLED: 0,
+      DISPUTED: 0,
+    };
+
+    for (const agreement of agreements) {
+      statusCounts[agreement.status]++;
+    }
+
+    const allMilestones = agreements.flatMap((a) => a.milestones);
+    const currencies = new Set(allMilestones.map((m) => m.currency));
+
+    if (currencies.size > 1) {
+      throw new AppException({ code: ErrorCode.CLIENT_SUMMARY_MIXED_CURRENCY });
+    }
+
+    const currency = currencies.size === 1 ? [...currencies][0] : null;
+
+    const totalAmount = allMilestones.reduce(
+      (sum, m) => sum + m.amount.toNumber(),
+      0,
+    );
+    const releasedAmount = allMilestones
+      .filter((m) => m.paymentStatus === 'RELEASED')
+      .reduce((sum, m) => sum + m.amount.toNumber(), 0);
+    const pendingAmount = totalAmount - releasedAmount;
+
+    const recentAgreements = agreements.slice(0, 5).map((a) => ({
+      id: a.id,
+      title: a.title,
+      status: a.status,
+      totalAmount: a.totalAmount.toNumber(),
+      currency: a.currency,
+      createdAt: a.createdAt,
+    }));
+
+    return {
+      client: this.toClientResponse(client),
+      agreements: {
+        total: agreements.length,
+        byStatus: statusCounts,
+      },
+      payments: {
+        totalAmount,
+        releasedAmount,
+        pendingAmount,
+        currency,
+      },
+      recentAgreements,
+    };
+  }
+
   private getFreelancerId(): string {
     const userId = this.clsService.get('userId');
 
@@ -169,9 +286,14 @@ export class ClientsService {
   }
 
   private isUniqueConstraintError(error: unknown): boolean {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return error.code === 'P2002';
+    }
     return (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as Record<string, unknown>).code === 'P2002'
     );
   }
 

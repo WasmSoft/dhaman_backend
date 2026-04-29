@@ -98,6 +98,48 @@ export class UpdateClientDto {
   companyName?: string;
 }
 
+export class ResolveClientDto {
+  @ApiProperty({
+    description: 'Client email address — normalized before matching',
+    example: 'client@example.sa',
+  })
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({
+    description: 'Full name of the client',
+    example: 'شركة التقنية',
+    maxLength: 100,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  name: string;
+
+  @ApiProperty({
+    description: 'Optional phone number',
+    example: '+966501234567',
+    required: false,
+    maxLength: 20,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  phone?: string;
+
+  @ApiProperty({
+    description: 'Optional company or organization name',
+    example: 'شركة التقنية للحلول',
+    required: false,
+    maxLength: 200,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  companyName?: string;
+}
+
 export class ClientQueryDto {
   @ApiProperty({
     description:
@@ -234,8 +276,13 @@ export class PaymentSummaryDto {
   })
   pendingAmount: number;
 
-  @ApiProperty({ description: 'Currency code (ISO 4217)', example: 'SAR' })
-  currency: string;
+  @ApiProperty({
+    description:
+      'Currency code (ISO 4217) — null when client has no milestones',
+    example: 'SAR',
+    nullable: true,
+  })
+  currency: string | null;
 }
 
 export class RecentAgreementDto {
@@ -260,6 +307,9 @@ export class RecentAgreementDto {
 
   @ApiProperty({ description: 'Total agreement amount', example: 15000 })
   totalAmount: number;
+
+  @ApiProperty({ description: 'Currency code (ISO 4217)', example: 'SAR' })
+  currency: string;
 
   @ApiProperty({
     description: 'Agreement creation date',
