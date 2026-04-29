@@ -137,7 +137,9 @@ describe('UsersService', () => {
       clsService.get.mockReturnValue('missing-user');
       prismaService.user.update.mockRejectedValue({ code: 'P2025' });
 
-      await expect(service.updateMe({ name: 'اسم جديد' })).rejects.toMatchObject({
+      await expect(
+        service.updateMe({ name: 'اسم جديد' }),
+      ).rejects.toMatchObject({
         code: ErrorCode.AUTH_USER_NOT_FOUND,
       });
     });
@@ -201,7 +203,10 @@ describe('UsersService', () => {
         updatedAt: new Date('2026-04-20T14:30:00.000Z'),
       });
 
-      await service.updateProfile({ businessName: 'مؤسسة أحمد', locale: undefined });
+      await service.updateProfile({
+        businessName: 'مؤسسة أحمد',
+        locale: undefined,
+      });
 
       expect(prismaService.userSettings.upsert).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
@@ -221,7 +226,9 @@ describe('UsersService', () => {
       clsService.get.mockReturnValue('missing-user');
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateProfile({ bio: 'نبذة' })).rejects.toMatchObject({
+      await expect(
+        service.updateProfile({ bio: 'نبذة' }),
+      ).rejects.toMatchObject({
         code: ErrorCode.AUTH_USER_NOT_FOUND,
       });
     });
@@ -230,6 +237,8 @@ describe('UsersService', () => {
   it('throws AppException instances for domain failures', async () => {
     clsService.get.mockReturnValue(undefined);
 
-    await expect(service.updateProfile({})).rejects.toBeInstanceOf(AppException);
+    await expect(service.updateProfile({})).rejects.toBeInstanceOf(
+      AppException,
+    );
   });
 });

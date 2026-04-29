@@ -85,10 +85,16 @@ function createPrismaMock() {
 
   const reset = () => {
     state.users = new Map(
-      Array.from(initialState.users.entries()).map(([key, value]) => [key, clone(value)]),
+      Array.from(initialState.users.entries()).map(([key, value]) => [
+        key,
+        clone(value),
+      ]),
     );
     state.profiles = new Map(
-      Array.from(initialState.profiles.entries()).map(([key, value]) => [key, clone(value)]),
+      Array.from(initialState.profiles.entries()).map(([key, value]) => [
+        key,
+        clone(value),
+      ]),
     );
     state.profileSequence = initialState.profileSequence;
   };
@@ -227,12 +233,10 @@ class EmptyController {}
 })
 class UsersE2eTestModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer
-      .apply(RequestContextMiddleware, TestAuthMiddleware)
-      .forRoutes({
-        path: '*',
-        method: RequestMethod.ALL,
-      });
+    consumer.apply(RequestContextMiddleware, TestAuthMiddleware).forRoutes({
+      path: '*',
+      method: RequestMethod.ALL,
+    });
   }
 }
 

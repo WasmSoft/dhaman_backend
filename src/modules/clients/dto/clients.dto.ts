@@ -100,7 +100,8 @@ export class UpdateClientDto {
 
 export class ClientQueryDto {
   @ApiProperty({
-    description: 'Search across name, email, and company name (case-insensitive)',
+    description:
+      'Search across name, email, and company name (case-insensitive)',
     example: 'تقنية',
     required: false,
   })
@@ -138,16 +139,26 @@ export class ClientQueryDto {
 }
 
 export class ClientResponseDto {
-  @ApiProperty({ description: 'Client unique identifier', example: 'c1a2b3c4-d5e6-7890-abcd-ef1234567890' })
+  @ApiProperty({
+    description: 'Client unique identifier',
+    example: 'c1a2b3c4-d5e6-7890-abcd-ef1234567890',
+  })
   id: string;
 
   @ApiProperty({ description: 'Client full name', example: 'شركة التقنية' })
   name: string;
 
-  @ApiProperty({ description: 'Client email address', example: 'client@example.sa' })
+  @ApiProperty({
+    description: 'Client email address',
+    example: 'client@example.sa',
+  })
   email: string;
 
-  @ApiProperty({ description: 'Phone number', example: '+966501234567', nullable: true })
+  @ApiProperty({
+    description: 'Phone number',
+    example: '+966501234567',
+    nullable: true,
+  })
   phone: string | null;
 
   @ApiProperty({
@@ -157,18 +168,30 @@ export class ClientResponseDto {
   })
   companyName: string | null;
 
-  @ApiProperty({ description: 'Record creation timestamp', example: '2026-04-29T10:00:00.000Z' })
+  @ApiProperty({
+    description: 'Record creation timestamp',
+    example: '2026-04-29T10:00:00.000Z',
+  })
   createdAt: Date;
 
-  @ApiProperty({ description: 'Last update timestamp', example: '2026-04-29T10:00:00.000Z' })
+  @ApiProperty({
+    description: 'Last update timestamp',
+    example: '2026-04-29T10:00:00.000Z',
+  })
   updatedAt: Date;
 }
 
 export class ClientListResponseDto {
-  @ApiProperty({ type: [ClientResponseDto], description: 'Page of client records' })
+  @ApiProperty({
+    type: [ClientResponseDto],
+    description: 'Page of client records',
+  })
   data: ClientResponseDto[];
 
-  @ApiProperty({ description: 'Total matching records across all pages', example: 42 })
+  @ApiProperty({
+    description: 'Total matching records across all pages',
+    example: 42,
+  })
   total: number;
 
   @ApiProperty({ description: 'Current page number', example: 1 })
@@ -193,13 +216,22 @@ export class AgreementsByStatusDto {
 }
 
 export class PaymentSummaryDto {
-  @ApiProperty({ description: 'Total milestone amount across all agreements', example: 50000 })
+  @ApiProperty({
+    description: 'Total milestone amount across all agreements',
+    example: 50000,
+  })
   totalAmount: number;
 
-  @ApiProperty({ description: 'Sum of released milestone amounts', example: 30000 })
+  @ApiProperty({
+    description: 'Sum of released milestone amounts',
+    example: 30000,
+  })
   releasedAmount: number;
 
-  @ApiProperty({ description: 'Sum of pending milestone amounts', example: 20000 })
+  @ApiProperty({
+    description: 'Sum of pending milestone amounts',
+    example: 20000,
+  })
   pendingAmount: number;
 
   @ApiProperty({ description: 'Currency code (ISO 4217)', example: 'SAR' })
@@ -207,27 +239,46 @@ export class PaymentSummaryDto {
 }
 
 export class RecentAgreementDto {
-  @ApiProperty({ description: 'Agreement identifier', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
+  @ApiProperty({
+    description: 'Agreement identifier',
+    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  })
   id: string;
 
-  @ApiProperty({ description: 'Agreement title', example: 'تصميم موقع إلكتروني' })
+  @ApiProperty({
+    description: 'Agreement title',
+    example: 'تصميم موقع إلكتروني',
+  })
   title: string;
 
-  @ApiProperty({ enum: AgreementStatus, description: 'Current agreement status', example: 'ACTIVE' })
+  @ApiProperty({
+    enum: AgreementStatus,
+    description: 'Current agreement status',
+    example: 'ACTIVE',
+  })
   status: AgreementStatus;
 
   @ApiProperty({ description: 'Total agreement amount', example: 15000 })
   totalAmount: number;
 
-  @ApiProperty({ description: 'Agreement creation date', example: '2026-04-01T00:00:00.000Z' })
+  @ApiProperty({
+    description: 'Agreement creation date',
+    example: '2026-04-01T00:00:00.000Z',
+  })
   createdAt: Date;
 }
 
 export class ClientSummaryResponseDto {
-  @ApiProperty({ type: () => ClientResponseDto, description: 'The client record' })
+  @ApiProperty({
+    type: () => ClientResponseDto,
+    description: 'The client record',
+  })
   client: ClientResponseDto;
 
-  @ApiProperty({ type: () => AgreementsByStatusDto, description: 'Agreement counts' })
+  @ApiProperty({
+    type: () => AgreementsByStatusDto,
+    description: 'Agreement counts',
+  })
   agreements: AgreementsByStatusDto;
 
   @ApiProperty({ type: () => PaymentSummaryDto, description: 'Payment totals' })
