@@ -1,0 +1,15 @@
+{
+  "matchScore": 87,
+  "recommendation": "ACCEPT",
+  "completedCriteria": [
+    "Responsive layout matches the approved design",
+    "Portfolio section is visible on mobile"
+  ],
+  "missingCriteria": [
+    "Brand colors match the style guide"
+  ],
+  "outOfScopeItems": [
+    "Add a separate admin dashboard"
+  ],
+  "reasoning": "The delivery meets most of the required acceptance criteria and is acceptable overall."
+}

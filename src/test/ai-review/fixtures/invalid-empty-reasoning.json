@@ -1,0 +1,8 @@
+{
+  "matchScore": 55,
+  "recommendation": "PARTIAL",
+  "completedCriteria": ["Responsive layout matches the approved design"],
+  "missingCriteria": ["Portfolio section is visible on mobile"],
+  "outOfScopeItems": [],
+  "reasoning": ""
+}

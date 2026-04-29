@@ -86,7 +86,9 @@ describe('UserResponseDto', () => {
       ...sampleUser,
       passwordHash: '$2b$10$secret',
     });
-    expect((dto as unknown as { passwordHash?: unknown }).passwordHash).toBeUndefined();
+    expect(
+      (dto as unknown as { passwordHash?: unknown }).passwordHash,
+    ).toBeUndefined();
   });
 
   it('returns avatarUrl as null when the user has no avatar', () => {

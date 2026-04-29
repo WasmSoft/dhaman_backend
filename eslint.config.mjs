@@ -7,18 +7,15 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   {
     ignores: [
-      
       'eslint.config.mjs',
       'node_modules/',
-      'dist/',
-      'build/',
-      'coverage/',
-      '*.min.js',
-    ,
-      'dist/**',
-      'build/**',
-      'coverage/**',
       'node_modules/**',
+      'dist/',
+      'dist/**',
+      'build/',
+      'build/**',
+      'coverage/',
+      'coverage/**',
       '*.min.js',
     ],
   },
