@@ -1,4 +1,8 @@
-import { AIRecommendation, AIReviewStatus, TimelineActorRole } from '@prisma/client';
+import {
+  AIRecommendation,
+  AIReviewStatus,
+  TimelineActorRole,
+} from '@prisma/client';
 import { Locale } from '../../common/enums/locale.enum';
 import {
   createGeminiServiceMock,

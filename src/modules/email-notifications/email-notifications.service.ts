@@ -85,6 +85,30 @@ export class EmailNotificationsService {
     });
   }
 
+  // EN: Creates a PENDING notification record for the client agreement invite.
+  // AR: ينشئ سجل إشعار معلق لدعوة العميل لمراجعة الاتفاقية.
+  async enqueueAgreementInvite(input: {
+    agreementId: string;
+    recipientEmail: string;
+    clientName: string;
+    agreementTitle: string;
+    inviteToken: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        type: NotificationType.AGREEMENT_INVITE,
+        subject: `Agreement invitation: ${input.agreementTitle}`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
   private placeholder(action: string, details?: Record<string, unknown>) {
     return {
       module: 'email-notifications',

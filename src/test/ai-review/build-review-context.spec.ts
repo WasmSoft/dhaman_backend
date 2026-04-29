@@ -55,7 +55,8 @@ describe('buildReviewContext', () => {
       },
       {
         type: 'review',
-        clause: 'The client reviews the delivery against the acceptance criteria only.',
+        clause:
+          'The client reviews the delivery against the acceptance criteria only.',
         rules: { clientReviewPeriodDays: 5 },
       },
     ]);
@@ -104,10 +105,11 @@ describe('buildReviewContext', () => {
   });
 
   it('does not expose internal ids when extra input fields exist', () => {
-    const input = createBuildReviewContextInputFixture() as BuildReviewContextInput & {
-      agreement: BuildReviewContextInput['agreement'] & { id: string };
-      delivery: BuildReviewContextInput['delivery'] & { providerId: string };
-    };
+    const input =
+      createBuildReviewContextInputFixture() as BuildReviewContextInput & {
+        agreement: BuildReviewContextInput['agreement'] & { id: string };
+        delivery: BuildReviewContextInput['delivery'] & { providerId: string };
+      };
 
     input.agreement.id = 'agreement-internal-id';
     input.delivery.providerId = 'provider-internal-id';

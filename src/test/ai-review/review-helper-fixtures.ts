@@ -44,7 +44,8 @@ export function createBuildReviewContextInputFixture(
     },
     delivery: {
       summary: 'Initial landing page delivery with mobile layout updates.',
-      notes: 'Header and footer are complete, but the portfolio section needs review.',
+      notes:
+        'Header and footer are complete, but the portfolio section needs review.',
       deliveryUrl: 'https://example.com/delivery/landing-page',
       fileUrl: 'https://example.com/files/final-design.pdf',
       fileName: 'final-design.pdf',
@@ -88,7 +89,8 @@ export function createReviewContextFixture(
       },
       {
         type: 'review',
-        clause: 'The client reviews the delivery against the acceptance criteria only.',
+        clause:
+          'The client reviews the delivery against the acceptance criteria only.',
         rules: { clientReviewPeriodDays: 5 },
       },
     ],
@@ -108,7 +110,8 @@ export function createReviewContextFixture(
     },
     delivery: {
       summary: 'Initial landing page delivery with mobile layout updates.',
-      notes: 'Header and footer are complete, but the portfolio section needs review.',
+      notes:
+        'Header and footer are complete, but the portfolio section needs review.',
       evidence: [
         {
           kind: 'url',

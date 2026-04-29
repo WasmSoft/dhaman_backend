@@ -12,7 +12,9 @@ describe('AiReviewModule', () => {
     }).compile();
 
     expect(moduleRef.get(AiReviewService)).toBeInstanceOf(AiReviewService);
-    expect(moduleRef.get(AiReviewController)).toBeInstanceOf(AiReviewController);
+    expect(moduleRef.get(AiReviewController)).toBeInstanceOf(
+      AiReviewController,
+    );
     expect(moduleRef.get(GeminiService)).toBeInstanceOf(GeminiService);
   });
 });

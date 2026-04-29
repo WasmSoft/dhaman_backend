@@ -17,18 +17,21 @@ jest.mock('@google/generative-ai', () => {
   };
 });
 
-const mockGenerateContent =
-  (jest.requireMock('@google/generative-ai') as Record<string, jest.Mock>)
-    .__mockGenerateContent;
+const mockGenerateContent = jest.requireMock(
+  '@google/generative-ai',
+).__mockGenerateContent;
 
 function createConfigMock(
   overrides: Partial<Record<string, string | undefined>> = {},
 ): ConfigService {
   return {
     get: jest.fn((key: string, defaultValue?: string) => {
-      if (key === 'ai.geminiApiKey') return overrides.geminiApiKey ?? 'test-key';
-      if (key === 'ai.geminiTimeoutMs') return overrides.geminiTimeoutMs ?? '30000';
-      if (key === 'ai.geminiModel') return overrides.geminiModel ?? 'gemini-1.5-flash';
+      if (key === 'ai.geminiApiKey')
+        return overrides.geminiApiKey ?? 'test-key';
+      if (key === 'ai.geminiTimeoutMs')
+        return overrides.geminiTimeoutMs ?? '30000';
+      if (key === 'ai.geminiModel')
+        return overrides.geminiModel ?? 'gemini-1.5-flash';
       return defaultValue;
     }),
   } as unknown as ConfigService;
@@ -53,11 +56,11 @@ describe('GeminiService', () => {
     });
 
     it('throws on missing API key', async () => {
-      const service = new GeminiService(
-        createConfigMock({ geminiApiKey: '' }),
-      );
+      const service = new GeminiService(createConfigMock({ geminiApiKey: '' }));
 
-      await expect(service.generateContent('test')).rejects.toThrow(AppException);
+      await expect(service.generateContent('test')).rejects.toThrow(
+        AppException,
+      );
       await expect(service.generateContent('test')).rejects.toMatchObject(
         expect.objectContaining({
           message: expect.stringContaining('API key'),
@@ -86,7 +89,8 @@ describe('GeminiService', () => {
 
       await service.generateContent('test prompt');
 
-      const gaInstance = (GoogleGenerativeAI as jest.Mock).mock.results[0].value;
+      const gaInstance = (GoogleGenerativeAI as jest.Mock).mock.results[0]
+        .value;
       expect(gaInstance.getGenerativeModel).toHaveBeenCalledWith({
         model: 'gemini-pro',
       });

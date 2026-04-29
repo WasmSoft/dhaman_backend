@@ -122,7 +122,10 @@ describe('AiReviewService — integration', () => {
         { provide: ClsService, useValue: clsMock },
         { provide: PaymentsService, useValue: paymentsServiceMock },
         { provide: TimelineEventsService, useValue: timelineEventsServiceMock },
-        { provide: EmailNotificationsService, useValue: emailNotificationsServiceMock },
+        {
+          provide: EmailNotificationsService,
+          useValue: emailNotificationsServiceMock,
+        },
         { provide: GeminiService, useValue: geminiServiceMock },
       ],
     }).compile();
@@ -138,9 +141,12 @@ describe('AiReviewService — integration', () => {
   // US1: findAll()
   // ---------------------------------------------------------------------------
   describe('findAll', () => {
-    it('T004: returns only reviews for authenticated user\'s agreements', async () => {
+    it("T004: returns only reviews for authenticated user's agreements", async () => {
       const userAId = 'user-a';
-      const reviewUserA = createReview({ id: 'review-a', agreementId: 'agreement-a' });
+      const reviewUserA = createReview({
+        id: 'review-a',
+        agreementId: 'agreement-a',
+      });
 
       prismaMock.$transaction.mockResolvedValue([[reviewUserA], 1]);
 
@@ -159,11 +165,16 @@ describe('AiReviewService — integration', () => {
     it('T005: findAll filters by agreementId correctly', async () => {
       const userId = 'user-1';
       const agreement1Id = 'agreement-1';
-      const review1 = createReview({ id: 'review-1', agreementId: agreement1Id });
+      const review1 = createReview({
+        id: 'review-1',
+        agreementId: agreement1Id,
+      });
 
       prismaMock.$transaction.mockResolvedValue([[review1], 1]);
 
-      const result = await service.findAll(userId, { agreementId: agreement1Id });
+      const result = await service.findAll(userId, {
+        agreementId: agreement1Id,
+      });
 
       expect(result.reviews).toHaveLength(1);
       expect(result.reviews[0].agreementId).toBe(agreement1Id);
@@ -176,7 +187,9 @@ describe('AiReviewService — integration', () => {
 
       prismaMock.$transaction.mockResolvedValue([[], 0]);
 
-      const result = await service.findAll(userId, { agreementId: otherAgreementId });
+      const result = await service.findAll(userId, {
+        agreementId: otherAgreementId,
+      });
 
       expect(result.reviews).toEqual([]);
       expect(result.total).toBe(0);
@@ -185,11 +198,16 @@ describe('AiReviewService — integration', () => {
 
     it('T007: findAll status filter returns only matching status', async () => {
       const userId = 'user-1';
-      const completedReview = createReview({ id: 'review-completed', status: AIReviewStatus.COMPLETED });
+      const completedReview = createReview({
+        id: 'review-completed',
+        status: AIReviewStatus.COMPLETED,
+      });
 
       prismaMock.$transaction.mockResolvedValue([[completedReview], 1]);
 
-      const result = await service.findAll(userId, { status: AIReviewStatus.COMPLETED });
+      const result = await service.findAll(userId, {
+        status: AIReviewStatus.COMPLETED,
+      });
 
       expect(result.reviews).toHaveLength(1);
       expect(result.reviews[0].status).toBe(AIReviewStatus.COMPLETED);
@@ -236,7 +254,9 @@ describe('AiReviewService — integration', () => {
       expect(result.completedCriteria).toEqual(['criteria-1']);
       expect(result.missingCriteria).toEqual(['missing-1']);
       expect(result.outOfScopeItems).toEqual(['out-of-scope-1']);
-      expect((result as unknown as Record<string, unknown>).rawResponse).toBeUndefined();
+      expect(
+        (result as unknown as Record<string, unknown>).rawResponse,
+      ).toBeUndefined();
       expect(prismaMock.aIReview.findFirst).toHaveBeenCalledTimes(1);
     });
 
@@ -246,32 +266,43 @@ describe('AiReviewService — integration', () => {
 
       prismaMock.aIReview.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne(nonExistentId, userId)).rejects.toThrow(AppException);
+      await expect(service.findOne(nonExistentId, userId)).rejects.toThrow(
+        AppException,
+      );
 
       try {
         await service.findOne(nonExistentId, userId);
         fail('Expected AppException to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(AppException);
-        expect((error as AppException).code).toBe(ErrorCode.AI_REVIEW_NOT_FOUND);
+        expect((error as AppException).code).toBe(
+          ErrorCode.AI_REVIEW_NOT_FOUND,
+        );
       }
     });
 
     it('T016: returns 404 for review owned by another user', async () => {
       const userAId = 'user-a';
       const userBId = 'user-b';
-      const review = createReview({ id: 'review-owned-by-a', agreementId: 'agreement-a' });
+      const review = createReview({
+        id: 'review-owned-by-a',
+        agreementId: 'agreement-a',
+      });
 
       prismaMock.aIReview.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne(review.id, userBId)).rejects.toThrow(AppException);
+      await expect(service.findOne(review.id, userBId)).rejects.toThrow(
+        AppException,
+      );
 
       try {
         await service.findOne(review.id, userBId);
         fail('Expected AppException to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(AppException);
-        expect((error as AppException).code).toBe(ErrorCode.AI_REVIEW_NOT_FOUND);
+        expect((error as AppException).code).toBe(
+          ErrorCode.AI_REVIEW_NOT_FOUND,
+        );
       }
     });
   });

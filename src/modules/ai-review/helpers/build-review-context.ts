@@ -67,7 +67,9 @@ function buildAcceptanceCriteria(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === 'string');
 }
 
-function serializeAmount(value: BuildReviewContextInput['milestone']['amount']): string {
+function serializeAmount(
+  value: BuildReviewContextInput['milestone']['amount'],
+): string {
   if (typeof value === 'string') {
     return value;
   }
@@ -95,7 +97,9 @@ export function buildReviewContext(
       description: input.milestone.description ?? '',
       amount: serializeAmount(input.milestone.amount),
       currency: input.milestone.currency,
-      acceptanceCriteria: buildAcceptanceCriteria(input.milestone.acceptanceCriteria),
+      acceptanceCriteria: buildAcceptanceCriteria(
+        input.milestone.acceptanceCriteria,
+      ),
       revisionLimit: input.milestone.revisionLimit,
     },
     delivery: {

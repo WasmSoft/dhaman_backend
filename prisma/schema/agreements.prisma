@@ -11,10 +11,10 @@ enum AgreementStatus {
 model Agreement {
   id                   String          @id @default(uuid())
   freelancerId         String
-  clientId             String
+  clientId             String?
   title                String
-  description          String
-  serviceType          String
+  description          String?
+  serviceType          String?
   totalAmount          Decimal         @db.Decimal(12, 2)
   currency             String
   durationText         String?
@@ -28,7 +28,7 @@ model Agreement {
   updatedAt            DateTime        @updatedAt
 
   freelancer         User                @relation("FreelancerAgreements", fields: [freelancerId], references: [id])
-  client             Client              @relation(fields: [clientId], references: [id])
+  client             Client?             @relation(fields: [clientId], references: [id])
   policy             AgreementPolicy?
   milestones         Milestone[]
   payments           Payment[]

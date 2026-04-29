@@ -27,7 +27,9 @@ describe('AiReviewService openReview client failure', () => {
       id: 'payment-1',
       status: 'CLIENT_REVIEW',
     });
-    (prisma.aIReview.create as jest.Mock).mockResolvedValue(createReviewRecord());
+    (prisma.aIReview.create as jest.Mock).mockResolvedValue(
+      createReviewRecord(),
+    );
     (prisma.aIReview.update as jest.Mock)
       .mockResolvedValueOnce(
         createReviewRecord({ status: AIReviewStatus.PROCESSING }),
@@ -52,7 +54,8 @@ describe('AiReviewService openReview client failure', () => {
     expect(result.matchScore).toBe(72);
     expect(geminiService.generateContent).toHaveBeenCalledTimes(2);
 
-    const completionUpdate = (prisma.aIReview.update as jest.Mock).mock.calls[1][0].data;
+    const completionUpdate = (prisma.aIReview.update as jest.Mock).mock
+      .calls[1][0].data;
     expect(completionUpdate.rawResponse).toEqual({
       provider: 'mock',
       reason: 'ai_failure',
@@ -85,7 +88,9 @@ describe('AiReviewService openReview client failure', () => {
       id: 'payment-1',
       status: 'CLIENT_REVIEW',
     });
-    (prisma.aIReview.create as jest.Mock).mockResolvedValue(createReviewRecord());
+    (prisma.aIReview.create as jest.Mock).mockResolvedValue(
+      createReviewRecord(),
+    );
     (prisma.aIReview.update as jest.Mock)
       .mockResolvedValueOnce(
         createReviewRecord({ status: AIReviewStatus.PROCESSING }),

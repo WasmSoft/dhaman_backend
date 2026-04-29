@@ -1,41 +1,424 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma, TimelineActorRole, TimelineEventType } from '@prisma/client';
+import { randomBytes } from 'node:crypto';
+import { ClsService } from '../../common/cls/cls.service';
+import { ErrorCode } from '../../common/enums/error-code.enum';
+import { AppException } from '../../common/errors/app-exception';
+import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { ClientsService } from '../clients/clients.service';
+import { EmailNotificationsService } from '../email-notifications/email-notifications.service';
+import { TimelineEventsService } from '../timeline-events/timeline-events.service';
+import {
+  AgreementListResponseDto,
+  AgreementListItemDto,
+} from './dto/agreement-list.dto';
+import { AgreementQueryDto } from './dto/agreement-query.dto';
+import { AgreementResponseDto } from './dto/agreement-response.dto';
+import { CreateAgreementDto } from './dto/create-agreement.dto';
+import { UpdateAgreementDto } from './dto/update-agreement.dto';
 
-/**
- * Phase 1 scope: scaffold and DTO contracts only.
- * No lifecycle transitions, invitations, activation, archival, persistence,
- * emails, or payments are implemented in this phase.
- *
- * All methods return placeholder responses indicating "not-implemented" status.
- */
+type AgreementWithIncludes = Prisma.AgreementGetPayload<{
+  include: {
+    client: true;
+    milestones: { orderBy: { order: 'asc' } };
+    policy: true;
+  };
+}>;
+
+type AgreementListRow = Prisma.AgreementGetPayload<{
+  select: {
+    id: true;
+    title: true;
+    clientId: true;
+    client: { select: { name: true } };
+    totalAmount: true;
+    currency: true;
+    status: true;
+    sentAt: true;
+    createdAt: true;
+    _count: { select: { milestones: true } };
+  };
+}>;
+
 @Injectable()
 export class AgreementsService {
-  list() {
-    return this.placeholder('list');
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cls: ClsService,
+    private readonly clientsService: ClientsService,
+    private readonly timelineEvents: TimelineEventsService,
+    private readonly emailNotifications: EmailNotificationsService,
+  ) {}
+
+  async create(dto: CreateAgreementDto): Promise<AgreementResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    if (dto.clientId) {
+      await this.clientsService.getById(dto.clientId);
+    }
+
+    const currency = dto.currency ?? (await this.getCurrency(freelancerId));
+
+    const agreement = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.agreement.create({
+        data: {
+          freelancerId,
+          title: dto.title,
+          description: dto.description ?? null,
+          serviceType: dto.serviceType ?? null,
+          clientId: dto.clientId ?? null,
+          totalAmount: 0,
+          currency,
+          durationText: dto.durationText ?? null,
+          expectedDeliveryDate: dto.expectedDeliveryDate
+            ? new Date(dto.expectedDeliveryDate)
+            : null,
+          status: 'DRAFT',
+        },
+        include: {
+          client: true,
+          milestones: { orderBy: { order: 'asc' } },
+          policy: true,
+        },
+      });
+
+      await this.timelineEvents.createEvent(
+        {
+          agreementId: created.id,
+          type: TimelineEventType.AGREEMENT_CREATED,
+          actorRole: TimelineActorRole.FREELANCER,
+          actorId: freelancerId,
+          title: 'Agreement created',
+          description: 'A new agreement draft was created.',
+        },
+        tx,
+      );
+
+      return created;
+    });
+
+    return this.mapToResponse(agreement);
   }
 
-  create(dto: unknown) {
-    return this.placeholder('create', { dto });
-  }
+  async findAll(query: AgreementQueryDto): Promise<AgreementListResponseDto> {
+    const freelancerId = this.getFreelancerId();
 
-  getById(id: string) {
-    return this.placeholder('getById', { id });
-  }
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+    const skip = (page - 1) * limit;
 
-  update(id: string, dto: unknown) {
-    return this.placeholder('update', { id, dto });
-  }
+    const where: Prisma.AgreementWhereInput = { freelancerId };
 
-  sendInvite(id: string) {
-    return this.placeholder('sendInvite', { id });
-  }
+    if (query.status) {
+      where.status = query.status;
+    }
 
-  private placeholder(action: string, details?: Record<string, unknown>) {
+    if (query.clientId) {
+      where.clientId = query.clientId;
+    }
+
+    if (query.search) {
+      where.OR = [
+        { title: { contains: query.search, mode: 'insensitive' } },
+        { client: { name: { contains: query.search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [total, agreements] = await this.prisma.$transaction([
+      this.prisma.agreement.count({ where }),
+      this.prisma.agreement.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          clientId: true,
+          client: { select: { name: true } },
+          totalAmount: true,
+          currency: true,
+          status: true,
+          sentAt: true,
+          createdAt: true,
+          _count: { select: { milestones: true } },
+        },
+      }),
+    ]);
+
     return {
-      module: 'agreements',
-      action,
-      phase: 0,
-      status: 'not-implemented',
-      ...details,
+      data: agreements.map((a) => this.mapToListItem(a)),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  list(query: AgreementQueryDto = {}): Promise<AgreementListResponseDto> {
+    return this.findAll(query);
+  }
+
+  async findOne(id: string): Promise<AgreementResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    const agreement = await this.prisma.agreement.findFirst({
+      where: { id, freelancerId },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    if (!agreement) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    return this.mapToResponse(agreement);
+  }
+
+  getById(id: string): Promise<AgreementResponseDto> {
+    return this.findOne(id);
+  }
+
+  async update(
+    id: string,
+    dto: UpdateAgreementDto,
+  ): Promise<AgreementResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    const existing = await this.prisma.agreement.findFirst({
+      where: { id, freelancerId },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    if (!existing) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    if (existing.status !== 'DRAFT') {
+      throw new AppException({ code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED });
+    }
+
+    if (dto.clientId !== undefined && dto.clientId !== existing.clientId) {
+      await this.clientsService.getById(dto.clientId);
+    }
+
+    if (dto.totalAmount !== undefined) {
+      const milestoneSum = await this.prisma.milestone.aggregate({
+        where: { agreementId: id },
+        _sum: { amount: true },
+      });
+      const sum = Number(milestoneSum._sum.amount ?? 0);
+      if (sum > 0 && sum !== dto.totalAmount) {
+        throw new AppException({ code: ErrorCode.PAYMENT_INVALID_AMOUNT });
+      }
+    }
+
+    const data: Prisma.AgreementUpdateInput = {};
+
+    if (dto.title !== undefined) {
+      data.title = dto.title;
+    }
+    if (dto.description !== undefined) {
+      data.description = dto.description;
+    }
+    if (dto.serviceType !== undefined) {
+      data.serviceType = dto.serviceType;
+    }
+    if (dto.clientId !== undefined) {
+      data.client = { connect: { id: dto.clientId } };
+    }
+    if (dto.totalAmount !== undefined) {
+      data.totalAmount = dto.totalAmount;
+    }
+    if (dto.currency !== undefined) {
+      data.currency = dto.currency;
+    }
+    if (dto.durationText !== undefined) {
+      data.durationText = dto.durationText;
+    }
+    if (dto.expectedDeliveryDate !== undefined) {
+      data.expectedDeliveryDate = new Date(dto.expectedDeliveryDate);
+    }
+
+    const updated = await this.prisma.agreement.update({
+      where: { id },
+      data,
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    return this.mapToResponse(updated);
+  }
+
+  async sendInvite(id: string): Promise<AgreementResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    const agreement = await this.prisma.agreement.findFirst({
+      where: { id, freelancerId },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    if (!agreement) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    // 1. Status must be DRAFT — check before all other readiness conditions
+    if (agreement.status !== 'DRAFT') {
+      throw new AppException({ code: ErrorCode.AGREEMENT_ALREADY_SENT });
+    }
+
+    // 2. Client must be linked
+    if (!agreement.clientId || !agreement.client) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_CLIENT_REQUIRED });
+    }
+
+    // 3. At least one milestone must exist
+    if (agreement.milestones.length === 0) {
+      throw new AppException({
+        code: ErrorCode.VALIDATION_ERROR,
+        details: { reason: 'AGREEMENT_MILESTONES_REQUIRED' },
+      });
+    }
+
+    // 4. Policy must exist
+    if (!agreement.policy) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_POLICY_REQUIRED });
+    }
+
+    // 5. totalAmount must equal the sum of milestone amounts (Decimal-safe)
+    const milestoneAggregate = await this.prisma.milestone.aggregate({
+      where: { agreementId: id },
+      _sum: { amount: true },
+    });
+    const milestoneSum = milestoneAggregate._sum.amount ?? 0;
+    if (Number(agreement.totalAmount) !== Number(milestoneSum)) {
+      throw new AppException({ code: ErrorCode.PAYMENT_INVALID_AMOUNT });
+    }
+
+    // Generate unique URL-safe 64-character tokens (48 bytes → 64 base64url chars)
+    const inviteToken = randomBytes(48).toString('base64url');
+    const portalToken = randomBytes(48).toString('base64url');
+
+    // Atomic: update agreement status/tokens/sentAt + record AGREEMENT_SENT timeline event
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const updatedAgreement = await tx.agreement.update({
+        where: { id },
+        data: {
+          status: 'SENT',
+          sentAt: new Date(),
+          inviteToken,
+          portalToken,
+        },
+        include: {
+          client: true,
+          milestones: { orderBy: { order: 'asc' } },
+          policy: true,
+        },
+      });
+
+      await this.timelineEvents.createEvent(
+        {
+          agreementId: id,
+          type: TimelineEventType.AGREEMENT_SENT,
+          actorRole: TimelineActorRole.FREELANCER,
+          actorId: freelancerId,
+          title: 'Agreement sent to client',
+          description: 'The agreement invite was sent to the linked client.',
+        },
+        tx,
+      );
+
+      return updatedAgreement;
+    });
+
+    // Dispatch invite email after commit — failure is logged, SENT state is preserved
+    try {
+      await this.emailNotifications.enqueueAgreementInvite({
+        agreementId: id,
+        recipientEmail: agreement.client.email,
+        clientName: agreement.client.name,
+        agreementTitle: agreement.title,
+        inviteToken,
+      });
+    } catch (emailError) {
+      console.error(
+        `[AgreementsService.sendInvite] Failed to enqueue invite email for agreement ${id}:`,
+        emailError,
+      );
+    }
+
+    return this.mapToResponse(updated);
+  }
+
+  private getFreelancerId(): string {
+    const id = this.cls.get('userId');
+    if (!id) {
+      throw new AppException({ code: ErrorCode.UNAUTHORIZED });
+    }
+    return id;
+  }
+
+  private async getCurrency(freelancerId: string): Promise<string> {
+    const settings = await this.prisma.userSettings.findFirst({
+      where: { userId: freelancerId },
+      select: { preferredCurrency: true },
+    });
+    return settings?.preferredCurrency ?? 'SAR';
+  }
+
+  private mapToResponse(
+    agreement: AgreementWithIncludes,
+  ): AgreementResponseDto {
+    return {
+      id: agreement.id,
+      freelancerId: agreement.freelancerId,
+      clientId: agreement.clientId,
+      client: agreement.client ?? null,
+      title: agreement.title,
+      description: agreement.description,
+      serviceType: agreement.serviceType,
+      totalAmount: Number(agreement.totalAmount),
+      currency: agreement.currency,
+      durationText: agreement.durationText,
+      expectedDeliveryDate: agreement.expectedDeliveryDate,
+      status: agreement.status as unknown as AgreementResponseDto['status'],
+      inviteToken: agreement.inviteToken,
+      portalToken: agreement.portalToken,
+      approvedAt: agreement.approvedAt,
+      sentAt: agreement.sentAt,
+      createdAt: agreement.createdAt,
+      updatedAt: agreement.updatedAt,
+      milestones: agreement.milestones ?? [],
+      policy: agreement.policy ?? null,
+    };
+  }
+
+  private mapToListItem(agreement: AgreementListRow): AgreementListItemDto {
+    return {
+      id: agreement.id,
+      title: agreement.title,
+      clientId: agreement.clientId,
+      clientName: agreement.client?.name ?? null,
+      totalAmount: Number(agreement.totalAmount),
+      currency: agreement.currency,
+      status: agreement.status as unknown as AgreementListItemDto['status'],
+      milestonesCount: agreement._count.milestones,
+      sentAt: agreement.sentAt,
+      createdAt: agreement.createdAt,
     };
   }
 }

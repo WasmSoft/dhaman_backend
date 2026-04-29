@@ -27,8 +27,8 @@ export type ReviewEvidenceItem = {
 export type ReviewContext = {
   agreement: {
     title: string;
-    description: string;
-    serviceType: string;
+    description: string | null;
+    serviceType: string | null;
     currency: string;
   };
   policies: ReviewPolicyContext[];
@@ -62,8 +62,8 @@ export type ReviewResult = {
 export type BuildReviewContextInput = {
   agreement: {
     title: string;
-    description: string;
-    serviceType: string;
+    description: string | null;
+    serviceType: string | null;
     currency: string;
     policy?: {
       delayPolicy: string;

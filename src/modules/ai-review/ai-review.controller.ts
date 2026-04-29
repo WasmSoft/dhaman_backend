@@ -74,7 +74,12 @@ export class AiReviewController {
     description:
       'Returns a single AI review. Returns 404 if the review does not exist or the authenticated freelancer does not own the related agreement.',
   })
-  @ApiParam({ name: 'id', description: 'AI review ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'id',
+    description: 'AI review ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 200, type: AiReviewResponseDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED' })
   @ApiResponse({ status: 404, description: 'AI_REVIEW_NOT_FOUND' })
@@ -91,7 +96,12 @@ export class AiReviewController {
     description:
       'Applies the AI recommendation to the milestone payment. ACCEPT moves payment to READY_TO_RELEASE; REJECT and PARTIAL move it to ON_HOLD; NEEDS_HUMAN_REVIEW leaves payment unchanged. Optionally creates ChangeRequests for out-of-scope items.',
   })
-  @ApiParam({ name: 'id', description: 'AI review ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'id',
+    description: 'AI review ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 200, type: AcceptRecommendationResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_ERROR' })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED' })
@@ -132,8 +142,17 @@ export class AiReviewController {
     description:
       'Opens an AI review for a delivery using a portal access token. Accessible by clients through the portal link.',
   })
-  @ApiParam({ name: 'token', description: 'Portal access token', type: 'string' })
-  @ApiParam({ name: 'id', description: 'Delivery ID', type: 'string', format: 'uuid' })
+  @ApiParam({
+    name: 'token',
+    description: 'Portal access token',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Delivery ID',
+    type: 'string',
+    format: 'uuid',
+  })
   @ApiResponse({ status: 201, type: AiReviewResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_ERROR' })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED' })

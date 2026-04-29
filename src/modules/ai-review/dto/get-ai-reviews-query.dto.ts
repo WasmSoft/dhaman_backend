@@ -33,7 +33,8 @@ export class GetAiReviewsQueryDto {
   page?: number;
 
   @ApiPropertyOptional({
-    description: 'Optional page size. Defaults to 20 when omitted and is capped at 50.',
+    description:
+      'Optional page size. Defaults to 20 when omitted and is capped at 50.',
     example: 20,
     default: 20,
   })

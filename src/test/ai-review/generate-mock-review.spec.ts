@@ -20,7 +20,9 @@ describe('generateMockReview', () => {
         'Contact form works correctly',
         'Performance remains acceptable on mobile',
       ],
-      outOfScopeItems: ['عنصر إضافي خارج نطاق العمل تم رصده في المراجعة التجريبية.'],
+      outOfScopeItems: [
+        'عنصر إضافي خارج نطاق العمل تم رصده في المراجعة التجريبية.',
+      ],
       reasoning:
         'التسليم يحقق جزءاً من معايير القبول، لكنه يحتاج إلى استكمال بعض البنود قبل التوصية بالقبول الكامل.',
     });
@@ -51,7 +53,9 @@ describe('generateMockReview', () => {
     expect(generateMockReview(context)).toMatchObject({
       completedCriteria: [],
       missingCriteria: [],
-      outOfScopeItems: ['عنصر إضافي خارج نطاق العمل تم رصده في المراجعة التجريبية.'],
+      outOfScopeItems: [
+        'عنصر إضافي خارج نطاق العمل تم رصده في المراجعة التجريبية.',
+      ],
     });
   });
 
@@ -67,7 +71,9 @@ describe('generateMockReview', () => {
     expect(generateMockReview(context)).toMatchObject({
       reasoning:
         'التسليم يحقق جزءاً من معايير القبول، لكنه يحتاج إلى استكمال بعض البنود قبل التوصية بالقبول الكامل.',
-      outOfScopeItems: ['عنصر إضافي خارج نطاق العمل تم رصده في المراجعة التجريبية.'],
+      outOfScopeItems: [
+        'عنصر إضافي خارج نطاق العمل تم رصده في المراجعة التجريبية.',
+      ],
     });
   });
 
@@ -77,7 +83,9 @@ describe('generateMockReview', () => {
     expect(generateMockReview(context)).toMatchObject({
       reasoning:
         'The delivery meets part of the acceptance criteria, but some items still need completion before full acceptance.',
-      outOfScopeItems: ['Additional out-of-scope item identified by the mock review.'],
+      outOfScopeItems: [
+        'Additional out-of-scope item identified by the mock review.',
+      ],
     });
   });
 

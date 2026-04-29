@@ -35,7 +35,9 @@ function formatCriteria(criteria: string[]): string {
     return 'No acceptance criteria provided.';
   }
 
-  return criteria.map((criterion, index) => `${index + 1}. ${criterion}`).join('\n');
+  return criteria
+    .map((criterion, index) => `${index + 1}. ${criterion}`)
+    .join('\n');
 }
 
 function formatEvidence(context: ReviewContext): string {
@@ -49,7 +51,9 @@ function formatEvidence(context: ReviewContext): string {
         return `${index + 1}. URL: ${item.ref}`;
       }
 
-      const fileDetails = [item.fileName, item.fileType].filter(Boolean).join(' | ');
+      const fileDetails = [item.fileName, item.fileType]
+        .filter(Boolean)
+        .join(' | ');
 
       return `${index + 1}. FILE: ${item.ref}${fileDetails ? ` | ${fileDetails}` : ''}`;
     })

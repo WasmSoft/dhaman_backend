@@ -9,7 +9,9 @@ function readFixture(fileName: string): string {
 }
 
 async function expectInvalidResponse(raw: string): Promise<void> {
-  await expect(async () => parseReviewResponse(raw)).rejects.toThrow(AppException);
+  await expect(async () => parseReviewResponse(raw)).rejects.toThrow(
+    AppException,
+  );
 
   try {
     parseReviewResponse(raw);
@@ -42,7 +44,9 @@ describe('parseReviewResponse', () => {
   });
 
   it('parses a valid single markdown JSON fence into a ReviewResult object', () => {
-    expect(parseReviewResponse(readFixture('markdown-fenced-response.txt'))).toEqual({
+    expect(
+      parseReviewResponse(readFixture('markdown-fenced-response.txt')),
+    ).toEqual({
       matchScore: 61,
       recommendation: 'PARTIAL',
       completedCriteria: ['Responsive layout matches the approved design'],

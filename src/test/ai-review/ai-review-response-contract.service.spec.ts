@@ -1,4 +1,8 @@
-import { AIRecommendation, AIReviewStatus, TimelineActorRole } from '@prisma/client';
+import {
+  AIRecommendation,
+  AIReviewStatus,
+  TimelineActorRole,
+} from '@prisma/client';
 import {
   createReviewRecord,
   createService,
@@ -8,7 +12,11 @@ describe('AiReviewService response contract', () => {
   it('maps the public review fields and excludes rawResponse', () => {
     const { service } = createService();
 
-    const result = (service as never as { toResponse: (value: unknown) => Record<string, unknown> }).toResponse(
+    const result = (
+      service as never as {
+        toResponse: (value: unknown) => Record<string, unknown>;
+      }
+    ).toResponse(
       createReviewRecord({
         status: AIReviewStatus.COMPLETED,
         recommendation: AIRecommendation.PARTIAL,

@@ -25,7 +25,8 @@ describe('ReviewPaymentReleaseDto', () => {
   it('accepts a valid payload with UUID v4 ids', async () => {
     const errors = await validateDto({
       ...VALID_UUIDS,
-      objection: 'The delivery appears ready, but I want an AI review before release.',
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
       relatedCriteria: ['performance budget', 'RTL support'],
     });
 
@@ -36,7 +37,8 @@ describe('ReviewPaymentReleaseDto', () => {
     const errors = await validateDto({
       milestoneId: VALID_UUIDS.milestoneId,
       deliveryId: VALID_UUIDS.deliveryId,
-      objection: 'The delivery appears ready, but I want an AI review before release.',
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
     });
 
     const constraints = constraintsFor(errors, 'agreementId');
@@ -49,7 +51,8 @@ describe('ReviewPaymentReleaseDto', () => {
     const errors = await validateDto({
       agreementId: VALID_UUIDS.agreementId,
       deliveryId: VALID_UUIDS.deliveryId,
-      objection: 'The delivery appears ready, but I want an AI review before release.',
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
     });
 
     const constraints = constraintsFor(errors, 'milestoneId');
@@ -62,7 +65,8 @@ describe('ReviewPaymentReleaseDto', () => {
     const errors = await validateDto({
       agreementId: VALID_UUIDS.agreementId,
       milestoneId: VALID_UUIDS.milestoneId,
-      objection: 'The delivery appears ready, but I want an AI review before release.',
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
     });
 
     const constraints = constraintsFor(errors, 'deliveryId');
@@ -76,7 +80,8 @@ describe('ReviewPaymentReleaseDto', () => {
       agreementId: VALID_UUIDS.agreementId,
       milestoneId: VALID_UUIDS.milestoneId,
       deliveryId: 'delivery-123',
-      objection: 'The delivery appears ready, but I want an AI review before release.',
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
     });
 
     expect(constraintsFor(errors, 'deliveryId')).toHaveProperty('isUuid');
@@ -103,7 +108,8 @@ describe('ReviewPaymentReleaseDto', () => {
   it('accepts an omitted relatedCriteria array', async () => {
     const errors = await validateDto({
       ...VALID_UUIDS,
-      objection: 'The delivery appears ready, but I want an AI review before release.',
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
     });
 
     expect(errors).toHaveLength(0);
@@ -112,20 +118,29 @@ describe('ReviewPaymentReleaseDto', () => {
   it('rejects non-string items in relatedCriteria', async () => {
     const errors = await validateDto({
       ...VALID_UUIDS,
-      objection: 'The delivery appears ready, but I want an AI review before release.',
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
       relatedCriteria: ['performance budget', 3],
     });
 
-    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty('isString');
+    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty(
+      'isString',
+    );
   });
 
   it('rejects relatedCriteria arrays longer than 50 items', async () => {
     const errors = await validateDto({
       ...VALID_UUIDS,
-      objection: 'The delivery appears ready, but I want an AI review before release.',
-      relatedCriteria: Array.from({ length: 51 }, (_, index) => `criterion-${index}`),
+      objection:
+        'The delivery appears ready, but I want an AI review before release.',
+      relatedCriteria: Array.from(
+        { length: 51 },
+        (_, index) => `criterion-${index}`,
+      ),
     });
 
-    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty('arrayMaxSize');
+    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty(
+      'arrayMaxSize',
+    );
   });
 });

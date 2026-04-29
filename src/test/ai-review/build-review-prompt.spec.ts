@@ -12,10 +12,18 @@ describe('buildReviewPrompt', () => {
     expect(prompt).toContain('Brand colors match the style guide');
     expect(prompt).toContain('Contact form works correctly');
     expect(prompt).toContain('Performance remains acceptable on mobile');
-    expect(prompt).toContain('Late delivery reduces the review period by one day.');
-    expect(prompt).toContain('Cancellation after approval requires mutual agreement.');
-    expect(prompt).toContain('Extra work outside the milestone must be agreed separately.');
-    expect(prompt).toContain('The client reviews the delivery against the acceptance criteria only.');
+    expect(prompt).toContain(
+      'Late delivery reduces the review period by one day.',
+    );
+    expect(prompt).toContain(
+      'Cancellation after approval requires mutual agreement.',
+    );
+    expect(prompt).toContain(
+      'Extra work outside the milestone must be agreed separately.',
+    );
+    expect(prompt).toContain(
+      'The client reviews the delivery against the acceptance criteria only.',
+    );
     expect(prompt).toContain('https://example.com/delivery/landing-page');
     expect(prompt).toContain('https://example.com/files/final-design.pdf');
     expect(prompt).toContain(
@@ -30,21 +38,27 @@ describe('buildReviewPrompt', () => {
   });
 
   it('instructs Arabic reasoning when the locale is Arabic', () => {
-    const prompt = buildReviewPrompt(createReviewContextFixture({ locale: 'ar' }));
+    const prompt = buildReviewPrompt(
+      createReviewContextFixture({ locale: 'ar' }),
+    );
 
     expect(prompt).toContain('Write the reasoning text in Arabic.');
     expect(prompt).toContain('Keep JSON keys in English.');
   });
 
   it('instructs English reasoning when the locale is English', () => {
-    const prompt = buildReviewPrompt(createReviewContextFixture({ locale: 'en' }));
+    const prompt = buildReviewPrompt(
+      createReviewContextFixture({ locale: 'en' }),
+    );
 
     expect(prompt).toContain('Write the reasoning text in English.');
     expect(prompt).toContain('Keep JSON keys in English.');
   });
 
   it('uses explicit empty text when no policies are provided', () => {
-    const prompt = buildReviewPrompt(createReviewContextFixture({ policies: [] }));
+    const prompt = buildReviewPrompt(
+      createReviewContextFixture({ policies: [] }),
+    );
 
     expect(prompt).toContain('No policies provided.');
   });

@@ -13,7 +13,8 @@ export class AcceptRecommendationResponseDto {
   paymentStatus!: string;
 
   @ApiProperty({
-    description: 'Number of change request records created from out-of-scope items.',
+    description:
+      'Number of change request records created from out-of-scope items.',
     example: 1,
   })
   changeRequestsCreated!: number;

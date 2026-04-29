@@ -48,7 +48,9 @@ function stripSingleJsonFence(raw: string): string {
 }
 
 function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === 'string')
+  );
 }
 
 function hasOnlyAllowedKeys(value: Record<string, unknown>): boolean {
@@ -56,7 +58,9 @@ function hasOnlyAllowedKeys(value: Record<string, unknown>): boolean {
 
   return (
     keys.length === ALLOWED_KEYS.length &&
-    keys.every((key) => ALLOWED_KEYS.includes(key as (typeof ALLOWED_KEYS)[number]))
+    keys.every((key) =>
+      ALLOWED_KEYS.includes(key as (typeof ALLOWED_KEYS)[number]),
+    )
   );
 }
 
@@ -93,7 +97,10 @@ export function parseReviewResponse(raw: string): ReviewResult {
     });
   }
 
-  if (typeof result.matchScore !== 'number' || !Number.isFinite(result.matchScore)) {
+  if (
+    typeof result.matchScore !== 'number' ||
+    !Number.isFinite(result.matchScore)
+  ) {
     invalidResponse('AI response matchScore must be a finite number.', {
       step: 'matchScoreType',
       field: 'matchScore',
@@ -109,7 +116,9 @@ export function parseReviewResponse(raw: string): ReviewResult {
 
   if (
     typeof result.recommendation !== 'string' ||
-    !ALLOWED_RECOMMENDATIONS.has(result.recommendation as ReviewResult['recommendation'])
+    !ALLOWED_RECOMMENDATIONS.has(
+      result.recommendation as ReviewResult['recommendation'],
+    )
   ) {
     invalidResponse('AI response recommendation is invalid.', {
       step: 'recommendation',
@@ -138,7 +147,10 @@ export function parseReviewResponse(raw: string): ReviewResult {
     });
   }
 
-  if (typeof result.reasoning !== 'string' || result.reasoning.trim().length === 0) {
+  if (
+    typeof result.reasoning !== 'string' ||
+    result.reasoning.trim().length === 0
+  ) {
     invalidResponse('AI response reasoning must be a non-empty string.', {
       step: 'reasoning',
       field: 'reasoning',
