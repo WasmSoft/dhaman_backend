@@ -1,0 +1,8 @@
+{
+  "matchScore": 120,
+  "recommendation": "ACCEPT",
+  "completedCriteria": ["Responsive layout matches the approved design"],
+  "missingCriteria": [],
+  "outOfScopeItems": [],
+  "reasoning": "The score is invalid because it is greater than 100."
+}

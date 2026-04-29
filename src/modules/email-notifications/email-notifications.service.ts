@@ -1,4 +1,8 @@
+import { NotificationStatus, NotificationType } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
+import { ErrorCode } from '../../common/enums/error-code.enum';
+import { AppException } from '../../common/errors/app-exception';
+import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import {
   EmailPreviewDto,
   SendTestEmailDto,
@@ -24,12 +28,61 @@ import {
  */
 @Injectable()
 export class EmailNotificationsService {
+  constructor(private readonly prisma: PrismaService) {}
+
   preview(dto: EmailPreviewDto) {
     return this.placeholder('preview', { dto });
   }
 
   sendTest(dto: SendTestEmailDto) {
     return this.placeholder('sendTest', { dto });
+  }
+
+  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بفتح مراجعة ذكاء اصطناعي جديدة.
+  // EN: Creates a pending notification record to inform the freelancer that an AI review was opened.
+  async enqueueAiReviewOpenedForFreelancer(input: {
+    agreementId: string;
+    recipientEmail: string;
+    aiReviewId: string;
+    deliveryId: string;
+    milestoneId: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        type: NotificationType.AI_REVIEW_READY,
+        subject: 'AI review opened for your delivery',
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بقبول التوصية.
+  // EN: Creates a pending notification record to inform the client that the recommendation was accepted.
+  async enqueueAiReviewRecommendationAcceptedForClient(input: {
+    agreementId: string;
+    recipientEmail: string;
+    recommendation: string;
+    paymentStatus: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        type: NotificationType.AI_REVIEW_RECOMMENDATION_ACCEPTED,
+        subject: `AI recommendation ${input.recommendation.toLowerCase()} - payment ${input.paymentStatus.toLowerCase()}`,
+        status: NotificationStatus.PENDING,
+      },
+    });
   }
 
   private placeholder(action: string, details?: Record<string, unknown>) {

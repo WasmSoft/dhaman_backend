@@ -1,15 +1,28 @@
-import { Injectable } from '@nestjs/common';
 import {
-  PaymentOperationType as PrismaPaymentOperationType,
-  PaymentStatus as PrismaPaymentStatus,
+  AIRecommendation,
+  PaymentOperationType,
+  PaymentStatus,
   Prisma,
 } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { AppException } from '../../common/errors/app-exception';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { FundMilestonePaymentDto, ReleasePaymentDto } from './dto/payments.dto';
 
+const AI_REVIEW_ALLOWED_PAYMENT_STATUSES = new Set<PaymentStatus>([
+  PaymentStatus.RESERVED,
+  PaymentStatus.CLIENT_REVIEW,
+  PaymentStatus.READY_TO_RELEASE,
+  PaymentStatus.ON_HOLD,
+]);
+
 type TransactionClient = Prisma.TransactionClient;
+
+type PaymentWriteClient = Pick<
+  PrismaService | Prisma.TransactionClient,
+  'payment' | 'milestone'
+>;
 
 /**
  * Module responsibility:
@@ -74,8 +87,8 @@ export class PaymentsService {
         currency: input.currency,
         demoMode: true,
         milestoneId: input.milestoneId,
-        operationType: PrismaPaymentOperationType.FUND_MILESTONE,
-        status: PrismaPaymentStatus.WAITING,
+        operationType: PaymentOperationType.FUND_MILESTONE,
+        status: PaymentStatus.WAITING,
       },
     });
   }
@@ -92,7 +105,7 @@ export class PaymentsService {
     const payment = await tx.payment.findFirst({
       where: {
         milestoneId: input.milestoneId,
-        operationType: PrismaPaymentOperationType.FUND_MILESTONE,
+        operationType: PaymentOperationType.FUND_MILESTONE,
       },
     });
 
@@ -115,7 +128,7 @@ export class PaymentsService {
     const payment = await tx.payment.findFirst({
       where: {
         milestoneId: input.milestoneId,
-        operationType: PrismaPaymentOperationType.FUND_MILESTONE,
+        operationType: PaymentOperationType.FUND_MILESTONE,
       },
     });
 
@@ -123,11 +136,141 @@ export class PaymentsService {
       throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
     }
 
-    if (payment.status !== PrismaPaymentStatus.WAITING) {
+    if (payment.status !== PaymentStatus.WAITING) {
       throw new AppException({ code: ErrorCode.MILESTONE_PAYMENT_NOT_WAITING });
     }
 
     return tx.payment.delete({ where: { id: payment.id } });
+  }
+
+  // AR: ينقل دفعة المرحلة إلى حالة مراجعة الذكاء الاصطناعي ويحافظ على اتساق حالة المرحلة.
+  // EN: Moves the milestone payment into AI review and keeps milestone payment status aligned.
+  async transitionMilestonePaymentToAiReview(
+    input: {
+      agreementId: string;
+      milestoneId: string;
+      deliveryId: string;
+    },
+    tx?: PaymentWriteClient,
+  ): Promise<{
+    paymentId: string;
+    previousStatus: PaymentStatus;
+    newStatus: PaymentStatus;
+  }> {
+    const client = tx ?? this.prisma;
+
+    const payment = await client.payment.findFirst({
+      where: {
+        agreementId: input.agreementId,
+        milestoneId: input.milestoneId,
+        operationType: PaymentOperationType.FUND_MILESTONE,
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, status: true },
+    });
+
+    if (!payment) {
+      throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+    }
+
+    if (!AI_REVIEW_ALLOWED_PAYMENT_STATUSES.has(payment.status)) {
+      throw new AppException({
+        code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE,
+        details: {
+          currentStatus: payment.status,
+          expectedStatus: 'reviewable',
+          deliveryId: input.deliveryId,
+        },
+      });
+    }
+
+    await client.payment.update({
+      where: { id: payment.id },
+      data: { status: PaymentStatus.AI_REVIEW },
+    });
+
+    await client.milestone.update({
+      where: { id: input.milestoneId },
+      data: { paymentStatus: PaymentStatus.AI_REVIEW },
+    });
+
+    return {
+      paymentId: payment.id,
+      previousStatus: payment.status,
+      newStatus: PaymentStatus.AI_REVIEW,
+    };
+  }
+
+  // AR: ينقل دفعة المرحلة من حالة مراجعة الذكاء الاصطناعي إلى الحالة النهائية بناءً على التوصية.
+  // EN: Moves the milestone payment from AI review to the final status based on the recommendation.
+  async transitionPaymentFromAiReviewToOutcome(
+    input: {
+      agreementId: string;
+      milestoneId: string;
+    },
+    recommendation: AIRecommendation,
+    tx?: PaymentWriteClient,
+  ): Promise<{
+    paymentId: string;
+    newStatus: PaymentStatus;
+  }> {
+    const client = tx ?? this.prisma;
+
+    const payment = await client.payment.findFirst({
+      where: {
+        agreementId: input.agreementId,
+        milestoneId: input.milestoneId,
+        operationType: PaymentOperationType.FUND_MILESTONE,
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, status: true },
+    });
+
+    if (!payment) {
+      throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+    }
+
+    if (payment.status !== PaymentStatus.AI_REVIEW) {
+      throw new AppException({
+        code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE,
+        details: {
+          currentStatus: payment.status,
+          expectedStatus: PaymentStatus.AI_REVIEW,
+        },
+      });
+    }
+
+    let targetStatus: PaymentStatus | null = null;
+
+    switch (recommendation) {
+      case AIRecommendation.ACCEPT:
+        targetStatus = PaymentStatus.READY_TO_RELEASE;
+        break;
+      case AIRecommendation.REJECT:
+      case AIRecommendation.PARTIAL:
+        targetStatus = PaymentStatus.ON_HOLD;
+        break;
+      case AIRecommendation.NEEDS_HUMAN_REVIEW:
+        targetStatus = null;
+        break;
+    }
+
+    if (targetStatus) {
+      await client.payment.update({
+        where: { id: payment.id },
+        data: { status: targetStatus },
+      });
+
+      await client.milestone.update({
+        where: { id: input.milestoneId },
+        data: { paymentStatus: targetStatus },
+      });
+    }
+
+    return {
+      paymentId: payment.id,
+      newStatus: targetStatus ?? PaymentStatus.AI_REVIEW,
+    };
   }
 
   private placeholder(action: string, details?: Record<string, unknown>) {

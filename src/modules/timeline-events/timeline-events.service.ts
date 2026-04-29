@@ -1,5 +1,9 @@
+import {
+  TimelineActorRole,
+  TimelineEventType,
+  type Prisma,
+} from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import { Prisma, TimelineActorRole, TimelineEventType } from '@prisma/client';
 import { ClsService } from '../../common/cls/cls.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { TimelineQueryDto } from './dto/timeline-events.dto';
@@ -73,6 +77,110 @@ export class TimelineEventsService {
       agreementId,
       query,
     };
+  }
+
+  // AR: يسجل حدث طلب مراجعة الذكاء الاصطناعي مع بيانات الفاعل والمرجع.
+  // EN: Records the AI review requested event with actor and reference metadata.
+  async recordAiReviewRequested(
+    input: {
+      agreementId: string;
+      milestoneId: string;
+      deliveryId: string;
+      paymentId: string;
+      aiReviewId: string;
+      actorRole: TimelineActorRole;
+      actorId?: string;
+      relatedCriteria: string[];
+      milestoneTitle: string;
+    },
+    tx?: TransactionClient,
+  ): Promise<void> {
+    await this.createEvent(
+      {
+        agreementId: input.agreementId,
+        milestoneId: input.milestoneId,
+        actorRole: input.actorRole,
+        actorId: input.actorId,
+        type: TimelineEventType.AI_REVIEW_REQUESTED,
+        title: 'AI review requested',
+        description: `AI review requested for ${input.milestoneTitle}.`,
+        metadata: {
+          aiReviewId: input.aiReviewId,
+          deliveryId: input.deliveryId,
+          paymentId: input.paymentId,
+          relatedCriteria: input.relatedCriteria,
+        },
+      },
+      tx,
+    );
+  }
+
+  // AR: يسجل حدث اكتمال مراجعة الذكاء الاصطناعي مع ملخص النتيجة.
+  // EN: Records the AI review completed event with a result summary.
+  async recordAiReviewCompleted(
+    input: {
+      agreementId: string;
+      milestoneId: string;
+      deliveryId: string;
+      paymentId: string;
+      aiReviewId: string;
+      matchScore: number;
+      recommendation: string;
+    },
+    tx?: TransactionClient,
+  ): Promise<void> {
+    await this.createEvent(
+      {
+        agreementId: input.agreementId,
+        milestoneId: input.milestoneId,
+        actorRole: TimelineActorRole.AI,
+        type: TimelineEventType.AI_REVIEW_COMPLETED,
+        title: 'AI review completed',
+        description: `AI review completed with ${input.recommendation} recommendation.`,
+        metadata: {
+          aiReviewId: input.aiReviewId,
+          deliveryId: input.deliveryId,
+          paymentId: input.paymentId,
+          matchScore: input.matchScore,
+          recommendation: input.recommendation,
+        },
+      },
+      tx,
+    );
+  }
+
+  // AR: يسجل حدث قبول التوصية من مراجعة الذكاء الاصطناعي.
+  // EN: Records the AI review recommendation accepted event by the freelancer.
+  async recordAiReviewRecommendationAccepted(
+    input: {
+      agreementId: string;
+      milestoneId: string;
+      deliveryId: string;
+      paymentId: string;
+      aiReviewId: string;
+      recommendation: string;
+      actorId: string;
+    },
+    tx?: TransactionClient,
+  ): Promise<void> {
+    await this.createEvent(
+      {
+        agreementId: input.agreementId,
+        milestoneId: input.milestoneId,
+        actorRole: TimelineActorRole.FREELANCER,
+        actorId: input.actorId,
+        type: TimelineEventType.AI_REVIEW_RECOMMENDATION_ACCEPTED,
+        title: 'AI recommendation accepted',
+        description: `Freelancer accepted the AI ${input.recommendation} recommendation.`,
+        metadata: {
+          aiReviewId: input.aiReviewId,
+          deliveryId: input.deliveryId,
+          paymentId: input.paymentId,
+          recommendation: input.recommendation,
+        },
+      },
+      tx,
+    );
   }
 
   private buildMetadata(
