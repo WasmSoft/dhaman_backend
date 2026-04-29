@@ -15,6 +15,8 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.AUTH_USER_NOT_FOUND]: 'Authenticated user not found',
   [ErrorCode.CLIENT_NOT_FOUND]: 'Client not found',
   [ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS]: 'Client email already exists',
+  [ErrorCode.CLIENT_SUMMARY_MIXED_CURRENCY]:
+    'Client summary contains agreements in multiple currencies',
   [ErrorCode.AGREEMENT_NOT_FOUND]: 'Agreement not found',
   [ErrorCode.AGREEMENT_NOT_DRAFT]: 'Agreement is not in draft state',
   [ErrorCode.AGREEMENT_ALREADY_SENT]: 'Agreement was already sent',
@@ -41,6 +43,8 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.PAYMENT_INVALID_AMOUNT]: 'Invalid payment amount',
   [ErrorCode.PAYMENT_DEMO_MODE_ONLY]:
     'Operation is available in demo mode only',
+  [ErrorCode.PAYMENT_INVALID_TRANSITION]:
+    'Invalid payment state transition',
   [ErrorCode.PAYMENT_MILESTONE_REQUIRED]:
     'Milestone is required for this payment operation',
   [ErrorCode.DELIVERY_NOT_FOUND]: 'Delivery not found',

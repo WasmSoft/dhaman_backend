@@ -16,6 +16,8 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.CLIENT_NOT_FOUND]: 'تعذر العثور على العميل',
   [ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS]:
     'البريد الإلكتروني للعميل مستخدم بالفعل',
+  [ErrorCode.CLIENT_SUMMARY_MIXED_CURRENCY]:
+    'ملخص العميل يحتوي على اتفاقيات بعملات مختلفة',
   [ErrorCode.AGREEMENT_NOT_FOUND]: 'لم يتم العثور على الاتفاق',
   [ErrorCode.AGREEMENT_NOT_DRAFT]: 'الاتفاق ليس في حالة مسودة',
   [ErrorCode.AGREEMENT_ALREADY_SENT]: 'تم إرسال الاتفاق مسبقاً',
@@ -40,6 +42,7 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.PAYMENT_NOT_READY_TO_RELEASE]: 'الدفعة غير جاهزة للتحرير',
   [ErrorCode.PAYMENT_INVALID_AMOUNT]: 'قيمة الدفعة غير صالحة',
   [ErrorCode.PAYMENT_DEMO_MODE_ONLY]: 'هذه العملية متاحة في وضع المحاكاة فقط',
+  [ErrorCode.PAYMENT_INVALID_TRANSITION]: 'انتقال حالة الدفعة غير صالح',
   [ErrorCode.PAYMENT_MILESTONE_REQUIRED]: 'يجب تحديد المرحلة لهذه العملية',
   [ErrorCode.DELIVERY_NOT_FOUND]: 'تعذر العثور على التسليم',
   [ErrorCode.DELIVERY_ALREADY_SUBMITTED]: 'تم إرسال التسليم مسبقاً',

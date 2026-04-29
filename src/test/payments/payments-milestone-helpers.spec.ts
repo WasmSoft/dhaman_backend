@@ -5,11 +5,13 @@ import {
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { PaymentsService } from '../../modules/payments/payments.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { TimelineEventsService } from '../../modules/timeline-events/timeline-events.service';
 
 type PaymentDelegateMock = {
   create: jest.Mock;
   delete: jest.Mock;
   findFirst: jest.Mock;
+  findUnique: jest.Mock;
   update: jest.Mock;
 };
 
@@ -46,6 +48,7 @@ describe('PaymentsService milestone helpers', () => {
   let service: PaymentsService;
   let prisma: PrismaServiceMock;
   let tx: { payment: PaymentDelegateMock };
+  let timelineEventsService: { createEvent: jest.Mock };
 
   beforeEach(() => {
     prisma = {
@@ -54,10 +57,17 @@ describe('PaymentsService milestone helpers', () => {
         delete: jest.fn(),
         findFirst: jest.fn(),
         update: jest.fn(),
+        findUnique: jest.fn(),
       },
     };
+    timelineEventsService = {
+      createEvent: jest.fn().mockResolvedValue({ id: 'timeline-event-1' }),
+    };
     tx = { payment: prisma.payment };
-    service = new PaymentsService(prisma as unknown as PrismaService);
+    service = new PaymentsService(
+      prisma as unknown as PrismaService,
+      timelineEventsService as unknown as TimelineEventsService,
+    );
   });
 
   afterEach(() => {
