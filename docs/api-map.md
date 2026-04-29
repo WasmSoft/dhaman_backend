@@ -38,7 +38,9 @@
 - `GET /api/v1/agreements/:agreementId/milestones`
 - `POST /api/v1/agreements/:agreementId/milestones`
 - `PATCH /api/v1/milestones/:id`
-- `PATCH /api/v1/milestones/:id/status`
+- `DELETE /api/v1/milestones/:id`
+- `PATCH /api/v1/milestones/:id/reorder`
+- `GET /api/v1/milestones/:id`
 
 ## Payments
 
@@ -87,6 +89,7 @@
 ## Timeline Events
 
 - `GET /api/v1/agreements/:agreementId/timeline`
+- Milestones emit `MILESTONE_CREATED`, `MILESTONE_UPDATED`, `MILESTONE_DELETED`, and `MILESTONES_REORDERED` through `TimelineEventsService`.
 
 ## Email Notifications
 

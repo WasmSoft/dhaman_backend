@@ -3,7 +3,6 @@ import {
   PaymentOperationType,
   PaymentStatus,
   Prisma,
-  type PrismaClient,
 } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { ErrorCode } from '../../common/enums/error-code.enum';
@@ -17,6 +16,8 @@ const AI_REVIEW_ALLOWED_PAYMENT_STATUSES = new Set<PaymentStatus>([
   PaymentStatus.READY_TO_RELEASE,
   PaymentStatus.ON_HOLD,
 ]);
+
+type TransactionClient = Prisma.TransactionClient;
 
 type PaymentWriteClient = Pick<
   PrismaService | Prisma.TransactionClient,
@@ -66,6 +67,80 @@ export class PaymentsService {
 
   getReceipt(id: string) {
     return this.placeholder('getReceipt', { id });
+  }
+
+  // AR: ينشئ دفعة تجريبية مرتبطة بالمرحلة داخل نفس المعاملة لضمان الاتساق.
+  // EN: Creates the demo milestone payment inside the same transaction for consistency.
+  async createPaymentForMilestone(
+    tx: TransactionClient,
+    input: {
+      agreementId: string;
+      amount: Prisma.Decimal | string;
+      currency: string;
+      milestoneId: string;
+    },
+  ) {
+    return tx.payment.create({
+      data: {
+        agreementId: input.agreementId,
+        amount: input.amount,
+        currency: input.currency,
+        demoMode: true,
+        milestoneId: input.milestoneId,
+        operationType: PaymentOperationType.FUND_MILESTONE,
+        status: PaymentStatus.WAITING,
+      },
+    });
+  }
+
+  // AR: يزامن مبلغ دفعة المرحلة داخل نفس المعاملة دون تغيير حالة الدفعة.
+  // EN: Syncs the milestone payment amount inside the same transaction without changing payment state.
+  async syncMilestonePaymentAmount(
+    tx: TransactionClient,
+    input: {
+      amount: Prisma.Decimal | string;
+      milestoneId: string;
+    },
+  ) {
+    const payment = await tx.payment.findFirst({
+      where: {
+        milestoneId: input.milestoneId,
+        operationType: PaymentOperationType.FUND_MILESTONE,
+      },
+    });
+
+    if (!payment) {
+      throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+    }
+
+    return tx.payment.update({
+      where: { id: payment.id },
+      data: { amount: input.amount },
+    });
+  }
+
+  // AR: يحذف دفعة المرحلة فقط إذا كانت ما زالت في حالة انتظار وداخل نفس المعاملة.
+  // EN: Deletes the milestone payment only if it is still waiting and within the same transaction.
+  async deleteWaitingPaymentForMilestone(
+    tx: TransactionClient,
+    input: { milestoneId: string },
+  ) {
+    const payment = await tx.payment.findFirst({
+      where: {
+        milestoneId: input.milestoneId,
+        operationType: PaymentOperationType.FUND_MILESTONE,
+      },
+    });
+
+    if (!payment) {
+      throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+    }
+
+    if (payment.status !== PaymentStatus.WAITING) {
+      throw new AppException({ code: ErrorCode.MILESTONE_PAYMENT_NOT_WAITING });
+    }
+
+    return tx.payment.delete({ where: { id: payment.id } });
   }
 
   // AR: ينقل دفعة المرحلة إلى حالة مراجعة الذكاء الاصطناعي ويحافظ على اتساق حالة المرحلة.
