@@ -4,6 +4,7 @@ import {
   CreateAgreementDto,
   UpdateAgreementDto,
 } from './dto/agreements.dto';
+import { EmailNotificationsService } from '../email-notifications/email-notifications.service';
 
 /**
  * Module responsibility:
@@ -31,6 +32,10 @@ import {
  */
 @Injectable()
 export class AgreementsService {
+  constructor(
+    private readonly emailNotificationsService: EmailNotificationsService,
+  ) {}
+
   list() {
     return this.placeholder('list');
   }
@@ -49,6 +54,12 @@ export class AgreementsService {
 
   sendInvite(id: string) {
     return this.placeholder('sendInvite', { id });
+  }
+
+  // AR: يعيد إرسال دعوة الاتفاق للعميل بعد تمرير هوية المستخدم من الخادم.
+  // EN: Resends the agreement invite after passing server-owned user identity into the email service.
+  resendInvite(id: string, userId: string) {
+    return this.emailNotificationsService.resendAgreementInvite(id, userId);
   }
 
   approve(id: string) {

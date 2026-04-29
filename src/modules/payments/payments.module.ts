@@ -5,8 +5,7 @@ import { PaymentsService } from './payments.service';
 import { TimelineEventsModule } from '../timeline-events/timeline-events.module';
 
 @Module({
-  imports: [TimelineEventsModule],
-  imports: [PrismaModule],
+  imports: [TimelineEventsModule, PrismaModule],
   controllers: [PaymentsController],
   providers: [PaymentsService],
   exports: [PaymentsService],
