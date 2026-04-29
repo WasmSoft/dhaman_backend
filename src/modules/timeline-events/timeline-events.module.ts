@@ -5,5 +5,6 @@ import { TimelineEventsService } from './timeline-events.service';
 @Module({
   controllers: [TimelineEventsController],
   providers: [TimelineEventsService],
+  exports: [TimelineEventsService],
 })
 export class TimelineEventsModule {}

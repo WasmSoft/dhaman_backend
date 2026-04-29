@@ -7,7 +7,7 @@
 | Clients | Freelancer-owned client records | Auth, Prisma, timeline | Client, AuditLog | `GET /clients`, `POST /clients`, `GET /clients/:id`, `PATCH /clients/:id` | Phase 1 |
 | Agreements | Agreement lifecycle and invitations | Clients, Policies, Milestones, Timeline, Email | Agreement, Client, TimelineEvent | `GET /agreements`, `POST /agreements`, `GET /agreements/:id`, `PATCH /agreements/:id` | Phase 2 |
 | Agreement Policies | Agreement-level policies and review rules | Agreements, Prisma | AgreementPolicy | `GET /agreements/:agreementId/policies`, `PATCH /agreements/:agreementId/policies` | Phase 2 |
-| Milestones | Scope breakdown, due dates, acceptance criteria | Agreements, Payments, Deliveries | Milestone | `GET /agreements/:agreementId/milestones`, `POST /agreements/:agreementId/milestones`, `PATCH /milestones/:id` | Phase 2 |
+| Milestones | Scope breakdown, due dates, acceptance criteria | Agreements, Payments, Deliveries, Timeline Events | Milestone, TimelineEvent | `GET /agreements/:agreementId/milestones`, `POST /agreements/:agreementId/milestones`, `PATCH /milestones/:id`, `DELETE /milestones/:id`, `PATCH /milestones/:id/reorder`, `GET /milestones/:id` | Phase 2 |
 | Payments | Demo funding, reserve, release, receipt view | Agreements, Milestones, Change Requests | Payment | `GET /agreements/:agreementId/payments`, `POST /payments/fund-milestone`, `POST /payments/release` | Phase 3 |
 | Deliveries | Delivery submissions and review transitions | Milestones, Agreements, AI Review | Delivery | `POST /milestones/:milestoneId/deliveries`, `GET /deliveries`, `GET /deliveries/:id` | Phase 3 |
 | Timeline Events | Agreement activity feed | Agreements, Milestones | TimelineEvent | `GET /agreements/:agreementId/timeline` | Phase 3 |

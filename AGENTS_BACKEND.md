@@ -310,6 +310,31 @@ Rules:
 5. Every module must document test cases.
 6. Every module must stop after each phase and ask before continuing.
 
+### 4.1 Milestones Module Implementation Rules
+
+Milestones are agreement-scoped and payment-coupled. Before implementing or changing the
+Milestones module, read `docs/backend-module-plans/07_MILESTONES_MODULE.md` and apply these
+rules as phase gates:
+
+1. Implement and verify all six endpoints: create, update, delete, reorder, get one, and
+   list by agreement under `/api/v1`.
+2. Scope every read and mutation through the parent `Agreement` owner, even when the route
+   starts with `milestoneId`.
+3. Allow create, update, delete, and reorder only for `DRAFT` and `PENDING_APPROVAL`
+   agreements. Use Change Requests after activation.
+4. Keep `orderIndex` as the API field and map it internally to Prisma `order`.
+5. Reject empty acceptance criteria and default missing `required` values consistently.
+6. Inherit currency from the agreement and use Decimal-safe amount handling.
+7. Return the documented `amountWarning` when milestone totals differ from agreement total.
+8. Create, sync, and delete milestone payments only through `PaymentsService` or the
+   approved payment service method; never update payment status directly from Milestones.
+9. Wrap milestone plus payment writes and reorder writes in transactions.
+10. Treat reorder as a full replacement: every milestone included, unique contiguous order
+    values from `1`, and no silent auto-adjustment.
+11. Emit milestone timeline events with actor, agreement, milestone, and safe metadata.
+12. Finish Swagger, centralized EN/AR errors, DTO tests, service tests, integration tests,
+    and scenario coverage before marking the phase complete.
+
 ---
 
 ## 5. Controller Rules

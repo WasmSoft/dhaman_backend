@@ -32,6 +32,8 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.MILESTONE_ALREADY_SUBMITTED]: 'تم إرسال المرحلة مسبقاً',
   [ErrorCode.MILESTONE_NOT_ACTIVE]: 'المرحلة غير مفعلة',
   [ErrorCode.MILESTONE_PAYMENT_NOT_RESERVED]: 'لم يتم حجز دفعة المرحلة',
+  [ErrorCode.MILESTONE_PAYMENT_NOT_WAITING]:
+    'يجب أن تكون دفعة المرحلة في حالة انتظار قبل الحذف',
   [ErrorCode.PAYMENT_NOT_FOUND]: 'تعذر العثور على الدفعة',
   [ErrorCode.PAYMENT_ALREADY_RESERVED]: 'تم حجز الدفعة مسبقاً',
   [ErrorCode.PAYMENT_ALREADY_RELEASED]: 'تم تحرير الدفعة مسبقاً',

@@ -49,10 +49,12 @@ The tables below define implementation-time expectations for success behavior, c
 
 | Endpoint | Success | Possible Errors | Side Effects | Testing Cases |
 | --- | --- | --- | --- | --- |
-| `GET /api/v1/agreements/:agreementId/milestones` | Lists milestones | `UNAUTHORIZED`, `AGREEMENT_NOT_FOUND` | none | list by agreement |
-| `POST /api/v1/agreements/:agreementId/milestones` | Creates milestone | `UNAUTHORIZED`, `VALIDATION_ERROR`, `AGREEMENT_NOT_FOUND`, `MILESTONE_INVALID_AMOUNT`, `MILESTONE_INVALID_ORDER` | Creates timeline event `MILESTONE_CREATED` | valid create, invalid amount |
-| `PATCH /api/v1/milestones/:id` | Updates milestone | `UNAUTHORIZED`, `VALIDATION_ERROR`, `MILESTONE_NOT_FOUND`, `MILESTONE_NOT_ACTIVE` | May update timeline | valid patch |
-| `PATCH /api/v1/milestones/:id/status` | Changes milestone status | `UNAUTHORIZED`, `VALIDATION_ERROR`, `MILESTONE_NOT_FOUND`, `MILESTONE_ALREADY_SUBMITTED` | May affect payment and delivery states | valid transition, invalid transition |
+| `GET /api/v1/agreements/:agreementId/milestones` | Lists owned agreement milestones with totals | `UNAUTHORIZED`, `AGREEMENT_NOT_FOUND` | none | owned list, wrong owner |
+| `POST /api/v1/agreements/:agreementId/milestones` | Creates milestone | `UNAUTHORIZED`, `VALIDATION_ERROR`, `AGREEMENT_NOT_FOUND`, `AGREEMENT_CANNOT_BE_MODIFIED`, `MILESTONE_INVALID_AMOUNT`, `MILESTONE_INVALID_ORDER` | Creates waiting demo payment; emits `MILESTONE_CREATED` timeline event | valid create, invalid amount, duplicate order, timeline event |
+| `PATCH /api/v1/milestones/:id` | Updates milestone | `UNAUTHORIZED`, `VALIDATION_ERROR`, `MILESTONE_NOT_FOUND`, `AGREEMENT_CANNOT_BE_MODIFIED`, `MILESTONE_INVALID_AMOUNT`, `PAYMENT_NOT_FOUND` | Syncs linked payment amount when changed; emits `MILESTONE_UPDATED` timeline event when fields change | valid patch, active agreement blocked, timeline event |
+| `DELETE /api/v1/milestones/:id` | Deletes milestone | `UNAUTHORIZED`, `MILESTONE_NOT_FOUND`, `AGREEMENT_CANNOT_BE_MODIFIED`, `PAYMENT_NOT_FOUND`, `MILESTONE_PAYMENT_NOT_WAITING` | Deletes linked waiting payment; emits `MILESTONE_DELETED` timeline event | valid delete, funded payment blocked, timeline event |
+| `PATCH /api/v1/milestones/:id/reorder` | Reorders all milestones in the agreement | `UNAUTHORIZED`, `VALIDATION_ERROR`, `MILESTONE_NOT_FOUND`, `AGREEMENT_CANNOT_BE_MODIFIED`, `MILESTONE_INVALID_ORDER` | Updates milestone order fields transactionally; emits `MILESTONES_REORDERED` timeline event with ordered milestone IDs | valid reorder, duplicate order, missing milestone, active agreement blocked, timeline event |
+| `GET /api/v1/milestones/:id` | Returns one owned milestone | `UNAUTHORIZED`, `MILESTONE_NOT_FOUND` | none | owned fetch, wrong owner |
 
 ## Payments
 
