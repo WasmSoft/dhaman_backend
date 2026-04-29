@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { ClsService } from '../../common/cls/cls.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
@@ -20,6 +21,29 @@ type MockPrisma = {
   agreement: {
     findMany: jest.Mock;
   };
+  $transaction: jest.Mock;
+};
+
+const mockClient = {
+  id: 'c1a2b3c4-d5e6-7890-abcd-ef1234567890',
+  freelancerId: 'freelancer-a-id',
+  name: 'شركة التقنية',
+  email: 'client@example.sa',
+  phone: '+966501234567',
+  companyName: 'شركة التقنية للحلول',
+  createdAt: new Date('2026-01-01T00:00:00.000Z'),
+  updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+};
+
+const mockClientMinimal = {
+  id: 'c1a2b3c4-d5e6-7890-abcd-ef0000000001',
+  freelancerId: 'freelancer-a-id',
+  name: 'عميل جديد',
+  email: 'minimal@example.sa',
+  phone: null,
+  companyName: null,
+  createdAt: new Date('2026-01-02T00:00:00.000Z'),
+  updatedAt: new Date('2026-01-02T00:00:00.000Z'),
 };
 
 describe('ClientsService', () => {
@@ -43,6 +67,7 @@ describe('ClientsService', () => {
       agreement: {
         findMany: jest.fn(),
       },
+      $transaction: jest.fn(),
     };
 
     service = new ClientsService(
@@ -499,7 +524,6 @@ describe('ClientsService', () => {
 
       expect(prismaService.agreement.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           where: expect.objectContaining({
             clientId: 'client-a',
             freelancerId: 'freelancer-a',
@@ -550,6 +574,404 @@ describe('ClientsService', () => {
 
       expect(prismaService.client.update).not.toHaveBeenCalled();
       expect(prismaService.agreement.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('create', () => {
+    it('creates client with correct freelancerId from CLS', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.create.mockResolvedValue(mockClient);
+
+      const dto = {
+        name: 'شركة التقنية',
+        email: 'client@example.sa',
+        phone: '+966501234567',
+        companyName: 'شركة التقنية للحلول',
+      };
+      await service.create(dto);
+
+      expect(prismaService.client.create).toHaveBeenCalledWith({
+        data: {
+          freelancerId: 'freelancer-a-id',
+          name: 'شركة التقنية',
+          email: 'client@example.sa',
+          phone: '+966501234567',
+          companyName: 'شركة التقنية للحلول',
+        },
+      });
+    });
+
+    it('returns ClientResponseDto on success', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.create.mockResolvedValue(mockClient);
+
+      const result = await service.create({
+        name: mockClient.name,
+        email: mockClient.email,
+        phone: mockClient.phone,
+        companyName: mockClient.companyName,
+      });
+
+      expect(result).toEqual({
+        id: mockClient.id,
+        name: mockClient.name,
+        email: mockClient.email,
+        phone: mockClient.phone,
+        companyName: mockClient.companyName,
+        createdAt: mockClient.createdAt,
+        updatedAt: mockClient.updatedAt,
+      });
+    });
+
+    it('normalizes email to lowercase before save', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.create.mockResolvedValue(mockClient);
+
+      await service.create({
+        name: 'Client',
+        email: 'CLIENT@EXAMPLE.SA',
+      });
+
+      expect(prismaService.client.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            email: 'client@example.sa',
+          }),
+        }),
+      );
+    });
+
+    it('normalizes email with surrounding whitespace', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.create.mockResolvedValue(mockClient);
+
+      await service.create({
+        name: 'Client',
+        email: '  client@example.sa  ',
+      });
+
+      expect(prismaService.client.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            email: 'client@example.sa',
+          }),
+        }),
+      );
+    });
+
+    it('throws CLIENT_EMAIL_ALREADY_EXISTS on P2002', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      const prismaError = new Error('Unique constraint failed') as Error & {
+        code: string;
+      };
+      prismaError.code = 'P2002';
+      prismaService.client.create.mockRejectedValue(prismaError);
+
+      await expect(
+        service.create({
+          name: 'Client',
+          email: 'duplicate@example.sa',
+        }),
+      ).rejects.toMatchObject({
+        code: ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS,
+      });
+    });
+
+    it('throws UNAUTHORIZED when CLS has no userId', async () => {
+      clsService.get.mockReturnValue(undefined);
+
+      await expect(
+        service.create({
+          name: 'Client',
+          email: 'client@example.sa',
+        }),
+      ).rejects.toMatchObject({
+        code: ErrorCode.UNAUTHORIZED,
+      });
+    });
+  });
+
+  describe('findAll', () => {
+    it('returns paginated list with defaults (page=1, limit=20)', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.$transaction.mockResolvedValue([
+        [mockClient, mockClientMinimal],
+        2,
+      ]);
+
+      const result = await service.findAll({});
+
+      expect(result).toEqual({
+        data: [
+          {
+            id: mockClient.id,
+            name: mockClient.name,
+            email: mockClient.email,
+            phone: mockClient.phone,
+            companyName: mockClient.companyName,
+            createdAt: mockClient.createdAt,
+            updatedAt: mockClient.updatedAt,
+          },
+          {
+            id: mockClientMinimal.id,
+            name: mockClientMinimal.name,
+            email: mockClientMinimal.email,
+            phone: mockClientMinimal.phone,
+            companyName: mockClientMinimal.companyName,
+            createdAt: mockClientMinimal.createdAt,
+            updatedAt: mockClientMinimal.updatedAt,
+          },
+        ],
+        total: 2,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      });
+    });
+
+    it('uses custom page and limit', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.$transaction.mockResolvedValue([[], 0]);
+
+      await service.findAll({ page: 2, limit: 5 });
+
+      expect(prismaService.client.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 5,
+          take: 5,
+        }),
+      );
+    });
+
+    it('calculates totalPages correctly', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.$transaction.mockResolvedValue([[mockClient], 11]);
+
+      const result = await service.findAll({ limit: 5 });
+
+      expect(result.totalPages).toBe(3);
+    });
+
+    it('returns empty array and valid pagination for no clients', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.$transaction.mockResolvedValue([[], 0]);
+
+      const result = await service.findAll({});
+
+      expect(result).toEqual({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      });
+    });
+
+    it('scopes query to freelancerId from CLS', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.$transaction.mockResolvedValue([[mockClient], 1]);
+
+      await service.findAll({});
+
+      expect(prismaService.client.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            freelancerId: 'freelancer-a-id',
+          }),
+        }),
+      );
+    });
+
+    it('adds OR search filter when search provided', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.$transaction.mockResolvedValue([[mockClient], 1]);
+
+      await service.findAll({ search: 'تقنية' });
+
+      expect(prismaService.client.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: [
+              { name: { contains: 'تقنية', mode: 'insensitive' } },
+              { email: { contains: 'تقنية', mode: 'insensitive' } },
+              { companyName: { contains: 'تقنية', mode: 'insensitive' } },
+            ],
+          }),
+        }),
+      );
+    });
+
+    it('does not add OR filter when search is absent', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.$transaction.mockResolvedValue([[mockClient], 1]);
+
+      await service.findAll({});
+
+      const callArgs = prismaService.client.findMany.mock.calls[0][0];
+      expect(callArgs.where).not.toHaveProperty('OR');
+    });
+
+    it('throws UNAUTHORIZED when CLS has no userId', async () => {
+      clsService.get.mockReturnValue(undefined);
+
+      await expect(service.findAll({})).rejects.toMatchObject({
+        code: ErrorCode.UNAUTHORIZED,
+      });
+    });
+  });
+
+  describe('getById', () => {
+    it('returns ClientResponseDto for owned client', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.findFirst.mockResolvedValue(mockClient);
+
+      const result = await service.getById(mockClient.id);
+
+      expect(result).toEqual({
+        id: mockClient.id,
+        name: mockClient.name,
+        email: mockClient.email,
+        phone: mockClient.phone,
+        companyName: mockClient.companyName,
+        createdAt: mockClient.createdAt,
+        updatedAt: mockClient.updatedAt,
+      });
+    });
+
+    it('queries with both id and freelancerId', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.findFirst.mockResolvedValue(mockClient);
+
+      await service.getById(mockClient.id);
+
+      expect(prismaService.client.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: mockClient.id,
+          freelancerId: 'freelancer-a-id',
+        },
+      });
+    });
+
+    it('throws CLIENT_NOT_FOUND for non-existent client', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.findFirst.mockResolvedValue(null);
+
+      await expect(service.getById('nonexistent-id')).rejects.toMatchObject({
+        code: ErrorCode.CLIENT_NOT_FOUND,
+      });
+    });
+
+    it('throws CLIENT_NOT_FOUND for client owned by another freelancer', async () => {
+      clsService.get.mockReturnValue('freelancer-b-id');
+      prismaService.client.findFirst.mockResolvedValue(null);
+
+      await expect(service.getById(mockClient.id)).rejects.toMatchObject({
+        code: ErrorCode.CLIENT_NOT_FOUND,
+      });
+    });
+
+    it('throws UNAUTHORIZED when CLS has no userId', async () => {
+      clsService.get.mockReturnValue(undefined);
+
+      await expect(service.getById(mockClient.id)).rejects.toMatchObject({
+        code: ErrorCode.UNAUTHORIZED,
+      });
+    });
+  });
+
+  describe('update', () => {
+    it('partially updates only provided fields', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      const existingClient = { ...mockClient };
+      const updatedClient = { ...mockClient, name: 'New Name' };
+      prismaService.client.findFirst.mockResolvedValue(existingClient);
+      prismaService.client.update.mockResolvedValue(updatedClient);
+
+      await service.update(mockClient.id, { name: 'New Name' });
+
+      expect(prismaService.client.update).toHaveBeenCalledWith({
+        where: { id: mockClient.id },
+        data: { name: 'New Name' },
+      });
+    });
+
+    it('skips undefined fields — does not spread undefined into data', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      const existingClient = { ...mockClient };
+      prismaService.client.findFirst.mockResolvedValue(existingClient);
+      prismaService.client.update.mockResolvedValue(mockClient);
+
+      await service.update(mockClient.id, { name: 'X' });
+
+      const updateData = prismaService.client.update.mock.calls[0][0].data;
+      expect(updateData).not.toHaveProperty('email');
+      expect(updateData).not.toHaveProperty('phone');
+      expect(updateData).toHaveProperty('name');
+    });
+
+    it('normalizes email to lowercase on update', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      const existingClient = { ...mockClient };
+      const updatedClient = { ...mockClient, email: 'new@example.sa' };
+      prismaService.client.findFirst.mockResolvedValue(existingClient);
+      prismaService.client.update.mockResolvedValue(updatedClient);
+
+      await service.update(mockClient.id, { email: 'NEW@EXAMPLE.SA' });
+
+      expect(prismaService.client.update).toHaveBeenCalledWith({
+        where: { id: mockClient.id },
+        data: expect.objectContaining({
+          email: 'new@example.sa',
+        }),
+      });
+    });
+
+    it('throws CLIENT_NOT_FOUND for non-existent client', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.update('nonexistent-id', { name: 'X' }),
+      ).rejects.toMatchObject({
+        code: ErrorCode.CLIENT_NOT_FOUND,
+      });
+    });
+
+    it('throws CLIENT_NOT_FOUND for client owned by another freelancer', async () => {
+      clsService.get.mockReturnValue('freelancer-b-id');
+      prismaService.client.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.update(mockClient.id, { name: 'X' }),
+      ).rejects.toMatchObject({
+        code: ErrorCode.CLIENT_NOT_FOUND,
+      });
+    });
+
+    it('throws CLIENT_EMAIL_ALREADY_EXISTS on P2002 during update', async () => {
+      clsService.get.mockReturnValue('freelancer-a-id');
+      prismaService.client.findFirst.mockResolvedValue(mockClient);
+      const prismaError = new Error('Unique constraint failed') as Error & {
+        code: string;
+      };
+      prismaError.code = 'P2002';
+      prismaService.client.update.mockRejectedValue(prismaError);
+
+      await expect(
+        service.update(mockClient.id, { email: 'duplicate@example.sa' }),
+      ).rejects.toMatchObject({
+        code: ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS,
+      });
+    });
+
+    it('throws UNAUTHORIZED when CLS has no userId', async () => {
+      clsService.get.mockReturnValue(undefined);
+
+      await expect(
+        service.update(mockClient.id, { name: 'X' }),
+      ).rejects.toMatchObject({
+        code: ErrorCode.UNAUTHORIZED,
+      });
     });
   });
 });
