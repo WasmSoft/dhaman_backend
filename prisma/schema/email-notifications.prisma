@@ -6,6 +6,7 @@ enum NotificationType {
   DELIVERY_SUBMITTED
   CHANGE_REQUEST_CREATED
   AI_REVIEW_READY
+  AI_REVIEW_RECOMMENDATION_ACCEPTED
 }
 
 enum NotificationStatus {
