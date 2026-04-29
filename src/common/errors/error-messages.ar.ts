@@ -67,4 +67,6 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.EMAIL_RECIPIENT_REQUIRED]: 'البريد الإلكتروني للمستلم مطلوب',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'تعذر العثور على الإعدادات',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'قيمة الإعدادات غير صالحة',
+  [ErrorCode.DASHBOARD_RANGE_INVALID]: 'نطاق التاريخ للوحة التحكم غير صالح.',
+  [ErrorCode.DASHBOARD_AGGREGATION_FAILED]: 'تعذر حساب بيانات لوحة التحكم.',
 };

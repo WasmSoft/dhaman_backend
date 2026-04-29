@@ -29,7 +29,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = http.getResponse<Response>();
     const locale =
       this.clsService.get('locale') ??
-      (request.requestContext?.locale as Locale | undefined) ??
+      request.requestContext?.locale ??
       Locale.AR;
     const requestId =
       this.clsService.get('requestId') ??

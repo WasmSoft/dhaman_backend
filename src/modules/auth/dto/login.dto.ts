@@ -10,7 +10,8 @@ export class LoginDto {
   email!: string;
 
   @ApiProperty({
-    description: 'Account password. Credential correctness is checked by the auth service.',
+    description:
+      'Account password. Credential correctness is checked by the auth service.',
     example: 'Str0ngPassw0rd!',
     minLength: 1,
   })
