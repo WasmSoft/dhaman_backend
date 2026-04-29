@@ -2,20 +2,30 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import { ClsService } from '../src/common/cls/cls.service';
+import { RequestContextMiddleware } from '../src/common/cls/request-context.middleware';
 import { ResponseEnvelopeInterceptor } from '../src/common/interceptors/response-envelope.interceptor';
-import { AppModule } from './../src/app.module';
+import { AppController } from '../src/app.controller';
+import { AppService } from '../src/app.service';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      controllers: [AppController],
+      providers: [
+        AppService,
+        ClsService,
+        RequestContextMiddleware,
+        ResponseEnvelopeInterceptor,
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
     app.useGlobalInterceptors(moduleFixture.get(ResponseEnvelopeInterceptor));
+    app.use(moduleFixture.get(RequestContextMiddleware).use.bind(moduleFixture.get(RequestContextMiddleware)));
     await app.init();
   });
 

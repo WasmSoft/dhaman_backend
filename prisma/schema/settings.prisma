@@ -9,6 +9,11 @@ model UserSettings {
   defaultReviewPolicy       String?
   aiStrictness              String   @default("balanced")
   emailNotificationsEnabled Boolean  @default(true)
+  businessName              String?
+  bio                       String?
+  specialization            String?
+  preferredCurrency         String   @default("SAR")
+  locale                    String   @default("ar")
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 
