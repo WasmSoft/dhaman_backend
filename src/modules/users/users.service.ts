@@ -3,7 +3,11 @@ import { AppException } from '../../common/errors/app-exception';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { ClsService } from '../../common/cls/cls.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import type { UpdateCurrentUserDto, UpdateUserDto, UpdateUserProfileDto } from './dto/users.dto';
+import type {
+  UpdateCurrentUserDto,
+  UpdateUserDto,
+  UpdateUserProfileDto,
+} from './dto/users.dto';
 
 @Injectable()
 export class UsersService {

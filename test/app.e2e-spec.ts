@@ -34,7 +34,11 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
     app.useGlobalInterceptors(moduleFixture.get(ResponseEnvelopeInterceptor));
-    app.use(moduleFixture.get(RequestContextMiddleware).use.bind(moduleFixture.get(RequestContextMiddleware)));
+    app.use(
+      moduleFixture
+        .get(RequestContextMiddleware)
+        .use.bind(moduleFixture.get(RequestContextMiddleware)),
+    );
     await app.init();
   });
 
