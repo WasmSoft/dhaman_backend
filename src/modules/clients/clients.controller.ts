@@ -5,12 +5,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -20,6 +22,7 @@ import { ParseUuidPipe } from '../../common/pipes/parse-uuid.pipe';
 import { ClientsService } from './clients.service';
 import {
   ClientListResponseDto,
+  ClientQueryDto,
   ClientResponseDto,
   ClientSummaryResponseDto,
   CreateClientDto,
@@ -39,10 +42,33 @@ export class ClientsController {
     description:
       'Returns a paginated list of clients owned by the authenticated freelancer.',
   })
+  @ApiQuery({
+    name: 'search',
+    type: String,
+    required: false,
+    description:
+      'Search across name, email, and company name (case-insensitive)',
+    example: 'تقنية',
+  })
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Page number (1-indexed)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Records per page (1–100)',
+    example: 20,
+  })
   @ApiResponse({ status: 200, type: ClientListResponseDto })
+  @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, type: ErrorResponseDto })
-  list() {
-    return this.clientsService.list();
+  list(@Query() query: ClientQueryDto) {
+    return this.clientsService.findAll(query);
   }
 
   @Post()
@@ -65,6 +91,7 @@ export class ClientsController {
     description:
       'Returns a single client record owned by the authenticated freelancer.',
   })
+  @ApiParam({ name: 'id', type: String, description: 'Client UUID' })
   @ApiResponse({ status: 200, type: ClientResponseDto })
   @ApiResponse({ status: 401, type: ErrorResponseDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
@@ -78,6 +105,7 @@ export class ClientsController {
     description:
       'Partially updates a client record owned by the authenticated freelancer.',
   })
+  @ApiParam({ name: 'id', type: String, description: 'Client UUID' })
   @ApiResponse({ status: 200, type: ClientResponseDto })
   @ApiResponse({ status: 400, type: ErrorResponseDto })
   @ApiResponse({ status: 401, type: ErrorResponseDto })
@@ -97,7 +125,6 @@ export class ClientsController {
   @ApiResponse({ status: 200, type: ClientSummaryResponseDto })
   @ApiResponse({ status: 401, type: ErrorResponseDto })
   @ApiResponse({ status: 404, type: ErrorResponseDto })
-  @ApiResponse({ status: 409, type: ErrorResponseDto })
   getSummary(@Param('id', ParseUuidPipe) id: string) {
     return this.clientsService.getSummary(id);
   }
