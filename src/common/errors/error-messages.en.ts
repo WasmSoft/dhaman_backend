@@ -32,6 +32,8 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.MILESTONE_NOT_ACTIVE]: 'Milestone is not active',
   [ErrorCode.MILESTONE_PAYMENT_NOT_RESERVED]:
     'Milestone payment is not reserved',
+  [ErrorCode.MILESTONE_PAYMENT_NOT_WAITING]:
+    'Milestone payment must be waiting before deletion',
   [ErrorCode.PAYMENT_NOT_FOUND]: 'Payment not found',
   [ErrorCode.PAYMENT_ALREADY_RESERVED]: 'Payment was already reserved',
   [ErrorCode.PAYMENT_ALREADY_RELEASED]: 'Payment was already released',
