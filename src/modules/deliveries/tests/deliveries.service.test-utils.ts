@@ -142,16 +142,24 @@ export function buildTimelineServiceMock() {
 
 export function buildPaymentsServiceMock() {
   return {
-    transitionToClientReview: jest.fn().mockResolvedValue({ id: 'payment-1', status: 'CLIENT_REVIEW' }),
-    transitionToReadyToRelease: jest.fn().mockResolvedValue({ id: 'payment-1', status: 'READY_TO_RELEASE' }),
-    transitionToOnHold: jest.fn().mockResolvedValue({ id: 'payment-1', status: 'ON_HOLD' }),
+    transitionToClientReview: jest
+      .fn()
+      .mockResolvedValue({ id: 'payment-1', status: 'CLIENT_REVIEW' }),
+    transitionToReadyToRelease: jest
+      .fn()
+      .mockResolvedValue({ id: 'payment-1', status: 'READY_TO_RELEASE' }),
+    transitionToOnHold: jest
+      .fn()
+      .mockResolvedValue({ id: 'payment-1', status: 'ON_HOLD' }),
   };
 }
 
 export function buildEmailServiceMock() {
   return {
     enqueueDeliverySubmittedForClient: jest.fn().mockResolvedValue(undefined),
-    enqueueDeliveryChangesRequestedForFreelancer: jest.fn().mockResolvedValue(undefined),
+    enqueueDeliveryChangesRequestedForFreelancer: jest
+      .fn()
+      .mockResolvedValue(undefined),
   };
 }
 

@@ -267,9 +267,12 @@ export class ChangeRequestsService {
     if (dto.description !== undefined) updateData.description = dto.description;
     if (dto.amount !== undefined) updateData.amount = new Decimal(dto.amount);
     if (dto.currency !== undefined) updateData.currency = dto.currency;
-    if (dto.timelineDays !== undefined) updateData.timelineDays = dto.timelineDays;
-    if (dto.additionalTimelineText !== undefined) updateData.additionalTimelineText = dto.additionalTimelineText;
-    if (dto.acceptanceCriteria !== undefined) updateData.acceptanceCriteria = dto.acceptanceCriteria;
+    if (dto.timelineDays !== undefined)
+      updateData.timelineDays = dto.timelineDays;
+    if (dto.additionalTimelineText !== undefined)
+      updateData.additionalTimelineText = dto.additionalTimelineText;
+    if (dto.acceptanceCriteria !== undefined)
+      updateData.acceptanceCriteria = dto.acceptanceCriteria;
 
     const updated = await this.prisma.changeRequest.update({
       where: { id },
@@ -290,10 +293,7 @@ export class ChangeRequestsService {
     return this.toResponseDto(updated);
   }
 
-  async send(
-    id: string,
-    userId?: string,
-  ): Promise<ChangeRequestResponseDto> {
+  async send(id: string, userId?: string): Promise<ChangeRequestResponseDto> {
     const resolvedUserId = userId ?? this.clsService.get('userId');
     if (!resolvedUserId) {
       throw new AppException({ code: ErrorCode.UNAUTHORIZED });
@@ -672,9 +672,10 @@ export class ChangeRequestsService {
       });
     }
 
-    const amount = typeof options.amount === 'string'
-      ? new Decimal(options.amount)
-      : options.amount;
+    const amount =
+      typeof options.amount === 'string'
+        ? new Decimal(options.amount)
+        : options.amount;
 
     if (amount.lessThanOrEqualTo(0)) {
       throw new AppException({

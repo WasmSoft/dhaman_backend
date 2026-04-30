@@ -48,7 +48,10 @@ class TestJwtAuthGuard implements CanActivate {
 
 type SettingsServiceHttpMock = Partial<
   Record<
-    'getSettings' | 'updateSettings' | 'getDefaultPolicies' | 'updateDefaultPolicies',
+    | 'getSettings'
+    | 'updateSettings'
+    | 'getDefaultPolicies'
+    | 'updateDefaultPolicies',
     jest.Mock
   >
 >;
@@ -75,7 +78,9 @@ export async function createSettingsHttpTestApp(
     .compile();
 
   const app = moduleRef.createNestApplication();
-  const errorTranslator = app.get<ErrorTranslatorService>(ErrorTranslatorService);
+  const errorTranslator = app.get<ErrorTranslatorService>(
+    ErrorTranslatorService,
+  );
 
   app.use((req: Request, _res: Response, next: NextFunction) => {
     clsService.run(

@@ -15,18 +15,31 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 const DECIMAL_SAFE_PATTERN = /^\d+(\.\d{1,2})?$/;
 
 export class FundMilestoneDto {
-  @ApiProperty({ description: 'Milestone identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({
+    description: 'Milestone identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @IsUUID()
   @IsNotEmpty()
   milestoneId!: string;
 
-  @ApiProperty({ description: 'Amount in Decimal-safe string format (positive, max 2 decimals)', example: '1500.00' })
+  @ApiProperty({
+    description:
+      'Amount in Decimal-safe string format (positive, max 2 decimals)',
+    example: '1500.00',
+  })
   @IsString()
   @IsNotEmpty()
-  @Matches(DECIMAL_SAFE_PATTERN, { message: 'Amount must be a valid Decimal-safe string (digits with up to 2 decimal places)' })
+  @Matches(DECIMAL_SAFE_PATTERN, {
+    message:
+      'Amount must be a valid Decimal-safe string (digits with up to 2 decimal places)',
+  })
   amount!: string;
 
-  @ApiPropertyOptional({ description: 'Payment method display label', example: 'Demo Bank Transfer' })
+  @ApiPropertyOptional({
+    description: 'Payment method display label',
+    example: 'Demo Bank Transfer',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(50)
@@ -34,13 +47,23 @@ export class FundMilestoneDto {
 }
 
 export class PortalFundPaymentDto {
-  @ApiProperty({ description: 'Amount in Decimal-safe string format (positive, max 2 decimals)', example: '1500.00' })
+  @ApiProperty({
+    description:
+      'Amount in Decimal-safe string format (positive, max 2 decimals)',
+    example: '1500.00',
+  })
   @IsString()
   @IsNotEmpty()
-  @Matches(DECIMAL_SAFE_PATTERN, { message: 'Amount must be a valid Decimal-safe string (digits with up to 2 decimal places)' })
+  @Matches(DECIMAL_SAFE_PATTERN, {
+    message:
+      'Amount must be a valid Decimal-safe string (digits with up to 2 decimal places)',
+  })
   amount!: string;
 
-  @ApiPropertyOptional({ description: 'Payment method display label', example: 'Demo Bank Transfer' })
+  @ApiPropertyOptional({
+    description: 'Payment method display label',
+    example: 'Demo Bank Transfer',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(50)
@@ -48,7 +71,10 @@ export class PortalFundPaymentDto {
 }
 
 export class ReleasePaymentDto {
-  @ApiProperty({ description: 'Payment identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({
+    description: 'Payment identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @IsUUID()
   @IsNotEmpty()
   paymentId!: string;
@@ -92,7 +118,10 @@ export class PaymentResponseDto {
   @IsString()
   changeRequestId?: string;
 
-  @ApiProperty({ description: 'Amount in Decimal-safe string format', example: '1500.00' })
+  @ApiProperty({
+    description: 'Amount in Decimal-safe string format',
+    example: '1500.00',
+  })
   @IsString()
   amount!: string;
 
@@ -113,12 +142,18 @@ export class PaymentResponseDto {
   @IsString()
   paymentMethodLabel?: string;
 
-  @ApiPropertyOptional({ description: 'Receipt number', example: 'DHM-20260429-A1B2C3' })
+  @ApiPropertyOptional({
+    description: 'Receipt number',
+    example: 'DHM-20260429-A1B2C3',
+  })
   @IsOptional()
   @IsString()
   receiptNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Transaction reference', example: 'TXN-cuidvalue' })
+  @ApiPropertyOptional({
+    description: 'Transaction reference',
+    example: 'TXN-cuidvalue',
+  })
   @IsOptional()
   @IsString()
   transactionReference?: string;
@@ -155,15 +190,24 @@ export class PaymentReceiptResponseDto {
   @IsString()
   paymentId!: string;
 
-  @ApiProperty({ description: 'Receipt number', example: 'DHM-20260429-A1B2C3' })
+  @ApiProperty({
+    description: 'Receipt number',
+    example: 'DHM-20260429-A1B2C3',
+  })
   @IsString()
   receiptNumber!: string;
 
-  @ApiProperty({ description: 'Transaction reference', example: 'TXN-cuidvalue' })
+  @ApiProperty({
+    description: 'Transaction reference',
+    example: 'TXN-cuidvalue',
+  })
   @IsString()
   transactionReference!: string;
 
-  @ApiProperty({ description: 'Amount in Decimal-safe string format', example: '1500.00' })
+  @ApiProperty({
+    description: 'Amount in Decimal-safe string format',
+    example: '1500.00',
+  })
   @IsString()
   amount!: string;
 

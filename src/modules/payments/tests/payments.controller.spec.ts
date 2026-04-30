@@ -121,7 +121,10 @@ describe('PaymentsController', () => {
       controllers: [PaymentsController],
       providers: [
         { provide: PaymentsService, useValue: paymentsService },
-        { provide: ClsService, useValue: { getContext: jest.fn(), setContext: jest.fn() } },
+        {
+          provide: ClsService,
+          useValue: { getContext: jest.fn(), setContext: jest.fn() },
+        },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -148,9 +151,14 @@ describe('PaymentsController', () => {
   describe('listByAgreementId', () => {
     it('should delegate to paymentsService.listByAgreementId with userId', async () => {
       const agreementId = '123e4567-e89b-12d3-a456-426614174000';
-      const result = await controller.listByAgreementId(agreementId, { id: TEST_USER_ID } as any);
+      const result = await controller.listByAgreementId(agreementId, {
+        id: TEST_USER_ID,
+      } as any);
 
-      expect(paymentsService.listByAgreementId).toHaveBeenCalledWith(agreementId, TEST_USER_ID);
+      expect(paymentsService.listByAgreementId).toHaveBeenCalledWith(
+        agreementId,
+        TEST_USER_ID,
+      );
       expect(result).toHaveProperty('payments');
       expect(result).toHaveProperty('totalFunded');
       expect(result).toHaveProperty('totalReleased');
@@ -175,10 +183,18 @@ describe('PaymentsController', () => {
 
   describe('fundMilestone', () => {
     it('should delegate to paymentsService.fundMilestone with userId', async () => {
-      const dto = { milestoneId: '123e4567-e89b-12d3-a456-426614174000', amount: '1000.00' };
-      const result = await controller.fundMilestone(dto, { id: TEST_USER_ID } as any);
+      const dto = {
+        milestoneId: '123e4567-e89b-12d3-a456-426614174000',
+        amount: '1000.00',
+      };
+      const result = await controller.fundMilestone(dto, {
+        id: TEST_USER_ID,
+      } as any);
 
-      expect(paymentsService.fundMilestone).toHaveBeenCalledWith(dto, TEST_USER_ID);
+      expect(paymentsService.fundMilestone).toHaveBeenCalledWith(
+        dto,
+        TEST_USER_ID,
+      );
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('status', 'RESERVED');
       expect(result).toHaveProperty('receiptNumber');
@@ -190,7 +206,10 @@ describe('PaymentsController', () => {
       (paymentsService.fundMilestone as jest.Mock).mockRejectedValue(
         new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND }),
       );
-      const dto = { milestoneId: '123e4567-e89b-12d3-a456-426614174000', amount: '1000.00' };
+      const dto = {
+        milestoneId: '123e4567-e89b-12d3-a456-426614174000',
+        amount: '1000.00',
+      };
       await expect(
         controller.fundMilestone(dto, { id: TEST_USER_ID } as any),
       ).rejects.toMatchObject({ code: ErrorCode.PAYMENT_NOT_FOUND });
@@ -200,7 +219,10 @@ describe('PaymentsController', () => {
       (paymentsService.fundMilestone as jest.Mock).mockRejectedValue(
         new AppException({ code: ErrorCode.PAYMENT_ALREADY_RESERVED }),
       );
-      const dto = { milestoneId: '123e4567-e89b-12d3-a456-426614174000', amount: '1000.00' };
+      const dto = {
+        milestoneId: '123e4567-e89b-12d3-a456-426614174000',
+        amount: '1000.00',
+      };
       await expect(
         controller.fundMilestone(dto, { id: TEST_USER_ID } as any),
       ).rejects.toMatchObject({ code: ErrorCode.PAYMENT_ALREADY_RESERVED });
@@ -210,7 +232,10 @@ describe('PaymentsController', () => {
       (paymentsService.fundMilestone as jest.Mock).mockRejectedValue(
         new AppException({ code: ErrorCode.PAYMENT_INVALID_AMOUNT }),
       );
-      const dto = { milestoneId: '123e4567-e89b-12d3-a456-426614174000', amount: '0.01' };
+      const dto = {
+        milestoneId: '123e4567-e89b-12d3-a456-426614174000',
+        amount: '0.01',
+      };
       await expect(
         controller.fundMilestone(dto, { id: TEST_USER_ID } as any),
       ).rejects.toMatchObject({ code: ErrorCode.PAYMENT_INVALID_AMOUNT });
@@ -296,7 +321,9 @@ describe('PaymentsController', () => {
   describe('getReceipt', () => {
     it('should delegate to paymentsService.getReceipt with userId', async () => {
       const id = '123e4567-e89b-12d3-a456-426614174000';
-      const result = await controller.getReceipt(id, { id: TEST_USER_ID } as any);
+      const result = await controller.getReceipt(id, {
+        id: TEST_USER_ID,
+      } as any);
 
       expect(paymentsService.getReceipt).toHaveBeenCalledWith(id, TEST_USER_ID);
       expect(result).toHaveProperty('receiptNumber', 'DHM-20260429-ABC123');
@@ -326,7 +353,11 @@ describe('PaymentsController', () => {
       const dto = { amount: '500.00' };
       const result = await controller.portalFund(token, paymentId, dto);
 
-      expect(paymentsService.portalFund).toHaveBeenCalledWith(token, paymentId, dto);
+      expect(paymentsService.portalFund).toHaveBeenCalledWith(
+        token,
+        paymentId,
+        dto,
+      );
       expect(result).toHaveProperty('status', 'RESERVED');
       expect(result).toHaveProperty('receiptNumber');
     });
@@ -337,9 +368,17 @@ describe('PaymentsController', () => {
       const token = 'test-token';
       const paymentId = '123e4567-e89b-12d3-a456-426614174000';
       const dto = { confirmed: true };
-      const result = await controller.portalReleaseConfirmation(token, paymentId, dto);
+      const result = await controller.portalReleaseConfirmation(
+        token,
+        paymentId,
+        dto,
+      );
 
-      expect(paymentsService.portalReleaseConfirmation).toHaveBeenCalledWith(token, paymentId, dto);
+      expect(paymentsService.portalReleaseConfirmation).toHaveBeenCalledWith(
+        token,
+        paymentId,
+        dto,
+      );
       expect(result).toHaveProperty('status', 'RELEASED');
       expect(result).toHaveProperty('releasedAt');
     });

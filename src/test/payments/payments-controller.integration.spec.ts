@@ -122,7 +122,9 @@ describe('PaymentsController HTTP integration', () => {
     const paymentsService = {
       fundMilestone: jest
         .fn()
-        .mockRejectedValue(new AppException({ code: ErrorCode.PAYMENT_ALREADY_RESERVED })),
+        .mockRejectedValue(
+          new AppException({ code: ErrorCode.PAYMENT_ALREADY_RESERVED }),
+        ),
     };
     const { app, authHeader, request } =
       await createPaymentsHttpTestApp(paymentsService);
@@ -163,7 +165,10 @@ describe('PaymentsController HTTP integration', () => {
         .send(payload)
         .expect(200);
 
-      expect(paymentsService.release).toHaveBeenCalledWith(payload, TEST_USER_ID);
+      expect(paymentsService.release).toHaveBeenCalledWith(
+        payload,
+        TEST_USER_ID,
+      );
       expect(response.body.data).toMatchObject({
         status: 'RELEASED',
         releasedAt: '2026-04-29T01:00:00.000Z',
@@ -177,7 +182,9 @@ describe('PaymentsController HTTP integration', () => {
     const paymentsService = {
       release: jest
         .fn()
-        .mockRejectedValue(new AppException({ code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE })),
+        .mockRejectedValue(
+          new AppException({ code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE }),
+        ),
     };
     const { app, authHeader, request } =
       await createPaymentsHttpTestApp(paymentsService);
@@ -226,9 +233,11 @@ describe('PaymentsController HTTP integration', () => {
 
   it('returns 200 for GET /payments/:id/receipt', async () => {
     const paymentsService = {
-      getReceipt: jest.fn().mockResolvedValue(
-        makeReceiptResponse({ milestoneTitle: 'Initial Deposit' }),
-      ),
+      getReceipt: jest
+        .fn()
+        .mockResolvedValue(
+          makeReceiptResponse({ milestoneTitle: 'Initial Deposit' }),
+        ),
     };
     const { app, authHeader, request } =
       await createPaymentsHttpTestApp(paymentsService);
@@ -265,7 +274,10 @@ describe('PaymentsController HTTP integration', () => {
       ),
     };
     const { app, request } = await createPaymentsHttpTestApp(paymentsService);
-    const payload = { amount: '1500.00', paymentMethodLabel: 'Demo Bank Transfer' };
+    const payload = {
+      amount: '1500.00',
+      paymentMethodLabel: 'Demo Bank Transfer',
+    };
 
     try {
       const response = await request
@@ -360,7 +372,9 @@ describe('PaymentsController HTTP integration', () => {
           milestoneId: TEST_MILESTONE_ID,
           amount: '1500.00',
         }),
-        request.post('/api/v1/payments/release').send({ paymentId: TEST_PAYMENT_ID }),
+        request
+          .post('/api/v1/payments/release')
+          .send({ paymentId: TEST_PAYMENT_ID }),
         request.get(`/api/v1/payments/${TEST_PAYMENT_ID}`),
         request.get(`/api/v1/payments/${TEST_PAYMENT_ID}/receipt`),
       ]);

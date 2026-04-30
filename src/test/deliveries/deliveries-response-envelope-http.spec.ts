@@ -15,9 +15,15 @@ describe('Deliveries Response Envelope HTTP', () => {
 
   beforeAll(async () => {
     serviceMock = {
-      createDelivery: jest.fn().mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
-      listDeliveries: jest.fn().mockResolvedValue({ deliveries: [], total: 0, page: 1, limit: 20 }),
-      getDeliveryById: jest.fn().mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
+      createDelivery: jest
+        .fn()
+        .mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
+      listDeliveries: jest
+        .fn()
+        .mockResolvedValue({ deliveries: [], total: 0, page: 1, limit: 20 }),
+      getDeliveryById: jest
+        .fn()
+        .mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
       updateDelivery: jest.fn(),
       submitDelivery: jest.fn(),
       acceptDeliveryFromPortal: jest
@@ -49,7 +55,9 @@ describe('Deliveries Response Envelope HTTP', () => {
 
     it('should wrap a portal route response in the success envelope', async () => {
       const res = await httpRequest
-        .post(`/api/v1/portal/${TEST_PORTAL_TOKEN}/deliveries/${VALID_DELIVERY}/accept`)
+        .post(
+          `/api/v1/portal/${TEST_PORTAL_TOKEN}/deliveries/${VALID_DELIVERY}/accept`,
+        )
         .send({});
       expect([200, 201]).toContain(res.status);
       expect(res.body.success).toBe(true);
@@ -71,7 +79,9 @@ describe('Deliveries Response Envelope HTTP', () => {
 
     it('should return a translated error envelope for invalid portal token requests', async () => {
       const res = await httpRequest
-        .post(`/api/v1/portal/invalid-token/deliveries/${VALID_DELIVERY}/accept`)
+        .post(
+          `/api/v1/portal/invalid-token/deliveries/${VALID_DELIVERY}/accept`,
+        )
         .send({});
       expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);

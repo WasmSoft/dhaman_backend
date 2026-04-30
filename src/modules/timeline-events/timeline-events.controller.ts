@@ -177,7 +177,8 @@ export class TimelineEventsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Portal timeline returned successfully with client-safe metadata only.',
+    description:
+      'Portal timeline returned successfully with client-safe metadata only.',
     type: PaginatedTimelineEventsResponseDto,
   })
   @ApiResponse({
@@ -187,7 +188,8 @@ export class TimelineEventsController {
   })
   @ApiResponse({
     status: 401,
-    description: 'PORTAL_TOKEN_INVALID, PORTAL_TOKEN_EXPIRED, or PORTAL_TOKEN_REVOKED',
+    description:
+      'PORTAL_TOKEN_INVALID, PORTAL_TOKEN_EXPIRED, or PORTAL_TOKEN_REVOKED',
     type: ErrorResponseDto,
   })
   @Get('portal/:token/timeline')

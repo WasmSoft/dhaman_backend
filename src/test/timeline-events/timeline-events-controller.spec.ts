@@ -33,12 +33,26 @@ describe('TimelineEventsController', () => {
         email: 'freelancer@example.com',
       } as AuthenticatedUser;
 
-      const mockResult = { items: [], page: 1, limit: 20, total: 0, hasNextPage: false };
+      const mockResult = {
+        items: [],
+        page: 1,
+        limit: 20,
+        total: 0,
+        hasNextPage: false,
+      };
       service.listByAgreementId.mockResolvedValue(mockResult);
 
-      const result = await controller.listByAgreementId(agreementId, query, user);
+      const result = await controller.listByAgreementId(
+        agreementId,
+        query,
+        user,
+      );
 
-      expect(service.listByAgreementId).toHaveBeenCalledWith(agreementId, query, user.id);
+      expect(service.listByAgreementId).toHaveBeenCalledWith(
+        agreementId,
+        query,
+        user.id,
+      );
       expect(result).toBe(mockResult);
     });
 
@@ -58,12 +72,22 @@ describe('TimelineEventsController', () => {
         email: 'freelancer2@example.com',
       } as AuthenticatedUser;
 
-      const mockResult = { items: [], page: 2, limit: 10, total: 0, hasNextPage: false };
+      const mockResult = {
+        items: [],
+        page: 2,
+        limit: 10,
+        total: 0,
+        hasNextPage: false,
+      };
       service.listByAgreementId.mockResolvedValue(mockResult);
 
       await controller.listByAgreementId(agreementId, query, user);
 
-      expect(service.listByAgreementId).toHaveBeenCalledWith(agreementId, query, user.id);
+      expect(service.listByAgreementId).toHaveBeenCalledWith(
+        agreementId,
+        query,
+        user.id,
+      );
     });
   });
 
@@ -72,7 +96,13 @@ describe('TimelineEventsController', () => {
       const rawToken = 'portal-token-abc123';
       const query: TimelineQueryDto = {};
 
-      const mockResult = { items: [], page: 1, limit: 20, total: 0, hasNextPage: false };
+      const mockResult = {
+        items: [],
+        page: 1,
+        limit: 20,
+        total: 0,
+        hasNextPage: false,
+      };
       service.listByPortalToken.mockResolvedValue(mockResult);
 
       const result = await controller.listByPortalToken(rawToken, query);
@@ -89,7 +119,13 @@ describe('TimelineEventsController', () => {
         limit: 50,
       };
 
-      const mockResult = { items: [], page: 1, limit: 50, total: 0, hasNextPage: false };
+      const mockResult = {
+        items: [],
+        page: 1,
+        limit: 50,
+        total: 0,
+        hasNextPage: false,
+      };
       service.listByPortalToken.mockResolvedValue(mockResult);
 
       await controller.listByPortalToken(rawToken, query);

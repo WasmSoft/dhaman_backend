@@ -50,18 +50,20 @@ describe('ClientPortalController — payments (US4)', () => {
     it('should only return payments for token agreement A', async () => {
       const paymentsA = {
         agreementId: AGREEMENT_A_UUID,
-        payments: [{
-          id: PAYMENT_A_UUID,
-          milestoneId: 'milestone-a1',
-          milestoneTitle: 'Logo Design',
-          amount: '2500.00',
-          currency: 'SAR',
-          status: 'WAITING',
-          demoMode: true,
-          createdAt: '2026-01-01T00:00:00.000Z',
-          fundedAt: undefined,
-          releasedAt: undefined,
-        }],
+        payments: [
+          {
+            id: PAYMENT_A_UUID,
+            milestoneId: 'milestone-a1',
+            milestoneTitle: 'Logo Design',
+            amount: '2500.00',
+            currency: 'SAR',
+            status: 'WAITING',
+            demoMode: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            fundedAt: undefined,
+            releasedAt: undefined,
+          },
+        ],
       };
       serviceMock.getPayments.mockResolvedValue(paymentsA);
 
@@ -85,9 +87,17 @@ describe('ClientPortalController — payments (US4)', () => {
 
       serviceMock.fundPayment.mockResolvedValue(mockResponse);
 
-      const result = await controller.fundPayment(VALID_TOKEN, PAYMENT_UUID, dto);
+      const result = await controller.fundPayment(
+        VALID_TOKEN,
+        PAYMENT_UUID,
+        dto,
+      );
 
-      expect(serviceMock.fundPayment).toHaveBeenCalledWith(VALID_TOKEN, PAYMENT_UUID, dto);
+      expect(serviceMock.fundPayment).toHaveBeenCalledWith(
+        VALID_TOKEN,
+        PAYMENT_UUID,
+        dto,
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -143,9 +153,17 @@ describe('ClientPortalController — payments (US4)', () => {
 
       serviceMock.releasePayment.mockResolvedValue(mockResponse);
 
-      const result = await controller.releasePayment(VALID_TOKEN, PAYMENT_UUID, dto);
+      const result = await controller.releasePayment(
+        VALID_TOKEN,
+        PAYMENT_UUID,
+        dto,
+      );
 
-      expect(serviceMock.releasePayment).toHaveBeenCalledWith(VALID_TOKEN, PAYMENT_UUID, dto);
+      expect(serviceMock.releasePayment).toHaveBeenCalledWith(
+        VALID_TOKEN,
+        PAYMENT_UUID,
+        dto,
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -196,7 +214,9 @@ describe('ClientPortalController — payments (US4)', () => {
         new AppException({ code: ErrorCode.PORTAL_TOKEN_INVALID }),
       );
 
-      await expect(controller.getPaymentHistory(VALID_TOKEN)).rejects.toMatchObject({
+      await expect(
+        controller.getPaymentHistory(VALID_TOKEN),
+      ).rejects.toMatchObject({
         code: ErrorCode.PORTAL_TOKEN_INVALID,
       });
     });

@@ -4,8 +4,7 @@ import { IsEnum, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 export class PreviewEmailDto {
   @ApiProperty({
-    description:
-      'Notification type. Determines which template is previewed.',
+    description: 'Notification type. Determines which template is previewed.',
     enum: NotificationType,
     example: NotificationType.AGREEMENT_INVITE,
     required: true,

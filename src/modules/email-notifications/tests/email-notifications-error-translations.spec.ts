@@ -39,10 +39,13 @@ describe('Email notification error translations', () => {
     expect(Object.values(HttpStatus)).toContain(ERROR_CODE_HTTP_STATUS[code]);
   });
 
-  it.each(EMAIL_ERROR_CODES)('%s Arabic message differs from English', (code) => {
-    const messages = errorMessagesAr as Record<string, string>;
-    expect(messages[code]).not.toBe(errorMessagesEn[code]);
-  });
+  it.each(EMAIL_ERROR_CODES)(
+    '%s Arabic message differs from English',
+    (code) => {
+      const messages = errorMessagesAr as Record<string, string>;
+      expect(messages[code]).not.toBe(errorMessagesEn[code]);
+    },
+  );
 
   it('Arabic messages contain Arabic script for all email codes', () => {
     const arabicRange = /[\u0600-\u06FF]/;
@@ -53,23 +56,33 @@ describe('Email notification error translations', () => {
   });
 
   it('EMAIL_TEMPLATE_NOT_FOUND maps to HTTP 404', () => {
-    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]).toBe(HttpStatus.NOT_FOUND);
+    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]).toBe(
+      HttpStatus.NOT_FOUND,
+    );
   });
 
   it('EMAIL_RECIPIENT_REQUIRED maps to HTTP 400', () => {
-    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.EMAIL_RECIPIENT_REQUIRED]).toBe(HttpStatus.BAD_REQUEST);
+    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.EMAIL_RECIPIENT_REQUIRED]).toBe(
+      HttpStatus.BAD_REQUEST,
+    );
   });
 
   it('EMAIL_NOTIFICATIONS_DISABLED maps to HTTP 409', () => {
-    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.EMAIL_NOTIFICATIONS_DISABLED]).toBe(HttpStatus.CONFLICT);
+    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.EMAIL_NOTIFICATIONS_DISABLED]).toBe(
+      HttpStatus.CONFLICT,
+    );
   });
 
   it('UNAUTHORIZED maps to HTTP 401', () => {
-    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.UNAUTHORIZED]).toBe(HttpStatus.UNAUTHORIZED);
+    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.UNAUTHORIZED]).toBe(
+      HttpStatus.UNAUTHORIZED,
+    );
   });
 
   it('FORBIDDEN maps to HTTP 403', () => {
-    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.FORBIDDEN]).toBe(HttpStatus.FORBIDDEN);
+    expect(ERROR_CODE_HTTP_STATUS[ErrorCode.FORBIDDEN]).toBe(
+      HttpStatus.FORBIDDEN,
+    );
   });
 });
 

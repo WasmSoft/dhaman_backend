@@ -1,6 +1,14 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { FundMilestoneDto, PortalFundPaymentDto, ReleasePaymentDto, PortalReleaseConfirmationDto, PaymentResponseDto, PaymentReceiptResponseDto, PaymentListResponseDto } from '../dto/payments.dto';
+import {
+  FundMilestoneDto,
+  PortalFundPaymentDto,
+  ReleasePaymentDto,
+  PortalReleaseConfirmationDto,
+  PaymentResponseDto,
+  PaymentReceiptResponseDto,
+  PaymentListResponseDto,
+} from '../dto/payments.dto';
 
 describe('Payments DTO Validation', () => {
   describe('FundMilestoneDto', () => {

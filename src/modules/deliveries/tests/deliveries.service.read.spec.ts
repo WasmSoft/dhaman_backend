@@ -26,11 +26,30 @@ describe('DeliveriesService — Read (list / detail)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeliveriesService,
-        { provide: require('../../../infrastructure/prisma/prisma.service').PrismaService, useValue: prismaMock },
-        { provide: require('../../payments/payments.service').PaymentsService, useValue: paymentsMock },
-        { provide: require('../../timeline-events/timeline-events.service').TimelineEventsService, useValue: timelineMock },
-        { provide: require('../../email-notifications/email-notifications.service').EmailNotificationsService, useValue: emailMock },
-        { provide: require('../../../common/cls/cls.service').ClsService, useValue: clsMock },
+        {
+          provide: require('../../../infrastructure/prisma/prisma.service')
+            .PrismaService,
+          useValue: prismaMock,
+        },
+        {
+          provide: require('../../payments/payments.service').PaymentsService,
+          useValue: paymentsMock,
+        },
+        {
+          provide: require('../../timeline-events/timeline-events.service')
+            .TimelineEventsService,
+          useValue: timelineMock,
+        },
+        {
+          provide:
+            require('../../email-notifications/email-notifications.service')
+              .EmailNotificationsService,
+          useValue: emailMock,
+        },
+        {
+          provide: require('../../../common/cls/cls.service').ClsService,
+          useValue: clsMock,
+        },
       ],
     }).compile();
 
@@ -56,8 +75,9 @@ describe('DeliveriesService — Read (list / detail)', () => {
 
     it('should reject when delivery not found', async () => {
       prismaMock.delivery.findUnique.mockResolvedValue(null);
-      await expect((service as any).getDeliveryById('delivery-1'))
-        .rejects.toMatchObject({ code: 'DELIVERY_NOT_FOUND' });
+      await expect(
+        (service as any).getDeliveryById('delivery-1'),
+      ).rejects.toMatchObject({ code: 'DELIVERY_NOT_FOUND' });
     });
 
     it('should reject when delivery is not owned by the freelancer', async () => {
@@ -65,14 +85,18 @@ describe('DeliveriesService — Read (list / detail)', () => {
         id: 'agreement-1',
         freelancerId: 'other-freelancer',
       });
-      await expect((service as any).getDeliveryById('delivery-1'))
-        .rejects.toMatchObject({ code: 'DELIVERY_NOT_FOUND' });
+      await expect(
+        (service as any).getDeliveryById('delivery-1'),
+      ).rejects.toMatchObject({ code: 'DELIVERY_NOT_FOUND' });
     });
   });
 
   describe('listDeliveries', () => {
     beforeEach(() => {
-      prismaMock.delivery.findMany.mockResolvedValue([makeMockDelivery(), makeMockDelivery({ id: 'delivery-2' })]);
+      prismaMock.delivery.findMany.mockResolvedValue([
+        makeMockDelivery(),
+        makeMockDelivery({ id: 'delivery-2' }),
+      ]);
       prismaMock.delivery.count.mockResolvedValue(2);
     });
 

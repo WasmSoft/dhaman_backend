@@ -74,14 +74,13 @@ describe('ClientPortalService', () => {
 
   describe('createPortalToken', () => {
     it('should generate a secure token and persist only hash', async () => {
-      prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement(),
-      );
-      prismaMock.portalToken.create.mockResolvedValue(
-        makeMockPortalToken(),
-      );
+      prismaMock.agreement.findUnique.mockResolvedValue(makeMockAgreement());
+      prismaMock.portalToken.create.mockResolvedValue(makeMockPortalToken());
 
-      const result = await service.createPortalToken('agreement-1', 'AGREEMENT_INVITE');
+      const result = await service.createPortalToken(
+        'agreement-1',
+        'AGREEMENT_INVITE',
+      );
 
       expect(result.rawToken).toBeDefined();
       expect(result.rawToken.length).toBe(64); // 32 bytes hex
@@ -106,9 +105,7 @@ describe('ClientPortalService', () => {
     });
 
     it('should throw PORTAL_TOKEN_CREATE_FAILED on persistence failure', async () => {
-      prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement(),
-      );
+      prismaMock.agreement.findUnique.mockResolvedValue(makeMockAgreement());
       prismaMock.portalToken.create.mockRejectedValue(new Error('DB down'));
 
       await expect(
@@ -141,12 +138,42 @@ describe('ClientPortalService', () => {
     it('should return invite summary with milestones and payments', async () => {
       const agreement = makeMockAgreement({
         milestones: [
-          { id: 'm1', order: 1, title: 'Logo', description: 'Logo design', amount: '2500.00', currency: 'SAR', status: 'DRAFT', dueDate: new Date('2026-02-01') },
-          { id: 'm2', order: 2, title: 'Brand book', description: null, amount: '2500.00', currency: 'SAR', status: 'DRAFT', dueDate: new Date('2026-03-01') },
+          {
+            id: 'm1',
+            order: 1,
+            title: 'Logo',
+            description: 'Logo design',
+            amount: '2500.00',
+            currency: 'SAR',
+            status: 'DRAFT',
+            dueDate: new Date('2026-02-01'),
+          },
+          {
+            id: 'm2',
+            order: 2,
+            title: 'Brand book',
+            description: null,
+            amount: '2500.00',
+            currency: 'SAR',
+            status: 'DRAFT',
+            dueDate: new Date('2026-03-01'),
+          },
         ],
         payments: [
-          { id: 'p1', milestoneId: 'm1', amount: '2500.00', currency: 'SAR', status: 'WAITING' },
-          { id: 'p2', milestoneId: 'm2', amount: '2500.00', currency: 'SAR', status: 'WAITING' },
+          {
+            id: 'p1',
+            milestoneId: 'm1',
+            amount: '2500.00',
+            currency: 'SAR',
+            status: 'WAITING',
+          },
+          {
+            id: 'p2',
+            milestoneId: 'm2',
+            amount: '2500.00',
+            currency: 'SAR',
+            status: 'WAITING',
+          },
         ],
       });
       prismaMock.agreement.findUnique.mockResolvedValue(agreement);
@@ -176,13 +203,20 @@ describe('ClientPortalService', () => {
   // ──────────────────────────────────────────────────────────
 
   describe('approve', () => {
-    const sentAgreement = makeMockAgreement({ status: 'SENT' as AgreementStatus });
-    const approvedAgreement = makeMockAgreement({ status: 'APPROVED' as AgreementStatus });
+    const sentAgreement = makeMockAgreement({
+      status: 'SENT',
+    });
+    const approvedAgreement = makeMockAgreement({
+      status: 'APPROVED',
+    });
 
     it('should approve agreement when status is SENT', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       const result = await service.approve('any-token');
@@ -206,7 +240,10 @@ describe('ClientPortalService', () => {
         status: 'SENT',
       });
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
       emailMock.sendNotification.mockResolvedValue({ id: 'email-1' });
 
@@ -223,7 +260,10 @@ describe('ClientPortalService', () => {
         status: 'SENT',
       });
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
       emailMock.sendNotification.mockRejectedValue(new Error('Email down'));
 
@@ -239,10 +279,12 @@ describe('ClientPortalService', () => {
 
   describe('requestChanges', () => {
     it('should transition status to CHANGE_REQUESTED', async () => {
-      const agreement = makeMockAgreement({ status: 'SENT' as AgreementStatus });
+      const agreement = makeMockAgreement({
+        status: 'SENT',
+      });
       prismaMock.agreement.findUnique.mockResolvedValue(agreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
 
       const result = await service.requestChanges('any-token', {
@@ -253,7 +295,9 @@ describe('ClientPortalService', () => {
     });
 
     it('should throw AGREEMENT_NOT_CHANGEABLE for non-sent agreements', async () => {
-      const agreement = makeMockAgreement({ status: 'APPROVED' as AgreementStatus });
+      const agreement = makeMockAgreement({
+        status: 'APPROVED',
+      });
       prismaMock.agreement.findUnique.mockResolvedValue(agreement);
 
       await expect(
@@ -272,10 +316,12 @@ describe('ClientPortalService', () => {
 
   describe('rejectAgreement', () => {
     it('should transition status to CANCELLED', async () => {
-      const agreement = makeMockAgreement({ status: 'SENT' as AgreementStatus });
+      const agreement = makeMockAgreement({
+        status: 'SENT',
+      });
       prismaMock.agreement.findUnique.mockResolvedValue(agreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       const result = await service.rejectAgreement('any-token', {
@@ -286,7 +332,9 @@ describe('ClientPortalService', () => {
     });
 
     it('should throw AGREEMENT_NOT_REJECTABLE for non-sent agreements', async () => {
-      const agreement = makeMockAgreement({ status: 'APPROVED' as AgreementStatus });
+      const agreement = makeMockAgreement({
+        status: 'APPROVED',
+      });
       prismaMock.agreement.findUnique.mockResolvedValue(agreement);
 
       await expect(
@@ -307,18 +355,46 @@ describe('ClientPortalService', () => {
     it('should return full workspace scoped to token agreement', async () => {
       const agreement = makeMockAgreement({
         milestones: [
-          { id: 'm1', order: 1, title: 'Logo', description: null, amount: '2500.00', currency: 'SAR', status: 'DRAFT', dueDate: new Date('2026-02-01') },
+          {
+            id: 'm1',
+            order: 1,
+            title: 'Logo',
+            description: null,
+            amount: '2500.00',
+            currency: 'SAR',
+            status: 'DRAFT',
+            dueDate: new Date('2026-02-01'),
+          },
         ],
         payments: [
-          { id: 'p1', milestoneId: 'm1', amount: '2500.00', currency: 'SAR', status: 'WAITING' },
+          {
+            id: 'p1',
+            milestoneId: 'm1',
+            amount: '2500.00',
+            currency: 'SAR',
+            status: 'WAITING',
+          },
         ],
         deliveries: [
-          { id: 'd1', milestoneId: 'm1', status: 'SUBMITTED', submittedAt: new Date(), notes: null, milestone: { title: 'Logo' } },
+          {
+            id: 'd1',
+            milestoneId: 'm1',
+            status: 'SUBMITTED',
+            submittedAt: new Date(),
+            notes: null,
+            milestone: { title: 'Logo' },
+          },
         ],
         changeRequests: [],
         aiReviews: [],
         timelineEvents: [
-          { id: 't1', type: 'AGREEMENT_APPROVED', actorRole: 'CLIENT', description: 'Approved', createdAt: new Date() },
+          {
+            id: 't1',
+            type: 'AGREEMENT_APPROVED',
+            actorRole: 'CLIENT',
+            description: 'Approved',
+            createdAt: new Date(),
+          },
         ],
       });
       prismaMock.agreement.findUnique.mockResolvedValue(agreement);
@@ -393,18 +469,27 @@ describe('ClientPortalService', () => {
 
   describe('acceptDelivery', () => {
     it('should delegate to DeliveriesService', async () => {
-      deliveriesMock.acceptDeliveryFromPortal.mockResolvedValue({ id: 'd1', status: 'ACCEPTED' });
+      deliveriesMock.acceptDeliveryFromPortal.mockResolvedValue({
+        id: 'd1',
+        status: 'ACCEPTED',
+      });
 
       const result = await service.acceptDelivery('any-token', 'd1');
 
-      expect(deliveriesMock.acceptDeliveryFromPortal).toHaveBeenCalledWith('any-token', 'd1');
+      expect(deliveriesMock.acceptDeliveryFromPortal).toHaveBeenCalledWith(
+        'any-token',
+        'd1',
+      );
       expect(result.status).toBe('ACCEPTED');
     });
   });
 
   describe('requestDeliveryChanges', () => {
     it('should delegate to DeliveriesService', async () => {
-      deliveriesMock.requestChangesFromPortal.mockResolvedValue({ id: 'd1', status: 'CHANGES_REQUESTED' });
+      deliveriesMock.requestChangesFromPortal.mockResolvedValue({
+        id: 'd1',
+        status: 'CHANGES_REQUESTED',
+      });
 
       const result = await service.requestDeliveryChanges('any-token', 'd1', {
         reason: 'Navigation overlaps header on mobile.',
@@ -421,7 +506,10 @@ describe('ClientPortalService', () => {
 
   describe('fundPayment', () => {
     it('should delegate to PaymentsService portalFund', async () => {
-      paymentsMock.portalFund.mockResolvedValue({ id: 'p1', status: 'RESERVED' });
+      paymentsMock.portalFund.mockResolvedValue({
+        id: 'p1',
+        status: 'RESERVED',
+      });
 
       const result = await service.fundPayment('any-token', 'p1', {
         amount: '2500.00',
@@ -435,7 +523,10 @@ describe('ClientPortalService', () => {
 
   describe('releasePayment', () => {
     it('should delegate to PaymentsService portalReleaseConfirmation', async () => {
-      paymentsMock.portalReleaseConfirmation.mockResolvedValue({ id: 'p1', status: 'RELEASED' });
+      paymentsMock.portalReleaseConfirmation.mockResolvedValue({
+        id: 'p1',
+        status: 'RELEASED',
+      });
 
       const result = await service.releasePayment('any-token', 'p1', {
         confirmed: true,
@@ -453,7 +544,17 @@ describe('ClientPortalService', () => {
   describe('getPayments', () => {
     it('should return payment plan for agreement', async () => {
       prismaMock.payment.findMany.mockResolvedValue([
-        { id: 'p1', milestoneId: 'm1', amount: '2500.00', currency: 'SAR', status: 'WAITING', demoMode: true, reservedAt: null, releasedAt: null, createdAt: new Date() },
+        {
+          id: 'p1',
+          milestoneId: 'm1',
+          amount: '2500.00',
+          currency: 'SAR',
+          status: 'WAITING',
+          demoMode: true,
+          reservedAt: null,
+          releasedAt: null,
+          createdAt: new Date(),
+        },
       ]);
       prismaMock.milestone.findMany.mockResolvedValue([
         { id: 'm1', title: 'Logo' },
@@ -469,7 +570,17 @@ describe('ClientPortalService', () => {
   describe('getPaymentHistory', () => {
     it('should return payment history for agreement', async () => {
       prismaMock.payment.findMany.mockResolvedValue([
-        { id: 'p1', milestoneId: 'm1', amount: '2500.00', currency: 'SAR', status: 'RELEASED', demoMode: true, reservedAt: new Date(), releasedAt: new Date(), createdAt: new Date() },
+        {
+          id: 'p1',
+          milestoneId: 'm1',
+          amount: '2500.00',
+          currency: 'SAR',
+          status: 'RELEASED',
+          demoMode: true,
+          reservedAt: new Date(),
+          releasedAt: new Date(),
+          createdAt: new Date(),
+        },
       ]);
       prismaMock.milestone.findMany.mockResolvedValue([
         { id: 'm1', title: 'Logo' },
@@ -489,7 +600,13 @@ describe('ClientPortalService', () => {
   describe('getTimeline', () => {
     it('should return timeline events for agreement', async () => {
       prismaMock.timelineEvent.findMany.mockResolvedValue([
-        { id: 't1', type: 'AGREEMENT_APPROVED', actorRole: 'CLIENT', description: 'Approved', createdAt: new Date() },
+        {
+          id: 't1',
+          type: 'AGREEMENT_APPROVED',
+          actorRole: 'CLIENT',
+          description: 'Approved',
+          createdAt: new Date(),
+        },
       ]);
 
       const result = await service.getTimeline('any-token');

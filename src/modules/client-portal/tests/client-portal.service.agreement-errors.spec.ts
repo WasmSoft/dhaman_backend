@@ -70,7 +70,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
   describe('AGREEMENT_NOT_APPROVABLE', () => {
     it('should throw for already approved agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       await expect(service.approve('any-token')).rejects.toMatchObject({
@@ -80,7 +80,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for draft agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'DRAFT' as AgreementStatus }),
+        makeMockAgreement({ status: 'DRAFT' }),
       );
 
       await expect(service.approve('any-token')).rejects.toMatchObject({
@@ -90,7 +90,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for cancelled agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       await expect(service.approve('any-token')).rejects.toMatchObject({
@@ -100,7 +100,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for rejected agreement (via CANCELLED)', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       await expect(service.approve('any-token')).rejects.toMatchObject({
@@ -118,7 +118,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for approved agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       await expect(
@@ -130,7 +130,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for draft agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'DRAFT' as AgreementStatus }),
+        makeMockAgreement({ status: 'DRAFT' }),
       );
 
       await expect(
@@ -142,7 +142,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for cancelled agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       await expect(
@@ -154,7 +154,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for terminated agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'TERMINATED' as AgreementStatus }),
+        makeMockAgreement({ status: 'TERMINATED' }),
       );
 
       await expect(
@@ -174,7 +174,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for approved agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       await expect(
@@ -186,7 +186,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for draft agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'DRAFT' as AgreementStatus }),
+        makeMockAgreement({ status: 'DRAFT' }),
       );
 
       await expect(
@@ -198,7 +198,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should throw for already cancelled agreement', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       await expect(
@@ -262,7 +262,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
   describe('No side effects on error', () => {
     it('should not write to DB when APPROVE fails with state conflict', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       await expect(service.approve('any-token')).rejects.toMatchObject({
@@ -275,7 +275,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should not write to DB when requestChanges fails with state conflict', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       await expect(
@@ -291,7 +291,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should not write to DB when rejectAgreement fails with state conflict', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       await expect(
@@ -307,7 +307,7 @@ describe('ClientPortalService — agreement business-state errors (US2)', () => 
 
     it('should not create timeline events when action is rejected', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       // approve should fail - no timeline should be created

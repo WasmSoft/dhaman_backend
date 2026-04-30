@@ -1,4 +1,8 @@
-import { TimelineActorRole, TimelineEventType, type Prisma } from '@prisma/client';
+import {
+  TimelineActorRole,
+  TimelineEventType,
+  type Prisma,
+} from '@prisma/client';
 import { ClsService } from '../../common/cls/cls.service';
 import { ActorType } from '../../common/enums/actor-type.enum';
 import { Locale } from '../../common/enums/locale.enum';
@@ -76,9 +80,7 @@ export function createPrismaStub(
     $transaction: jest
       .fn()
       .mockImplementation(async (arg: unknown) =>
-        Array.isArray(arg)
-          ? Promise.all(arg)
-          : [],
+        Array.isArray(arg) ? Promise.all(arg) : [],
       ),
     timelineEvent: {
       create: jest.fn().mockResolvedValue({ id: 'event-1' }),
@@ -98,11 +100,13 @@ export function createPrismaStub(
 
 // AR: كعب رمز بوابة بتكوين قابل للتخصيص للاختبار.
 // EN: Portal token stub factory with customizable configuration.
-export function createPortalTokenStub(overrides: {
-  agreementId?: string | null;
-  expiresAt?: Date | null;
-  revokedAt?: Date | null;
-} = {}) {
+export function createPortalTokenStub(
+  overrides: {
+    agreementId?: string | null;
+    expiresAt?: Date | null;
+    revokedAt?: Date | null;
+  } = {},
+) {
   return {
     agreementId: overrides.agreementId ?? 'agreement-portal',
     expiresAt: overrides.expiresAt === undefined ? null : overrides.expiresAt,

@@ -112,7 +112,8 @@ export class PaginatedTimelineEventsResponseDto {
   total!: number;
 
   @ApiProperty({
-    description: 'Whether additional matching results are available beyond the current page.',
+    description:
+      'Whether additional matching results are available beyond the current page.',
     example: true,
   })
   hasNextPage!: boolean;

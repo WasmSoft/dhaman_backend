@@ -52,13 +52,18 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.DELIVERY_URL_OR_FILE_REQUIRED]: 'Delivery URL or file is required',
   [ErrorCode.DELIVERY_NOT_IN_REVIEW]: 'Delivery is not in review state',
   [ErrorCode.DELIVERY_ALREADY_ACCEPTED]: 'Delivery was already accepted',
-  [ErrorCode.DELIVERY_ALREADY_EXISTS]: 'An editable delivery already exists for this milestone',
-  [ErrorCode.DELIVERY_NOT_EDITABLE]: 'Delivery cannot be edited in its current state',
-  [ErrorCode.DELIVERY_NOT_SUBMITTABLE]: 'Delivery cannot be submitted in its current state',
+  [ErrorCode.DELIVERY_ALREADY_EXISTS]:
+    'An editable delivery already exists for this milestone',
+  [ErrorCode.DELIVERY_NOT_EDITABLE]:
+    'Delivery cannot be edited in its current state',
+  [ErrorCode.DELIVERY_NOT_SUBMITTABLE]:
+    'Delivery cannot be submitted in its current state',
   [ErrorCode.DELIVERY_EVIDENCE_REQUIRED]: 'Delivery evidence is required',
-  [ErrorCode.DELIVERY_NOT_REVIEWABLE]: 'Delivery is not ready for client review',
+  [ErrorCode.DELIVERY_NOT_REVIEWABLE]:
+    'Delivery is not ready for client review',
   [ErrorCode.AGREEMENT_NOT_ACTIVE]: 'Agreement is not active',
-  [ErrorCode.PAYMENT_NOT_RESERVED]: 'Payment must be reserved before delivery review',
+  [ErrorCode.PAYMENT_NOT_RESERVED]:
+    'Payment must be reserved before delivery review',
   [ErrorCode.PORTAL_TOKEN_INVALID]: 'Portal token is invalid',
   [ErrorCode.PORTAL_TOKEN_EXPIRED]: 'Portal token has expired',
   [ErrorCode.PORTAL_TOKEN_REVOKED]: 'Portal token was revoked',
@@ -101,11 +106,9 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.SETTINGS_NOT_FOUND]: 'Settings not found',
   [ErrorCode.SETTINGS_CREATE_FAILED]: 'Could not create default settings',
   [ErrorCode.SETTINGS_UPDATE_FAILED]: 'Could not update settings',
-  [ErrorCode.SETTINGS_INVALID_AI_STRICTNESS]:
-    'AI strictness value is invalid',
+  [ErrorCode.SETTINGS_INVALID_AI_STRICTNESS]: 'AI strictness value is invalid',
   [ErrorCode.SETTINGS_INVALID_CURRENCY]: 'Default currency is invalid',
-  [ErrorCode.SETTINGS_POLICY_INVALID]:
-    'Default agreement policy is invalid',
+  [ErrorCode.SETTINGS_POLICY_INVALID]: 'Default agreement policy is invalid',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'Settings value is invalid',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'Dashboard date range is invalid.',
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]:

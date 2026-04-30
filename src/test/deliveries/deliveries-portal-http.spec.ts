@@ -39,7 +39,9 @@ describe('Deliveries Portal HTTP', () => {
   describe('POST /api/v1/portal/:token/deliveries/:id/accept', () => {
     it('should return 201 with a valid portal token', async () => {
       const res = await httpRequest
-        .post(`/api/v1/portal/${TEST_PORTAL_TOKEN}/deliveries/${VALID_DELIVERY}/accept`)
+        .post(
+          `/api/v1/portal/${TEST_PORTAL_TOKEN}/deliveries/${VALID_DELIVERY}/accept`,
+        )
         .send({});
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
@@ -52,14 +54,18 @@ describe('Deliveries Portal HTTP', () => {
 
     it('should return 401 with an invalid portal token', async () => {
       const res = await httpRequest
-        .post(`/api/v1/portal/invalid-token/deliveries/${VALID_DELIVERY}/accept`)
+        .post(
+          `/api/v1/portal/invalid-token/deliveries/${VALID_DELIVERY}/accept`,
+        )
         .send({});
       expect(res.status).toBe(401);
     });
 
     it('should return 401 with an expired portal token', async () => {
       const res = await httpRequest
-        .post(`/api/v1/portal/expired-token/deliveries/${VALID_DELIVERY}/accept`)
+        .post(
+          `/api/v1/portal/expired-token/deliveries/${VALID_DELIVERY}/accept`,
+        )
         .send({});
       expect(res.status).toBe(401);
     });
@@ -67,7 +73,8 @@ describe('Deliveries Portal HTTP', () => {
 
   describe('POST /api/v1/portal/:token/deliveries/:id/request-changes', () => {
     const payload = {
-      reason: 'The mobile navigation still overlaps the header and needs adjustment.',
+      reason:
+        'The mobile navigation still overlaps the header and needs adjustment.',
     };
 
     it('should return 201 with a valid portal token and required reason', async () => {
@@ -96,7 +103,9 @@ describe('Deliveries Portal HTTP', () => {
 
     it('should return 401 with an invalid portal token', async () => {
       const res = await httpRequest
-        .post(`/api/v1/portal/invalid-token/deliveries/${VALID_DELIVERY}/request-changes`)
+        .post(
+          `/api/v1/portal/invalid-token/deliveries/${VALID_DELIVERY}/request-changes`,
+        )
         .send(payload);
       expect(res.status).toBe(401);
     });

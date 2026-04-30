@@ -1,4 +1,8 @@
-import { NotificationStatus, NotificationType, AgreementStatus } from '@prisma/client';
+import {
+  NotificationStatus,
+  NotificationType,
+  AgreementStatus,
+} from '@prisma/client';
 import { ClsService } from '../../common/cls/cls.service';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { Locale } from '../../common/enums/locale.enum';
@@ -67,7 +71,11 @@ describe('EmailNotificationsService enqueueAiReviewOpenedForFreelancer', () => {
       totalAmount: { toString: () => '100' },
       currency: 'SAR',
       status: AgreementStatus.DRAFT,
-      client: { name: 'Client', email: 'client@example.com', companyName: null },
+      client: {
+        name: 'Client',
+        email: 'client@example.com',
+        companyName: null,
+      },
       freelancer: { name: 'FL', email: 'f@f.com' },
     });
     prisma.emailNotification.create.mockResolvedValue(createPendingRecord());
@@ -133,7 +141,11 @@ describe('EmailNotificationsService enqueueAiReviewRecommendationAcceptedForClie
       totalAmount: { toString: () => '100' },
       currency: 'SAR',
       status: AgreementStatus.DRAFT,
-      client: { name: 'Client', email: 'client@example.com', companyName: null },
+      client: {
+        name: 'Client',
+        email: 'client@example.com',
+        companyName: null,
+      },
       freelancer: { name: 'FL', email: 'f@f.com' },
     });
     prisma.emailNotification.create.mockResolvedValue(createPendingRecord());

@@ -8,7 +8,15 @@ import {
   AGREEMENT_UUID,
 } from './client-portal.controller.test-utils';
 
-export { VALID_TOKEN, INVALID_TOKEN, EXPIRED_TOKEN, REVOKED_TOKEN, DELIVERY_UUID, PAYMENT_UUID, AGREEMENT_UUID };
+export {
+  VALID_TOKEN,
+  INVALID_TOKEN,
+  EXPIRED_TOKEN,
+  REVOKED_TOKEN,
+  DELIVERY_UUID,
+  PAYMENT_UUID,
+  AGREEMENT_UUID,
+};
 
 // ──────────────────────────────────────────────
 //  Two-agreement scoping fixtures (Phase 5 cross-agreement tests)

@@ -31,7 +31,8 @@ export class UpdateChangeRequestDto {
 
   @ApiPropertyOptional({
     description: 'Detailed description of extra work',
-    example: 'Client needs an additional landing page with hero section and contact form.',
+    example:
+      'Client needs an additional landing page with hero section and contact form.',
     minLength: 10,
     maxLength: 3000,
   })
@@ -50,7 +51,8 @@ export class UpdateChangeRequestDto {
   @IsString()
   @IsNotEmpty()
   @Matches(DECIMAL_SAFE_PATTERN, {
-    message: 'Amount must be a valid Decimal-safe string (digits with up to 2 decimal places)',
+    message:
+      'Amount must be a valid Decimal-safe string (digits with up to 2 decimal places)',
   })
   amount?: string;
 
@@ -63,7 +65,9 @@ export class UpdateChangeRequestDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[A-Z]{3}$/, { message: 'Currency must be a 3-letter uppercase ISO code' })
+  @Matches(/^[A-Z]{3}$/, {
+    message: 'Currency must be a 3-letter uppercase ISO code',
+  })
   currency?: string;
 
   @ApiPropertyOptional({

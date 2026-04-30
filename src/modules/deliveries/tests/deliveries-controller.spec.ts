@@ -23,9 +23,20 @@ describe('DeliveriesController', () => {
       controllers: [DeliveriesController],
       providers: [
         { provide: DeliveriesService, useValue: serviceMock },
-        { provide: ClsService, useValue: { get: jest.fn(), getContext: jest.fn(), setContext: jest.fn() } },
+        {
+          provide: ClsService,
+          useValue: {
+            get: jest.fn(),
+            getContext: jest.fn(),
+            setContext: jest.fn(),
+          },
+        },
         { provide: Reflector, useValue: { getAllAndOverride: jest.fn() } },
-        { provide: require('../../../infrastructure/prisma/prisma.service').PrismaService, useValue: { portalToken: { findUnique: jest.fn() } } },
+        {
+          provide: require('../../../infrastructure/prisma/prisma.service')
+            .PrismaService,
+          useValue: { portalToken: { findUnique: jest.fn() } },
+        },
       ],
     }).compile();
 

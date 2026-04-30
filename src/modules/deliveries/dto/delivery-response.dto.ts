@@ -41,7 +41,10 @@ export class DeliveryMilestoneSummaryDto {
   })
   deliveryStatus!: DeliveryStatus;
 
-  @ApiProperty({ example: 3, description: 'Allowed revision rounds / عدد جولات التعديل' })
+  @ApiProperty({
+    example: 3,
+    description: 'Allowed revision rounds / عدد جولات التعديل',
+  })
   revisionLimit!: number;
 }
 
@@ -53,7 +56,10 @@ export class DeliveryPaymentSummaryDto {
   })
   status!: string;
 
-  @ApiProperty({ example: true, description: 'Whether this is a demo payment / هل الدفعة تجريبية' })
+  @ApiProperty({
+    example: true,
+    description: 'Whether this is a demo payment / هل الدفعة تجريبية',
+  })
   demoMode!: boolean;
 
   @ApiPropertyOptional({
@@ -74,14 +80,16 @@ export class DeliveryPaymentSummaryDto {
 export class DeliveryTimelineReferenceDto {
   @ApiProperty({
     example: 'f7c5b8d4-2c1a-4d2c-9d5e-2a4b6c8d0e2f',
-    description: 'Agreement identifier used for related timeline lookups / معرف الاتفاق',
+    description:
+      'Agreement identifier used for related timeline lookups / معرف الاتفاق',
   })
   agreementId!: string;
 
   @ApiPropertyOptional({
     example: 'a1b2c3d4-e5f6-4890-9234-567890abcdef',
     nullable: true,
-    description: 'Milestone identifier used for related timeline lookups / معرف المرحلة',
+    description:
+      'Milestone identifier used for related timeline lookups / معرف المرحلة',
   })
   milestoneId?: string | null;
 }
@@ -152,7 +160,10 @@ export class DeliveryResponseDto {
   @Type(() => DeliveryMilestoneSummaryDto)
   milestone!: DeliveryMilestoneSummaryDto;
 
-  @ApiPropertyOptional({ type: () => DeliveryPaymentSummaryDto, nullable: true })
+  @ApiPropertyOptional({
+    type: () => DeliveryPaymentSummaryDto,
+    nullable: true,
+  })
   @ValidateNested()
   @Type(() => DeliveryPaymentSummaryDto)
   payment?: DeliveryPaymentSummaryDto | null;

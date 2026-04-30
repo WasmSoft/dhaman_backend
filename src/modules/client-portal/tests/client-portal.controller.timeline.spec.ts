@@ -92,7 +92,9 @@ describe('ClientPortalController — timeline (US5)', () => {
       const result = await controller.getTimeline(VALID_TOKEN);
 
       // Must not contain events from agreement B
-      expect(result.every((e: any) => !e.description?.includes('B'))).toBe(true);
+      expect(result.every((e: any) => !e.description?.includes('B'))).toBe(
+        true,
+      );
     });
 
     it('should propagate PORTAL_TOKEN_EXPIRED from service', async () => {

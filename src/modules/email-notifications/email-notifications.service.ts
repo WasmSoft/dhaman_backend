@@ -871,7 +871,7 @@ export class EmailNotificationsService {
       portalTokenId: this.clsService?.get('portalTokenId'),
       requestId: this.clsService?.get('requestId'),
       userRole: this.clsService?.get('userRole'),
-    } as Prisma.InputJsonObject;
+    };
   }
 
   private requiresAgreement(type: NotificationType): boolean {

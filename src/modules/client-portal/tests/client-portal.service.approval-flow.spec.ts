@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AgreementStatus, TimelineActorRole, TimelineEventType } from '@prisma/client';
+import {
+  AgreementStatus,
+  TimelineActorRole,
+  TimelineEventType,
+} from '@prisma/client';
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { ClientPortalService } from '../client-portal.service';
 import {
@@ -73,14 +77,17 @@ describe('ClientPortalService — approval flow (US3)', () => {
 
   describe('invite approval flow', () => {
     const sentAgreement = makeMockAgreement({
-      status: 'SENT' as AgreementStatus,
+      status: 'SENT',
       freelancer: { email: 'ahmed@example.com', name: 'Ahmed' },
     });
 
     it('should transition status from SENT to APPROVED', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       const result = await service.approve('any-token');
@@ -93,22 +100,24 @@ describe('ClientPortalService — approval flow (US3)', () => {
     it('should set CLIENT actor role on approval timeline event', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       await service.approve('any-token');
 
-      assertTimelineEventExists(
-        timelineMock,
-        'AGREEMENT_APPROVED',
-        'CLIENT',
-      );
+      assertTimelineEventExists(timelineMock, 'AGREEMENT_APPROVED', 'CLIENT');
     });
 
     it('should create approval timeline event with correct metadata', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       await service.approve('any-token');
@@ -125,7 +134,10 @@ describe('ClientPortalService — approval flow (US3)', () => {
     it('should set agreementId in CLS context', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       await service.approve('any-token');
@@ -137,7 +149,10 @@ describe('ClientPortalService — approval flow (US3)', () => {
     it('should send approval email notification', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
       emailMock.sendNotification.mockResolvedValue({ id: 'email-1' });
 
@@ -159,12 +174,15 @@ describe('ClientPortalService — approval flow (US3)', () => {
   describe('change-requested to approved flow', () => {
     it('should allow approval from CHANGE_REQUESTED status', async () => {
       const changeReqAgreement = makeMockAgreement({
-        status: 'CHANGE_REQUESTED' as AgreementStatus,
+        status: 'CHANGE_REQUESTED',
         freelancer: { email: 'ahmed@example.com', name: 'Ahmed' },
       });
       prismaMock.agreement.findUnique.mockResolvedValue(changeReqAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       const result = await service.approve('any-token');
@@ -180,7 +198,7 @@ describe('ClientPortalService — approval flow (US3)', () => {
   describe('duplicate approval', () => {
     it('should reject duplicate approval (already APPROVED)', async () => {
       const approvedAgreement = makeMockAgreement({
-        status: 'APPROVED' as AgreementStatus,
+        status: 'APPROVED',
         approvedAt: new Date(),
       });
       prismaMock.agreement.findUnique.mockResolvedValue(approvedAgreement);
@@ -192,7 +210,7 @@ describe('ClientPortalService — approval flow (US3)', () => {
 
     it('should not create duplicate timeline events on rejected duplicate approval', async () => {
       const approvedAgreement = makeMockAgreement({
-        status: 'APPROVED' as AgreementStatus,
+        status: 'APPROVED',
         approvedAt: new Date(),
       });
       prismaMock.agreement.findUnique.mockResolvedValue(approvedAgreement);
@@ -207,7 +225,7 @@ describe('ClientPortalService — approval flow (US3)', () => {
 
     it('should not update agreement on duplicate approval attempt', async () => {
       const approvedAgreement = makeMockAgreement({
-        status: 'APPROVED' as AgreementStatus,
+        status: 'APPROVED',
         approvedAt: new Date(),
       });
       prismaMock.agreement.findUnique.mockResolvedValue(approvedAgreement);
@@ -228,10 +246,13 @@ describe('ClientPortalService — approval flow (US3)', () => {
   describe('portal actor context', () => {
     it('should use CLIENT actor role for portal approval', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'SENT' as AgreementStatus }),
+        makeMockAgreement({ status: 'SENT' }),
       );
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       await service.approve('any-token');
@@ -245,10 +266,13 @@ describe('ClientPortalService — approval flow (US3)', () => {
 
     it('should include portalTokenId as actorId in timeline event', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'SENT' as AgreementStatus }),
+        makeMockAgreement({ status: 'SENT' }),
       );
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       await service.approve('any-token');

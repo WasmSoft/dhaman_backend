@@ -179,7 +179,7 @@ export class SettingsService {
     }
 
     if (dto.aiStrictness !== undefined) {
-      if (!ALLOWED_AI_STRICTNESS.includes(dto.aiStrictness as never)) {
+      if (!ALLOWED_AI_STRICTNESS.includes(dto.aiStrictness)) {
         throw new AppException({
           code: ErrorCode.SETTINGS_INVALID_AI_STRICTNESS,
         });

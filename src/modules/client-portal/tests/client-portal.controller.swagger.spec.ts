@@ -5,7 +5,10 @@ describe('ClientPortalController — Swagger metadata', () => {
   const prototype = ClientPortalController.prototype;
 
   it('should apply @ApiTags("Client Portal") to the controller class', () => {
-    const tags = Reflect.getMetadata('swagger/apiUseTags', ClientPortalController);
+    const tags = Reflect.getMetadata(
+      'swagger/apiUseTags',
+      ClientPortalController,
+    );
     expect(tags).toBeDefined();
     if (Array.isArray(tags)) {
       expect(tags).toContain('Client Portal');
@@ -58,7 +61,14 @@ describe('ClientPortalController — Swagger metadata', () => {
       'fundPayment',
       'releasePayment',
     ];
-    const readRoutes = ['getInvite', 'approve', 'getPortal', 'getPayments', 'getPaymentHistory', 'getTimeline'];
+    const readRoutes = [
+      'getInvite',
+      'approve',
+      'getPortal',
+      'getPayments',
+      'getPaymentHistory',
+      'getTimeline',
+    ];
 
     for (const handler of bodyRoutes) {
       const fn = prototype[handler];

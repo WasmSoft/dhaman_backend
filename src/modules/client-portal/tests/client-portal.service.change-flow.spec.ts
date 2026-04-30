@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AgreementStatus, TimelineActorRole, TimelineEventType } from '@prisma/client';
+import {
+  AgreementStatus,
+  TimelineActorRole,
+  TimelineEventType,
+} from '@prisma/client';
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { ClientPortalService } from '../client-portal.service';
 import {
@@ -79,13 +83,13 @@ describe('ClientPortalService — change flow (US3)', () => {
     };
 
     const sentAgreement = makeMockAgreement({
-      status: 'SENT' as AgreementStatus,
+      status: 'SENT',
     });
 
     it('should transition from SENT to CHANGE_REQUESTED', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
 
       const result = await service.requestChanges('any-token', dto);
@@ -97,7 +101,7 @@ describe('ClientPortalService — change flow (US3)', () => {
     it('should create AGREEMENT_CHANGES_REQUESTED timeline event', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
 
       await service.requestChanges('any-token', dto);
@@ -112,7 +116,7 @@ describe('ClientPortalService — change flow (US3)', () => {
     it('should include change reason in timeline metadata', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
 
       await service.requestChanges('any-token', dto);
@@ -129,14 +133,15 @@ describe('ClientPortalService — change flow (US3)', () => {
     it('should not modify payments on agreement change request', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
 
       await service.requestChanges('any-token', dto);
 
       // Payment-related read operations may be called (via getPayments etc.),
       // but payment writes should not happen during change request
-      const paymentCalls = prismaMock.payment.findMany?.mock?.calls?.length ?? 0;
+      const paymentCalls =
+        prismaMock.payment.findMany?.mock?.calls?.length ?? 0;
       // The change request itself doesn't touch payments
       expect(true).toBe(true);
     });
@@ -147,7 +152,7 @@ describe('ClientPortalService — change flow (US3)', () => {
         freelancer: { email: 'ahmed@example.com', name: 'Ahmed' },
       });
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
       emailMock.sendNotification.mockResolvedValue({ id: 'email-1' });
 
@@ -171,13 +176,13 @@ describe('ClientPortalService — change flow (US3)', () => {
     };
 
     const sentAgreement = makeMockAgreement({
-      status: 'SENT' as AgreementStatus,
+      status: 'SENT',
     });
 
     it('should transition from SENT to CANCELLED', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       const result = await service.rejectAgreement('any-token', dto);
@@ -189,22 +194,18 @@ describe('ClientPortalService — change flow (US3)', () => {
     it('should create AGREEMENT_REJECTED timeline event', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       await service.rejectAgreement('any-token', dto);
 
-      assertTimelineEventExists(
-        timelineMock,
-        'AGREEMENT_REJECTED',
-        'CLIENT',
-      );
+      assertTimelineEventExists(timelineMock, 'AGREEMENT_REJECTED', 'CLIENT');
     });
 
     it('should include rejection reason in timeline metadata', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
 
       await service.rejectAgreement('any-token', dto);
@@ -219,7 +220,7 @@ describe('ClientPortalService — change flow (US3)', () => {
 
     it('should not create timeline events for non-rejectable states', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus }),
+        makeMockAgreement({ status: 'APPROVED' }),
       );
 
       await expect(

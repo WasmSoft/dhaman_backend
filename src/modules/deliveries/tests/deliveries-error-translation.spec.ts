@@ -25,13 +25,10 @@ const DELIVERY_ERROR_CODES: ErrorCode[] = [
 describe('Deliveries error translation and status map', () => {
   const translator = new ErrorTranslatorService();
 
-  it.each(DELIVERY_ERROR_CODES)(
-    'maps %s to a public HTTP status',
-    (code) => {
-      expect(ERROR_CODE_HTTP_STATUS[code]).toBeDefined();
-      expect(typeof ERROR_CODE_HTTP_STATUS[code]).toBe('number');
-    },
-  );
+  it.each(DELIVERY_ERROR_CODES)('maps %s to a public HTTP status', (code) => {
+    expect(ERROR_CODE_HTTP_STATUS[code]).toBeDefined();
+    expect(typeof ERROR_CODE_HTTP_STATUS[code]).toBe('number');
+  });
 
   it('uses expected HTTP statuses for critical delivery errors', () => {
     expect(ERROR_CODE_HTTP_STATUS[ErrorCode.DELIVERY_NOT_FOUND]).toBe(
@@ -57,21 +54,15 @@ describe('Deliveries error translation and status map', () => {
     );
   });
 
-  it.each(DELIVERY_ERROR_CODES)(
-    'has an English message for %s',
-    (code) => {
-      expect(errorMessagesEn[code]).toBeTruthy();
-      expect(errorMessagesEn[code].trim().length).toBeGreaterThan(0);
-    },
-  );
+  it.each(DELIVERY_ERROR_CODES)('has an English message for %s', (code) => {
+    expect(errorMessagesEn[code]).toBeTruthy();
+    expect(errorMessagesEn[code].trim().length).toBeGreaterThan(0);
+  });
 
-  it.each(DELIVERY_ERROR_CODES)(
-    'has an Arabic message for %s',
-    (code) => {
-      expect(errorMessagesAr[code]).toBeTruthy();
-      expect(String(errorMessagesAr[code]).trim().length).toBeGreaterThan(0);
-    },
-  );
+  it.each(DELIVERY_ERROR_CODES)('has an Arabic message for %s', (code) => {
+    expect(errorMessagesAr[code]).toBeTruthy();
+    expect(String(errorMessagesAr[code]).trim().length).toBeGreaterThan(0);
+  });
 
   it.each(DELIVERY_ERROR_CODES)(
     'translator returns English message for %s',

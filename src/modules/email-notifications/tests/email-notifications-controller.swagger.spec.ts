@@ -52,7 +52,9 @@ describe('email notifications swagger contract', () => {
   });
 
   it('documents logs endpoint with query parameters and paginated response', () => {
-    expect(controllerSource).toContain("summary: 'List freelancer-scoped email notification logs'");
+    expect(controllerSource).toContain(
+      "summary: 'List freelancer-scoped email notification logs'",
+    );
     expect(controllerSource).toContain("name: 'type'");
     expect(controllerSource).toContain("name: 'status'");
     expect(controllerSource).toContain("name: 'agreementId'");
@@ -61,7 +63,9 @@ describe('email notifications swagger contract', () => {
     expect(controllerSource).toContain("name: 'to'");
     expect(controllerSource).toContain("name: 'page'");
     expect(controllerSource).toContain("name: 'limit'");
-    expect(controllerSource).toContain('PaginatedEmailNotificationsResponseDto');
+    expect(controllerSource).toContain(
+      'PaginatedEmailNotificationsResponseDto',
+    );
   });
 
   it('documents test notification with SendTestNotificationDto and EmailNotificationResponseDto', () => {
@@ -86,13 +90,17 @@ describe('agreements resend invite swagger contract', () => {
 
   it('documents resend-invite with ApiBearerAuth, ApiOperation, and ApiParam', () => {
     expect(agreementsSource).toContain('@ApiBearerAuth()');
-    expect(agreementsSource).toContain("summary: 'Resend an agreement invitation'");
-    expect(agreementsSource).toContain("@ApiParam({ name: 'id', description: 'Agreement ID'");
+    expect(agreementsSource).toContain(
+      "summary: 'Resend an agreement invitation'",
+    );
+    expect(agreementsSource).toContain(
+      "@ApiParam({ name: 'id', description: 'Agreement ID'",
+    );
     expect(agreementsSource).toContain('EmailNotificationResponseDto');
   });
 
   it('documents resend-invite with 201, 400, 401, 404, and 409 ApiResponses', () => {
-    expect(agreementsSource).toContain("status: 201,");
-    expect(agreementsSource).toContain('@Post(\':id/resend-invite\')');
+    expect(agreementsSource).toContain('status: 201,');
+    expect(agreementsSource).toContain("@Post(':id/resend-invite')");
   });
 });

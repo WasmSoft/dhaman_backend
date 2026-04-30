@@ -131,14 +131,18 @@ export async function createPaymentsHttpTestApp(
     .compile();
 
   const app = moduleRef.createNestApplication();
-  const errorTranslator = app.get<ErrorTranslatorService>(ErrorTranslatorService);
+  const errorTranslator = app.get<ErrorTranslatorService>(
+    ErrorTranslatorService,
+  );
 
   app.use((req: Request, _res: Response, next: NextFunction) => {
     const isPortalRequest = req.path.includes('/portal/');
 
     clsService.run(
       {
-        actorType: isPortalRequest ? ActorType.CLIENT_PORTAL : ActorType.FREELANCER,
+        actorType: isPortalRequest
+          ? ActorType.CLIENT_PORTAL
+          : ActorType.FREELANCER,
         agreementId: isPortalRequest ? TEST_AGREEMENT_ID : undefined,
         correlationId: TEST_CORRELATION_ID,
         locale: Locale.AR,

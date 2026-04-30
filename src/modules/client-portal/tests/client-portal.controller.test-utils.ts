@@ -18,13 +18,33 @@ export const PORTAL_ROUTES = [
   { method: 'POST', path: ':token/request-changes', handler: 'requestChanges' },
   { method: 'POST', path: ':token/reject', handler: 'rejectAgreement' },
   { method: 'GET', path: ':token', handler: 'getPortal' },
-  { method: 'GET', path: ':token/deliveries/:deliveryId', handler: 'getDelivery' },
-  { method: 'POST', path: ':token/deliveries/:deliveryId/accept', handler: 'acceptDelivery' },
-  { method: 'POST', path: ':token/deliveries/:deliveryId/request-changes', handler: 'requestDeliveryChanges' },
+  {
+    method: 'GET',
+    path: ':token/deliveries/:deliveryId',
+    handler: 'getDelivery',
+  },
+  {
+    method: 'POST',
+    path: ':token/deliveries/:deliveryId/accept',
+    handler: 'acceptDelivery',
+  },
+  {
+    method: 'POST',
+    path: ':token/deliveries/:deliveryId/request-changes',
+    handler: 'requestDeliveryChanges',
+  },
   { method: 'GET', path: ':token/payments', handler: 'getPayments' },
   { method: 'POST', path: ':token/payments/:id/fund', handler: 'fundPayment' },
-  { method: 'POST', path: ':token/payments/:id/release', handler: 'releasePayment' },
-  { method: 'GET', path: ':token/payment-history', handler: 'getPaymentHistory' },
+  {
+    method: 'POST',
+    path: ':token/payments/:id/release',
+    handler: 'releasePayment',
+  },
+  {
+    method: 'GET',
+    path: ':token/payment-history',
+    handler: 'getPaymentHistory',
+  },
   { method: 'GET', path: ':token/timeline', handler: 'getTimeline' },
 ];
 
@@ -58,9 +78,7 @@ export async function createTestModule() {
 
   const module: TestingModule = await Test.createTestingModule({
     controllers: [ClientPortalController],
-    providers: [
-      { provide: ClientPortalService, useValue: serviceMock },
-    ],
+    providers: [{ provide: ClientPortalService, useValue: serviceMock }],
   })
     .overrideGuard(PortalTokenGuard)
     .useClass(TestPortalTokenGuard)
@@ -124,13 +142,21 @@ export function assertErrorCodeAndSafeMessage(
  * Verifies that no write operations (update, create, delete) occurred.
  */
 export function assertNoWriteSideEffects(prismaMock: any) {
-  const writeOps = ['create', 'update', 'delete', 'upsert', 'createMany', 'updateMany', 'deleteMany'];
+  const writeOps = [
+    'create',
+    'update',
+    'delete',
+    'upsert',
+    'createMany',
+    'updateMany',
+    'deleteMany',
+  ];
 
-  for (const model of Object.values(prismaMock) as any[]) {
+  for (const model of Object.values(prismaMock)) {
     if (typeof model !== 'object' || model === null) continue;
     for (const op of writeOps) {
-      if (typeof (model as any)[op] === 'function') {
-        expect((model as any)[op]).not.toHaveBeenCalled();
+      if (typeof model[op] === 'function') {
+        expect(model[op]).not.toHaveBeenCalled();
       }
     }
   }

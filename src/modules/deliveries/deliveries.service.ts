@@ -146,7 +146,9 @@ export class DeliveriesService {
     }
 
     const hasEvidence =
-      !!delivery.deliveryUrl || !!delivery.fileUrl || (delivery.summary && delivery.summary.length >= 10);
+      !!delivery.deliveryUrl ||
+      !!delivery.fileUrl ||
+      (delivery.summary && delivery.summary.length >= 10);
     if (!hasEvidence) {
       throw new AppException({ code: ErrorCode.DELIVERY_EVIDENCE_REQUIRED });
     }
@@ -185,7 +187,7 @@ export class DeliveriesService {
             ...(dto.noteToClient && { noteToClient: dto.noteToClient }),
           },
         },
-        tx as any,
+        tx,
       );
 
       try {
@@ -265,7 +267,7 @@ export class DeliveriesService {
             ...(dto?.note && { note: dto.note }),
           },
         },
-        tx as any,
+        tx,
       );
 
       const payment = await tx.payment.findFirst({
@@ -339,20 +341,22 @@ export class DeliveriesService {
             }),
           },
         },
-        tx as any,
+        tx,
       );
 
       // No direct payment status change per constitution
       // Optional hold path remains a future delegated PaymentsService concern
 
       try {
-        await this.emailNotificationsService.enqueueDeliveryChangesRequestedForFreelancer({
-          agreementId: delivery.agreementId,
-          deliveryId: delivery.id,
-          milestoneId: delivery.milestoneId,
-          milestoneTitle: result.milestone?.title ?? '',
-          reason: dto.reason,
-        });
+        await this.emailNotificationsService.enqueueDeliveryChangesRequestedForFreelancer(
+          {
+            agreementId: delivery.agreementId,
+            deliveryId: delivery.id,
+            milestoneId: delivery.milestoneId,
+            milestoneTitle: result.milestone?.title ?? '',
+            reason: dto.reason,
+          },
+        );
       } catch {
         // non-blocking per spec FR-015
       }
@@ -452,10 +456,7 @@ export class DeliveriesService {
     if (!milestone) {
       throw new AppException({ code: ErrorCode.MILESTONE_NOT_FOUND });
     }
-    if (
-      !milestone.agreement ||
-      milestone.agreement.freelancerId !== userId
-    ) {
+    if (!milestone.agreement || milestone.agreement.freelancerId !== userId) {
       throw new AppException({ code: ErrorCode.FORBIDDEN });
     }
     if (milestone.agreement.status === 'CANCELLED') {
@@ -483,7 +484,9 @@ export class DeliveriesService {
   }
 
   private isReviewable(status: string): boolean {
-    return REVIEWABLE_DELIVERY_STATUSES.includes(status as PrismaDeliveryStatus);
+    return REVIEWABLE_DELIVERY_STATUSES.includes(
+      status as PrismaDeliveryStatus,
+    );
   }
 
   private async resolvePortalToken(token: string, deliveryId: string) {

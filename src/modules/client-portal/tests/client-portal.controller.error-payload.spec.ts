@@ -1,6 +1,9 @@
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { AppException } from '../../../common/errors/app-exception';
-import { createTestModule, assertErrorPayloadIsSafe } from './client-portal.controller.test-utils';
+import {
+  createTestModule,
+  assertErrorPayloadIsSafe,
+} from './client-portal.controller.test-utils';
 import {
   VALID_TOKEN,
   INVALID_TOKEN,
@@ -91,7 +94,9 @@ describe('ClientPortalController — error payload safety (US2)', () => {
       );
 
       try {
-        await controller.fundPayment(VALID_TOKEN, 'some-uuid', { amount: '100.00' });
+        await controller.fundPayment(VALID_TOKEN, 'some-uuid', {
+          amount: '100.00',
+        });
       } catch (error: any) {
         const serialized = JSON.stringify(error);
         expect(serialized).not.toContain(VALID_TOKEN);

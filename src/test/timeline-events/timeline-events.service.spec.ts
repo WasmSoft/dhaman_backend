@@ -319,10 +319,20 @@ describe('TimelineEventsService createEvent — required fields and append-only'
     const clsService = new ClsService();
     const prisma = createPrismaStub();
     prisma.timelineEvent.create.mockResolvedValue({ id: 'event-req-1' });
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-req1', locale: Locale.EN, requestId: 'req-req1', startedAt: new Date(), userId: 'user-req1' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-req1',
+        locale: Locale.EN,
+        requestId: 'req-req1',
+        startedAt: new Date(),
+        userId: 'user-req1',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -353,10 +363,20 @@ describe('TimelineEventsService createEvent — required fields and append-only'
   it('never calls update or delete during event creation', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-app', locale: Locale.EN, requestId: 'req-app', startedAt: new Date(), userId: 'user-app' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-app',
+        locale: Locale.EN,
+        requestId: 'req-app',
+        startedAt: new Date(),
+        userId: 'user-app',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -368,9 +388,9 @@ describe('TimelineEventsService createEvent — required fields and append-only'
     );
 
     expect(prisma.timelineEvent.create).toHaveBeenCalled();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+
     expect(prisma.timelineEvent.update).not.toHaveBeenCalled();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+
     expect(prisma.timelineEvent.delete).not.toHaveBeenCalled();
   });
 });
@@ -381,10 +401,20 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
   it('rejects metadata containing a top-level sensitive key', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-sens1', locale: Locale.EN, requestId: 'req-sens1', startedAt: new Date(), userId: 'user-sens1' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-sens1',
+        locale: Locale.EN,
+        requestId: 'req-sens1',
+        startedAt: new Date(),
+        userId: 'user-sens1',
+      },
       async () => {
         await expect(
           service.createEvent({
@@ -403,10 +433,20 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
   it('rejects metadata containing a nested sensitive key', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-sens2', locale: Locale.EN, requestId: 'req-sens2', startedAt: new Date(), userId: 'user-sens2' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-sens2',
+        locale: Locale.EN,
+        requestId: 'req-sens2',
+        startedAt: new Date(),
+        userId: 'user-sens2',
+      },
       async () => {
         await expect(
           service.createEvent({
@@ -425,10 +465,20 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
   it('rejects metadata containing a sensitive key with mixed case', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-sens3', locale: Locale.EN, requestId: 'req-sens3', startedAt: new Date(), userId: 'user-sens3' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-sens3',
+        locale: Locale.EN,
+        requestId: 'req-sens3',
+        startedAt: new Date(),
+        userId: 'user-sens3',
+      },
       async () => {
         await expect(
           service.createEvent({
@@ -447,10 +497,20 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
   it('rejects metadata containing a sensitive key inside an array of objects', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-sens4', locale: Locale.EN, requestId: 'req-sens4', startedAt: new Date(), userId: 'user-sens4' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-sens4',
+        locale: Locale.EN,
+        requestId: 'req-sens4',
+        startedAt: new Date(),
+        userId: 'user-sens4',
+      },
       async () => {
         await expect(
           service.createEvent({
@@ -469,10 +529,20 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
   it('rejects non-object metadata input', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-sens5', locale: Locale.EN, requestId: 'req-sens5', startedAt: new Date(), userId: 'user-sens5' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-sens5',
+        locale: Locale.EN,
+        requestId: 'req-sens5',
+        startedAt: new Date(),
+        userId: 'user-sens5',
+      },
       async () => {
         await expect(
           service.createEvent({
@@ -491,10 +561,20 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
   it('accepts safe metadata without sensitive keys', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-safe', locale: Locale.EN, requestId: 'req-safe', startedAt: new Date(), userId: 'user-safe' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-safe',
+        locale: Locale.EN,
+        requestId: 'req-safe',
+        startedAt: new Date(),
+        userId: 'user-safe',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -502,7 +582,11 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
           description: 'Safe metadata.',
           title: 'Safe',
           type: TimelineEventType.AGREEMENT_CREATED,
-          metadata: { milestoneTitle: 'Homepage', amount: '1500.00', currency: 'SAR' },
+          metadata: {
+            milestoneTitle: 'Homepage',
+            amount: '1500.00',
+            currency: 'SAR',
+          },
         }),
     );
 
@@ -512,10 +596,20 @@ describe('TimelineEventsService createEvent — metadata safety', () => {
   it('accepts undefined metadata', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-undef', locale: Locale.EN, requestId: 'req-undef', startedAt: new Date(), userId: 'user-undef' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-undef',
+        locale: Locale.EN,
+        requestId: 'req-undef',
+        startedAt: new Date(),
+        userId: 'user-undef',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -536,10 +630,20 @@ describe('TimelineEventsService createEvent — CLS traceability', () => {
   it('includes requestId and correlationId in metadata when both are present', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-full1', locale: Locale.EN, requestId: 'req-full1', startedAt: new Date(), userId: 'user-full1' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-full1',
+        locale: Locale.EN,
+        requestId: 'req-full1',
+        startedAt: new Date(),
+        userId: 'user-full1',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -563,10 +667,20 @@ describe('TimelineEventsService createEvent — CLS traceability', () => {
   it('omits requestId from metadata when CLS context is missing it', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-no-req', locale: Locale.EN, requestId: '', startedAt: new Date(), userId: 'user-no-req' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-no-req',
+        locale: Locale.EN,
+        requestId: '',
+        startedAt: new Date(),
+        userId: 'user-no-req',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -584,17 +698,29 @@ describe('TimelineEventsService createEvent — CLS traceability', () => {
         }) as unknown,
       }) as unknown,
     });
-    const [call] = prisma.timelineEvent.create.mock.calls as Array<[{ data: { metadata: Record<string, unknown> } }]>;
+    const [call] = prisma.timelineEvent.create.mock.calls as Array<
+      [{ data: { metadata: Record<string, unknown> } }]
+    >;
     expect(call[0].data.metadata.requestId).toBeUndefined();
   });
 
   it('omits correlationId from metadata when CLS context is missing it', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: '', locale: Locale.EN, requestId: 'req-no-corr', startedAt: new Date(), userId: 'user-no-corr' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: '',
+        locale: Locale.EN,
+        requestId: 'req-no-corr',
+        startedAt: new Date(),
+        userId: 'user-no-corr',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -612,7 +738,9 @@ describe('TimelineEventsService createEvent — CLS traceability', () => {
         }) as unknown,
       }) as unknown,
     });
-    const [call] = prisma.timelineEvent.create.mock.calls as Array<[{ data: { metadata: Record<string, unknown> } }]>;
+    const [call] = prisma.timelineEvent.create.mock.calls as Array<
+      [{ data: { metadata: Record<string, unknown> } }]
+    >;
     expect(call[0].data.metadata.correlationId).toBeUndefined();
   });
 });
@@ -623,10 +751,20 @@ describe('TimelineEventsService createEvent — invalid inputs', () => {
   it('rejects unapproved timeline event types at the service level', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-inv1', locale: Locale.EN, requestId: 'req-inv1', startedAt: new Date(), userId: 'user-inv1' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-inv1',
+        locale: Locale.EN,
+        requestId: 'req-inv1',
+        startedAt: new Date(),
+        userId: 'user-inv1',
+      },
       async () => {
         await expect(
           service.createEvent({
@@ -644,10 +782,20 @@ describe('TimelineEventsService createEvent — invalid inputs', () => {
   it('rejects metadata containing forbidden fields with TIMELINE_METADATA_INVALID', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-err2', locale: Locale.EN, requestId: 'req-err2', startedAt: new Date(), userId: 'user-err2' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-err2',
+        locale: Locale.EN,
+        requestId: 'req-err2',
+        startedAt: new Date(),
+        userId: 'user-err2',
+      },
       async () => {
         await expect(
           service.createEvent({
@@ -670,10 +818,20 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
   it('preserves payment metadata with business identifiers', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-dom1', locale: Locale.EN, requestId: 'req-dom1', startedAt: new Date(), userId: 'user-dom1' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-dom1',
+        locale: Locale.EN,
+        requestId: 'req-dom1',
+        startedAt: new Date(),
+        userId: 'user-dom1',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.CLIENT,
@@ -681,7 +839,13 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
           description: 'Payment reserved.',
           title: 'Payment Reserved',
           type: TimelineEventType.PAYMENT_RESERVED,
-          metadata: { paymentId: 'pay-1', previousStatus: 'WAITING', newStatus: 'RESERVED', amount: '1500.00', receiptNumber: 'RCPT-001' },
+          metadata: {
+            paymentId: 'pay-1',
+            previousStatus: 'WAITING',
+            newStatus: 'RESERVED',
+            amount: '1500.00',
+            receiptNumber: 'RCPT-001',
+          },
         }),
     );
 
@@ -701,10 +865,20 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
   it('preserves delivery metadata with delivery and milestone identifiers', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-dom2', locale: Locale.EN, requestId: 'req-dom2', startedAt: new Date(), userId: 'user-dom2' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-dom2',
+        locale: Locale.EN,
+        requestId: 'req-dom2',
+        startedAt: new Date(),
+        userId: 'user-dom2',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.FREELANCER,
@@ -712,7 +886,11 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
           description: 'Delivery submitted.',
           title: 'Delivery Submitted',
           type: TimelineEventType.DELIVERY_SUBMITTED,
-          metadata: { deliveryId: 'del-1', milestoneId: 'mil-1', deliveryUrl: 'https://example.com/file.zip' },
+          metadata: {
+            deliveryId: 'del-1',
+            milestoneId: 'mil-1',
+            deliveryUrl: 'https://example.com/file.zip',
+          },
         }),
     );
 
@@ -730,10 +908,20 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
   it('preserves AI review metadata with matchScore and recommendation', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.SYSTEM, correlationId: 'corr-dom3', locale: Locale.EN, requestId: 'req-dom3', startedAt: new Date(), userId: 'user-dom3' },
+      {
+        actorType: ActorType.SYSTEM,
+        correlationId: 'corr-dom3',
+        locale: Locale.EN,
+        requestId: 'req-dom3',
+        startedAt: new Date(),
+        userId: 'user-dom3',
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.AI,
@@ -741,7 +929,12 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
           description: 'AI review completed.',
           title: 'AI Review Completed',
           type: TimelineEventType.AI_REVIEW_COMPLETED,
-          metadata: { aiReviewId: 'ai-1', deliveryId: 'del-2', matchScore: 92, recommendation: 'release' },
+          metadata: {
+            aiReviewId: 'ai-1',
+            deliveryId: 'del-2',
+            matchScore: 92,
+            recommendation: 'release',
+          },
         }),
     );
 
@@ -760,10 +953,19 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
   it('preserves change request metadata with business identifiers', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.CLIENT_PORTAL, correlationId: 'corr-dom4', locale: Locale.EN, requestId: 'req-dom4', startedAt: new Date() },
+      {
+        actorType: ActorType.CLIENT_PORTAL,
+        correlationId: 'corr-dom4',
+        locale: Locale.EN,
+        requestId: 'req-dom4',
+        startedAt: new Date(),
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.CLIENT,
@@ -771,7 +973,11 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
           description: 'Change request created.',
           title: 'Change Request Created',
           type: TimelineEventType.CHANGE_REQUEST_CREATED,
-          metadata: { changeRequestId: 'cr-1', title: 'Extra feature', amount: '500.00' },
+          metadata: {
+            changeRequestId: 'cr-1',
+            title: 'Extra feature',
+            amount: '500.00',
+          },
         }),
     );
 
@@ -789,10 +995,19 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
   it('preserves email evidence metadata with notification type', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.SYSTEM, correlationId: 'corr-dom5', locale: Locale.EN, requestId: 'req-dom5', startedAt: new Date() },
+      {
+        actorType: ActorType.SYSTEM,
+        correlationId: 'corr-dom5',
+        locale: Locale.EN,
+        requestId: 'req-dom5',
+        startedAt: new Date(),
+      },
       () =>
         service.createEvent({
           actorRole: TimelineActorRole.SYSTEM,
@@ -800,7 +1015,10 @@ describe('TimelineEventsService createEvent — domain metadata', () => {
           description: 'Agreement sent email.',
           title: 'Email Sent',
           type: TimelineEventType.EMAIL_SENT,
-          metadata: { emailType: 'agreement_sent', recipient: 'client@example.com' },
+          metadata: {
+            emailType: 'agreement_sent',
+            recipient: 'client@example.com',
+          },
         }),
     );
 
@@ -822,11 +1040,23 @@ describe('TimelineEventsService listing', () => {
     const clsService = new ClsService();
     const mockEvents = createTimelineEventRows(1);
     const prisma = createPrismaStub(mockEvents, 1);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-list1' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-list1' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-l1', locale: Locale.EN, requestId: 'req-l1', startedAt: new Date(), userId: 'user-l1' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-l1',
+        locale: Locale.EN,
+        requestId: 'req-l1',
+        startedAt: new Date(),
+        userId: 'user-l1',
+      },
       () => service.listByAgreementId('agreement-list1', {}),
     );
 
@@ -843,11 +1073,23 @@ describe('TimelineEventsService listing', () => {
     const clsService = new ClsService();
     const mockEvents = createTimelineEventRows(100);
     const prisma = createPrismaStub(mockEvents, 200);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-max' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-max' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-max', locale: Locale.EN, requestId: 'req-max', startedAt: new Date(), userId: 'user-max' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-max',
+        locale: Locale.EN,
+        requestId: 'req-max',
+        startedAt: new Date(),
+        userId: 'user-max',
+      },
       () =>
         service.listByAgreementId('agreement-max', { limit: 200 }, 'user-max'),
     );
@@ -863,13 +1105,29 @@ describe('TimelineEventsService listing', () => {
     const clsService = new ClsService();
     const mockEvents = createTimelineEventRows(10);
     const prisma = createPrismaStub(mockEvents, 30);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-p2' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-p2' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-p2', locale: Locale.EN, requestId: 'req-p2', startedAt: new Date(), userId: 'user-p2' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-p2',
+        locale: Locale.EN,
+        requestId: 'req-p2',
+        startedAt: new Date(),
+        userId: 'user-p2',
+      },
       () =>
-        service.listByAgreementId('agreement-p2', { page: 2, limit: 10 }, 'user-p2'),
+        service.listByAgreementId(
+          'agreement-p2',
+          { page: 2, limit: 10 },
+          'user-p2',
+        ),
     );
 
     expect(prisma.timelineEvent.findMany).toHaveBeenCalledWith(
@@ -884,11 +1142,23 @@ describe('TimelineEventsService listing', () => {
     const clsService = new ClsService();
     const mockEvents = createTimelineEventRows(3);
     const prisma = createPrismaStub(mockEvents, 3);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-order' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-order' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-ord', locale: Locale.EN, requestId: 'req-ord', startedAt: new Date(), userId: 'user-ord' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-ord',
+        locale: Locale.EN,
+        requestId: 'req-ord',
+        startedAt: new Date(),
+        userId: 'user-ord',
+      },
       () => service.listByAgreementId('agreement-order', {}),
     );
 
@@ -903,11 +1173,23 @@ describe('TimelineEventsService listing', () => {
     const clsService = new ClsService();
     const mockEvents = createTimelineEventRows(20);
     const prisma = createPrismaStub(mockEvents, 45);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-shape' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-shape' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-shp', locale: Locale.EN, requestId: 'req-shp', startedAt: new Date(), userId: 'user-shp' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-shp',
+        locale: Locale.EN,
+        requestId: 'req-shp',
+        startedAt: new Date(),
+        userId: 'user-shp',
+      },
       () => service.listByAgreementId('agreement-shape', {}),
     );
 
@@ -928,13 +1210,27 @@ describe('TimelineEventsService listing', () => {
 
   it('filters by event type when type query is provided', async () => {
     const clsService = new ClsService();
-    const mockEvents = createTimelineEventRows(2, { type: TimelineEventType.PAYMENT_RESERVED });
+    const mockEvents = createTimelineEventRows(2, {
+      type: TimelineEventType.PAYMENT_RESERVED,
+    });
     const prisma = createPrismaStub(mockEvents, 2);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-ft' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-ft' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-ft', locale: Locale.EN, requestId: 'req-ft', startedAt: new Date(), userId: 'user-ft' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-ft',
+        locale: Locale.EN,
+        requestId: 'req-ft',
+        startedAt: new Date(),
+        userId: 'user-ft',
+      },
       () =>
         service.listByAgreementId('agreement-ft', {
           type: TimelineEventType.PAYMENT_RESERVED,
@@ -952,13 +1248,27 @@ describe('TimelineEventsService listing', () => {
 
   it('filters by actor role when actorRole query is provided', async () => {
     const clsService = new ClsService();
-    const mockEvents = createTimelineEventRows(1, { actorRole: TimelineActorRole.CLIENT });
+    const mockEvents = createTimelineEventRows(1, {
+      actorRole: TimelineActorRole.CLIENT,
+    });
     const prisma = createPrismaStub(mockEvents, 1);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-ar' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-ar' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-ar', locale: Locale.EN, requestId: 'req-ar', startedAt: new Date(), userId: 'user-ar' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-ar',
+        locale: Locale.EN,
+        requestId: 'req-ar',
+        startedAt: new Date(),
+        userId: 'user-ar',
+      },
       () =>
         service.listByAgreementId('agreement-ar', {
           actorRole: TimelineActorRole.CLIENT,
@@ -977,11 +1287,23 @@ describe('TimelineEventsService listing', () => {
   it('rejects reversed date range with a validation error', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-rev' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-rev' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-rev', locale: Locale.EN, requestId: 'req-rev', startedAt: new Date(), userId: 'user-rev' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-rev',
+        locale: Locale.EN,
+        requestId: 'req-rev',
+        startedAt: new Date(),
+        userId: 'user-rev',
+      },
       async () => {
         await expect(
           service.listByAgreementId('agreement-rev', {
@@ -1001,11 +1323,23 @@ describe('TimelineEventsService — dashboard ownership', () => {
     const clsService = new ClsService();
     const mockEvents = createTimelineEventRows(3);
     const prisma = createPrismaStub(mockEvents, 3);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-own' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-own' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-own', locale: Locale.EN, requestId: 'req-own', startedAt: new Date(), userId: 'user-own' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-own',
+        locale: Locale.EN,
+        requestId: 'req-own',
+        startedAt: new Date(),
+        userId: 'user-own',
+      },
       () => service.listByAgreementId('agreement-own', {}),
     );
 
@@ -1019,10 +1353,19 @@ describe('TimelineEventsService — dashboard ownership', () => {
   it('rejects missing authentication with UNAUTHORIZED', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-noauth', locale: Locale.EN, requestId: 'req-noauth', startedAt: new Date() },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-noauth',
+        locale: Locale.EN,
+        requestId: 'req-noauth',
+        startedAt: new Date(),
+      },
       async () => {
         await expect(
           service.listByAgreementId('agreement-noauth', {}),
@@ -1035,10 +1378,20 @@ describe('TimelineEventsService — dashboard ownership', () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
     prisma.agreement.findFirst.mockResolvedValue(null);
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-nonown', locale: Locale.EN, requestId: 'req-nonown', startedAt: new Date(), userId: 'user-nonown' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-nonown',
+        locale: Locale.EN,
+        requestId: 'req-nonown',
+        startedAt: new Date(),
+        userId: 'user-nonown',
+      },
       async () => {
         await expect(
           service.listByAgreementId('agreement-nonown', {}),
@@ -1051,10 +1404,20 @@ describe('TimelineEventsService — dashboard ownership', () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
     prisma.agreement.findFirst.mockResolvedValue(null);
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-miss', locale: Locale.EN, requestId: 'req-miss', startedAt: new Date(), userId: 'user-miss' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-miss',
+        locale: Locale.EN,
+        requestId: 'req-miss',
+        startedAt: new Date(),
+        userId: 'user-miss',
+      },
       async () => {
         await expect(
           service.listByAgreementId('agreement-miss', {}),
@@ -1069,8 +1432,13 @@ describe('TimelineEventsService — portal token scoping', () => {
     const clsService = new ClsService();
     const mockEvents = createTimelineEventRows(2);
     const prisma = createPrismaStub(mockEvents, 2);
-    prisma.portalToken.findUnique.mockResolvedValue(createPortalTokenStub({ agreementId: 'agreement-portal' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.portalToken.findUnique.mockResolvedValue(
+      createPortalTokenStub({ agreementId: 'agreement-portal' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await service.listByPortalToken('valid-token', {});
 
@@ -1085,7 +1453,10 @@ describe('TimelineEventsService — portal token scoping', () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
     prisma.portalToken.findUnique.mockResolvedValue(null);
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await expect(
       service.listByPortalToken('invalid-token', {}),
@@ -1096,9 +1467,15 @@ describe('TimelineEventsService — portal token scoping', () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
     prisma.portalToken.findUnique.mockResolvedValue(
-      createPortalTokenStub({ agreementId: 'agreement-portal', revokedAt: new Date('2026-04-01') }),
+      createPortalTokenStub({
+        agreementId: 'agreement-portal',
+        revokedAt: new Date('2026-04-01'),
+      }),
     );
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await expect(
       service.listByPortalToken('revoked-token', {}),
@@ -1109,9 +1486,15 @@ describe('TimelineEventsService — portal token scoping', () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
     prisma.portalToken.findUnique.mockResolvedValue(
-      createPortalTokenStub({ agreementId: 'agreement-portal', expiresAt: new Date('2020-01-01') }),
+      createPortalTokenStub({
+        agreementId: 'agreement-portal',
+        expiresAt: new Date('2020-01-01'),
+      }),
     );
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await expect(
       service.listByPortalToken('expired-token', {}),
@@ -1120,15 +1503,24 @@ describe('TimelineEventsService — portal token scoping', () => {
 
   it('portal reads for one agreement cannot retrieve another agreements timeline', async () => {
     const clsService = new ClsService();
-    const mockEvents = createTimelineEventRows(1, { agreementId: 'agreement-portal' });
+    const mockEvents = createTimelineEventRows(1, {
+      agreementId: 'agreement-portal',
+    });
     const prisma = createPrismaStub(mockEvents, 1);
-    prisma.portalToken.findUnique.mockResolvedValue(createPortalTokenStub({ agreementId: 'agreement-portal' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.portalToken.findUnique.mockResolvedValue(
+      createPortalTokenStub({ agreementId: 'agreement-portal' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await service.listByPortalToken('scoped-token', {});
 
     // All returned events must belong to the tokens agreement only
-    expect(result.items.every((e) => e.agreementId === 'agreement-portal')).toBe(true);
+    expect(
+      result.items.every((e) => e.agreementId === 'agreement-portal'),
+    ).toBe(true);
   });
 });
 
@@ -1150,8 +1542,13 @@ describe('TimelineEventsService — portal-safe metadata', () => {
       }),
     ];
     const prisma = createPrismaStub(mockEvents, 1);
-    prisma.portalToken.findUnique.mockResolvedValue(createPortalTokenStub({ agreementId: 'agreement-safe' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.portalToken.findUnique.mockResolvedValue(
+      createPortalTokenStub({ agreementId: 'agreement-safe' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await service.listByPortalToken('safe-token', {});
 
@@ -1181,8 +1578,13 @@ describe('TimelineEventsService — portal-safe metadata', () => {
       }),
     ];
     const prisma = createPrismaStub(mockEvents, 1);
-    prisma.portalToken.findUnique.mockResolvedValue(createPortalTokenStub({ agreementId: 'agreement-nested' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.portalToken.findUnique.mockResolvedValue(
+      createPortalTokenStub({ agreementId: 'agreement-nested' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await service.listByPortalToken('nested-token', {});
 
@@ -1207,8 +1609,13 @@ describe('TimelineEventsService — portal-safe metadata', () => {
       }),
     ];
     const prisma = createPrismaStub(mockEvents, 1);
-    prisma.portalToken.findUnique.mockResolvedValue(createPortalTokenStub({ agreementId: 'agreement-array' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.portalToken.findUnique.mockResolvedValue(
+      createPortalTokenStub({ agreementId: 'agreement-array' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await service.listByPortalToken('array-token', {});
 
@@ -1234,11 +1641,23 @@ describe('TimelineEventsService — portal-safe metadata', () => {
       }),
     ];
     const prisma = createPrismaStub(mockEvents, 1);
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-dash' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-dash' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     const result = await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-dash', locale: Locale.EN, requestId: 'req-dash', startedAt: new Date(), userId: 'user-dash' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-dash',
+        locale: Locale.EN,
+        requestId: 'req-dash',
+        startedAt: new Date(),
+        userId: 'user-dash',
+      },
       () => service.listByAgreementId('agreement-dash', {}),
     );
 
@@ -1253,11 +1672,23 @@ describe('TimelineEventsService — read side effects', () => {
   it('listByAgreementId does not call timelineEvent.create', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    prisma.agreement.findFirst.mockResolvedValue(createAgreementStub({ id: 'agreement-se1' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.agreement.findFirst.mockResolvedValue(
+      createAgreementStub({ id: 'agreement-se1' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await clsService.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-se1', locale: Locale.EN, requestId: 'req-se1', startedAt: new Date(), userId: 'user-se1' },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-se1',
+        locale: Locale.EN,
+        requestId: 'req-se1',
+        startedAt: new Date(),
+        userId: 'user-se1',
+      },
       () => service.listByAgreementId('agreement-se1', {}),
     );
 
@@ -1267,8 +1698,13 @@ describe('TimelineEventsService — read side effects', () => {
   it('listByPortalToken does not call timelineEvent.create', async () => {
     const clsService = new ClsService();
     const prisma = createPrismaStub();
-    prisma.portalToken.findUnique.mockResolvedValue(createPortalTokenStub({ agreementId: 'agreement-se2' }));
-    const service = new TimelineEventsService(prisma as unknown as PrismaService, clsService);
+    prisma.portalToken.findUnique.mockResolvedValue(
+      createPortalTokenStub({ agreementId: 'agreement-se2' }),
+    );
+    const service = new TimelineEventsService(
+      prisma as unknown as PrismaService,
+      clsService,
+    );
 
     await service.listByPortalToken('read-token', {});
 

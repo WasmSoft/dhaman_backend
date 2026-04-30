@@ -24,7 +24,10 @@ export class PortalRequestChangesDto {
 
   @ApiPropertyOptional({
     description: 'Specific change items requested',
-    example: ['Extend milestone 1 deadline by 2 weeks', 'Reduce total amount by 10%'],
+    example: [
+      'Extend milestone 1 deadline by 2 weeks',
+      'Reduce total amount by 10%',
+    ],
     isArray: true,
     type: String,
   })

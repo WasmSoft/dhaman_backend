@@ -1,5 +1,8 @@
 export { PortalTokenParamDto } from './portal-token-param.dto';
-export { PortalRequestChangesDto, PortalRejectAgreementDto } from './portal-request.dto';
+export {
+  PortalRequestChangesDto,
+  PortalRejectAgreementDto,
+} from './portal-request.dto';
 export { PortalActionResponseDto } from './portal-action-response.dto';
 export {
   PortalInviteFreelancerDto,

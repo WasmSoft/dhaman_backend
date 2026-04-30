@@ -5,7 +5,8 @@ import { CreateDeliveryDto } from '../dto/create-delivery.dto';
 describe('CreateDeliveryDto', () => {
   it('should validate a valid payload', async () => {
     const dto = plainToInstance(CreateDeliveryDto, {
-      summary: 'Completed the homepage redesign with responsive navigation and final assets.',
+      summary:
+        'Completed the homepage redesign with responsive navigation and final assets.',
     });
     const errors = await validate(dto);
     expect(errors.length).toBe(0);

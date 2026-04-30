@@ -53,9 +53,9 @@ describe('Settings DTO validation', () => {
         emailNotificationsEnabled: 'yes',
       });
 
-      expect(constraintsFor(errors, 'emailNotificationsEnabled')).toHaveProperty(
-        'isBoolean',
-      );
+      expect(
+        constraintsFor(errors, 'emailNotificationsEnabled'),
+      ).toHaveProperty('isBoolean');
     });
 
     it('rejects values that exceed defaultCurrency and service type limits', async () => {

@@ -1,4 +1,10 @@
-import { AgreementStatus, NotificationStatus, NotificationType, TimelineActorRole, TimelineEventType } from '@prisma/client';
+import {
+  AgreementStatus,
+  NotificationStatus,
+  NotificationType,
+  TimelineActorRole,
+  TimelineEventType,
+} from '@prisma/client';
 import { ClsService } from '../../../common/cls/cls.service';
 import { ActorType } from '../../../common/enums/actor-type.enum';
 import { Locale } from '../../../common/enums/locale.enum';
@@ -22,8 +28,14 @@ import {
 describe('EmailNotificationsService — sendNotification (US1)', () => {
   it('creates PENDING then SENT when provider succeeds', async () => {
     const cls = new ClsService();
-    const createdRecord = createMockEmailNotification({ status: NotificationStatus.PENDING });
-    const updatedRecord = createMockEmailNotification({ status: NotificationStatus.SENT, sentAt: new Date(), providerMessageId: 'demo_123' });
+    const createdRecord = createMockEmailNotification({
+      status: NotificationStatus.PENDING,
+    });
+    const updatedRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+      sentAt: new Date(),
+      providerMessageId: 'demo_123',
+    });
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createdRecord),
@@ -35,7 +47,14 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -51,7 +70,9 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
 
   it('creates PENDING then FAILED when provider is unavailable', async () => {
     const cls = new ClsService();
-    const createdRecord = createMockEmailNotification({ status: NotificationStatus.PENDING });
+    const createdRecord = createMockEmailNotification({
+      status: NotificationStatus.PENDING,
+    });
     const failedRecord = createMockEmailNotification({
       status: NotificationStatus.FAILED,
       errorMessage: 'Email provider is not configured; preview stored.',
@@ -67,7 +88,14 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -101,7 +129,14 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -115,8 +150,12 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
 
   it('stores requestId and correlationId from CLS', async () => {
     const cls = new ClsService();
-    const createdRecord = createMockEmailNotification({ status: NotificationStatus.PENDING });
-    const updatedRecord = createMockEmailNotification({ status: NotificationStatus.SENT });
+    const createdRecord = createMockEmailNotification({
+      status: NotificationStatus.PENDING,
+    });
+    const updatedRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+    });
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createdRecord),
@@ -128,7 +167,14 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-test-1', locale: Locale.AR, requestId: 'req-test-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-test-1',
+        locale: Locale.AR,
+        requestId: 'req-test-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -149,8 +195,12 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
 
   it('stores CLS actor and locale metadata in the notification record', async () => {
     const cls = new ClsService();
-    const createdRecord = createMockEmailNotification({ status: NotificationStatus.PENDING });
-    const updatedRecord = createMockEmailNotification({ status: NotificationStatus.SENT });
+    const createdRecord = createMockEmailNotification({
+      status: NotificationStatus.PENDING,
+    });
+    const updatedRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+    });
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createdRecord),
@@ -162,7 +212,14 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-test-1', locale: Locale.AR, requestId: 'req-test-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-test-1',
+        locale: Locale.AR,
+        requestId: 'req-test-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -185,7 +242,10 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
 
   it('preserves preview HTML on success', async () => {
     const cls = new ClsService();
-    const createdRecord = createMockEmailNotification({ status: NotificationStatus.PENDING, previewHtml: '<html>preview</html>' });
+    const createdRecord = createMockEmailNotification({
+      status: NotificationStatus.PENDING,
+      previewHtml: '<html>preview</html>',
+    });
     const updatedRecord = createMockEmailNotification({
       status: NotificationStatus.SENT,
       previewHtml: '<html>preview</html>',
@@ -202,7 +262,14 @@ describe('EmailNotificationsService — sendNotification (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -228,7 +295,15 @@ describe('EmailNotificationsService — renderTemplate (US1)', () => {
       const rendered = service.renderTemplate(
         type,
         {
-          agreement: { id: 'a1', title: 'Test', description: '', serviceType: '', totalAmount: '100', currency: 'SAR', status: 'DRAFT' },
+          agreement: {
+            id: 'a1',
+            title: 'Test',
+            description: '',
+            serviceType: '',
+            totalAmount: '100',
+            currency: 'SAR',
+            status: 'DRAFT',
+          },
           client: { name: 'Client', email: 'c@c.com', companyName: null },
           freelancer: { name: 'FL', email: 'f@f.com' },
           metadata: {},
@@ -252,7 +327,15 @@ describe('EmailNotificationsService — renderTemplate (US1)', () => {
     const rendered = service.renderTemplate(
       NotificationType.AGREEMENT_INVITE,
       {
-        agreement: { id: 'a1', title: 'Test', description: '', serviceType: '', totalAmount: '100', currency: 'SAR', status: 'DRAFT' },
+        agreement: {
+          id: 'a1',
+          title: 'Test',
+          description: '',
+          serviceType: '',
+          totalAmount: '100',
+          currency: 'SAR',
+          status: 'DRAFT',
+        },
         client: { name: 'Client', email: 'c@c.com', companyName: null },
         freelancer: { name: 'FL', email: 'f@f.com' },
         metadata: {},
@@ -275,7 +358,15 @@ describe('EmailNotificationsService — renderTemplate (US1)', () => {
     const rendered = service.renderTemplate(
       NotificationType.AGREEMENT_INVITE,
       {
-        agreement: { id: 'a1', title: '<script>alert("xss")</script>', description: '', serviceType: '', totalAmount: '100', currency: 'SAR', status: 'DRAFT' },
+        agreement: {
+          id: 'a1',
+          title: '<script>alert("xss")</script>',
+          description: '',
+          serviceType: '',
+          totalAmount: '100',
+          currency: 'SAR',
+          status: 'DRAFT',
+        },
         client: { name: 'Client', email: 'c@c.com', companyName: null },
         freelancer: { name: 'FL', email: 'f@f.com' },
         metadata: {},
@@ -297,12 +388,24 @@ describe('EmailNotificationsService — renderTemplate (US1)', () => {
     const rendered = service.renderTemplate(
       NotificationType.AGREEMENT_APPROVED,
       {
-        agreement: { id: 'a1', title: 'Test & Co > Partners', description: '', serviceType: '', totalAmount: '100', currency: 'SAR', status: 'DRAFT' },
-        client: { name: 'Client \'The Bear\'', email: 'c@c.com', companyName: null },
+        agreement: {
+          id: 'a1',
+          title: 'Test & Co > Partners',
+          description: '',
+          serviceType: '',
+          totalAmount: '100',
+          currency: 'SAR',
+          status: 'DRAFT',
+        },
+        client: {
+          name: "Client 'The Bear'",
+          email: 'c@c.com',
+          companyName: null,
+        },
         freelancer: { name: 'FL', email: 'f@f.com' },
         metadata: {},
         recipientEmail: 'c@c.com',
-        recipientName: 'Client \'The Bear\'',
+        recipientName: "Client 'The Bear'",
       },
       'ar',
     );
@@ -321,7 +424,15 @@ describe('EmailNotificationsService — renderTemplate (US1)', () => {
       service.renderTemplate(
         fakeType,
         {
-          agreement: { id: 'a1', title: 'Test', description: '', serviceType: '', totalAmount: '100', currency: 'SAR', status: 'DRAFT' },
+          agreement: {
+            id: 'a1',
+            title: 'Test',
+            description: '',
+            serviceType: '',
+            totalAmount: '100',
+            currency: 'SAR',
+            status: 'DRAFT',
+          },
           client: { name: 'Client', email: 'c@c.com', companyName: null },
           freelancer: { name: 'FL', email: 'f@f.com' },
           metadata: {},
@@ -422,7 +533,14 @@ describe('EmailNotificationsService — locale resolution (US1)', () => {
   it('defaults to Arabic when no locale is set', () => {
     const cls = new ClsService();
     cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.EN, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.EN,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => {
         const prisma = createPrismaMock();
         const service = new EmailNotificationsService(prisma, cls);
@@ -430,7 +548,15 @@ describe('EmailNotificationsService — locale resolution (US1)', () => {
         const rendered = service.renderTemplate(
           NotificationType.AGREEMENT_INVITE,
           {
-            agreement: { id: 'a1', title: 'Test', description: '', serviceType: '', totalAmount: '100', currency: 'SAR', status: 'DRAFT' },
+            agreement: {
+              id: 'a1',
+              title: 'Test',
+              description: '',
+              serviceType: '',
+              totalAmount: '100',
+              currency: 'SAR',
+              status: 'DRAFT',
+            },
             client: { name: 'Client', email: 'c@c.com', companyName: null },
             freelancer: { name: 'FL', email: 'f@f.com' },
             metadata: {},
@@ -459,7 +585,14 @@ describe('EmailNotificationsService — previewEmail (US2)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.previewEmail(
           {
@@ -486,7 +619,14 @@ describe('EmailNotificationsService — previewEmail (US2)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.previewEmail(
           {
@@ -511,7 +651,14 @@ describe('EmailNotificationsService — previewEmail (US2)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.previewEmail(
           {
@@ -534,7 +681,14 @@ describe('EmailNotificationsService — previewEmail (US2)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () =>
           service.previewEmail(
             {
@@ -558,7 +712,14 @@ describe('EmailNotificationsService — previewEmail (US2)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () =>
           service.previewEmail(
             {
@@ -590,7 +751,12 @@ describe('EmailNotificationsService — sendTestNotification (US2)', () => {
     const prisma = createPrismaMock({
       agreement: { findFirst: jest.fn().mockResolvedValue(agreement) },
       emailNotification: {
-        create: jest.fn().mockResolvedValue(createMockEmailNotification({ type: NotificationType.SYSTEM_TEST, status: NotificationStatus.PENDING })),
+        create: jest.fn().mockResolvedValue(
+          createMockEmailNotification({
+            type: NotificationType.SYSTEM_TEST,
+            status: NotificationStatus.PENDING,
+          }),
+        ),
         update: jest.fn().mockResolvedValue(sentRecord),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
@@ -599,7 +765,14 @@ describe('EmailNotificationsService — sendTestNotification (US2)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendTestNotification(
           {
@@ -617,8 +790,15 @@ describe('EmailNotificationsService — sendTestNotification (US2)', () => {
 
   it('returns FAILED when provider is unavailable but still creates a record', async () => {
     const cls = new ClsService();
-    const createdRecord = createMockEmailNotification({ type: NotificationType.SYSTEM_TEST, status: NotificationStatus.PENDING });
-    const failedRecord = createMockEmailNotification({ type: NotificationType.SYSTEM_TEST, status: NotificationStatus.FAILED, errorMessage: '...' });
+    const createdRecord = createMockEmailNotification({
+      type: NotificationType.SYSTEM_TEST,
+      status: NotificationStatus.PENDING,
+    });
+    const failedRecord = createMockEmailNotification({
+      type: NotificationType.SYSTEM_TEST,
+      status: NotificationStatus.FAILED,
+      errorMessage: '...',
+    });
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createdRecord),
@@ -630,7 +810,14 @@ describe('EmailNotificationsService — sendTestNotification (US2)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendTestNotification(
           {
@@ -651,7 +838,14 @@ describe('EmailNotificationsService — sendTestNotification (US2)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () =>
           service.sendTestNotification(
             {
@@ -676,7 +870,14 @@ describe('EmailNotificationsService — sendTestNotification (US2)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () =>
           service.sendTestNotification(
             {
@@ -700,7 +901,14 @@ describe('EmailNotificationsService — sendTestNotification (US2)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () =>
           service.sendTestNotification(
             {
@@ -724,11 +932,18 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
   it('creates notification and timeline evidence for a valid invite', async () => {
     const cls = new ClsService();
     const agreement = createMockAgreement({ status: AgreementStatus.DRAFT });
-    const sentRecord = createMockEmailNotification({ status: NotificationStatus.SENT, sentAt: new Date() });
+    const sentRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+      sentAt: new Date(),
+    });
     const prisma = createPrismaMock({
       agreement: { findFirst: jest.fn().mockResolvedValue(agreement) },
       emailNotification: {
-        create: jest.fn().mockResolvedValue(createMockEmailNotification({ status: NotificationStatus.PENDING })),
+        create: jest
+          .fn()
+          .mockResolvedValue(
+            createMockEmailNotification({ status: NotificationStatus.PENDING }),
+          ),
         update: jest.fn().mockResolvedValue(sentRecord),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
@@ -737,7 +952,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.resendAgreementInvite(agreementId, freelancerId),
     );
 
@@ -768,7 +990,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () => service.resendAgreementInvite(agreementId, freelancerId),
       );
       fail('Expected AppException');
@@ -786,7 +1015,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () => service.resendAgreementInvite(agreementId, freelancerId),
       );
       fail('Expected AppException');
@@ -805,7 +1041,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () => service.resendAgreementInvite(agreementId, freelancerId),
       );
       fail('Expected AppException');
@@ -816,7 +1059,9 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
 
   it('throws AGREEMENT_NOT_INVITABLE for completed agreement', async () => {
     const cls = new ClsService();
-    const agreement = createMockAgreement({ status: AgreementStatus.COMPLETED });
+    const agreement = createMockAgreement({
+      status: AgreementStatus.COMPLETED,
+    });
     const prisma = createPrismaMock({
       agreement: { findFirst: jest.fn().mockResolvedValue(agreement) },
     });
@@ -824,7 +1069,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () => service.resendAgreementInvite(agreementId, freelancerId),
       );
       fail('Expected AppException');
@@ -835,7 +1087,9 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
 
   it('throws AGREEMENT_NOT_INVITABLE for cancelled agreement', async () => {
     const cls = new ClsService();
-    const agreement = createMockAgreement({ status: AgreementStatus.CANCELLED });
+    const agreement = createMockAgreement({
+      status: AgreementStatus.CANCELLED,
+    });
     const prisma = createPrismaMock({
       agreement: { findFirst: jest.fn().mockResolvedValue(agreement) },
     });
@@ -843,7 +1097,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
 
     try {
       await cls.run(
-        { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+        {
+          actorType: ActorType.FREELANCER,
+          correlationId: 'corr-1',
+          locale: Locale.AR,
+          requestId: 'req-1',
+          startedAt: new Date(),
+          userId: freelancerId,
+        },
         () => service.resendAgreementInvite(agreementId, freelancerId),
       );
       fail('Expected AppException');
@@ -855,11 +1116,18 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
   it('allows resend for DRAFT agreement', async () => {
     const cls = new ClsService();
     const agreement = createMockAgreement({ status: AgreementStatus.DRAFT });
-    const sentRecord = createMockEmailNotification({ status: NotificationStatus.SENT, sentAt: new Date() });
+    const sentRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+      sentAt: new Date(),
+    });
     const prisma = createPrismaMock({
       agreement: { findFirst: jest.fn().mockResolvedValue(agreement) },
       emailNotification: {
-        create: jest.fn().mockResolvedValue(createMockEmailNotification({ status: NotificationStatus.PENDING })),
+        create: jest
+          .fn()
+          .mockResolvedValue(
+            createMockEmailNotification({ status: NotificationStatus.PENDING }),
+          ),
         update: jest.fn().mockResolvedValue(sentRecord),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
@@ -868,7 +1136,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.resendAgreementInvite(agreementId, freelancerId),
     );
 
@@ -878,11 +1153,18 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
   it('allows resend for SENT agreement', async () => {
     const cls = new ClsService();
     const agreement = createMockAgreement({ status: AgreementStatus.SENT });
-    const sentRecord = createMockEmailNotification({ status: NotificationStatus.SENT, sentAt: new Date() });
+    const sentRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+      sentAt: new Date(),
+    });
     const prisma = createPrismaMock({
       agreement: { findFirst: jest.fn().mockResolvedValue(agreement) },
       emailNotification: {
-        create: jest.fn().mockResolvedValue(createMockEmailNotification({ status: NotificationStatus.PENDING })),
+        create: jest
+          .fn()
+          .mockResolvedValue(
+            createMockEmailNotification({ status: NotificationStatus.PENDING }),
+          ),
         update: jest.fn().mockResolvedValue(sentRecord),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
@@ -891,7 +1173,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.resendAgreementInvite(agreementId, freelancerId),
     );
 
@@ -908,7 +1197,11 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
     const prisma = createPrismaMock({
       agreement: { findFirst: jest.fn().mockResolvedValue(agreement) },
       emailNotification: {
-        create: jest.fn().mockResolvedValue(createMockEmailNotification({ status: NotificationStatus.PENDING })),
+        create: jest
+          .fn()
+          .mockResolvedValue(
+            createMockEmailNotification({ status: NotificationStatus.PENDING }),
+          ),
         update: jest.fn().mockResolvedValue(failedRecord),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
@@ -917,7 +1210,14 @@ describe('EmailNotificationsService — resendAgreementInvite (US3)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.resendAgreementInvite(agreementId, freelancerId),
     );
 
@@ -933,8 +1233,14 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
   it('returns paginated results with pagination metadata', async () => {
     const cls = new ClsService();
     const items = [
-      createMockEmailNotification({ id: 'n1', createdAt: new Date('2026-04-30T00:00:00.000Z') }),
-      createMockEmailNotification({ id: 'n2', createdAt: new Date('2026-04-29T00:00:00.000Z') }),
+      createMockEmailNotification({
+        id: 'n1',
+        createdAt: new Date('2026-04-30T00:00:00.000Z'),
+      }),
+      createMockEmailNotification({
+        id: 'n2',
+        createdAt: new Date('2026-04-29T00:00:00.000Z'),
+      }),
     ];
     const prisma = createPrismaMock({
       emailNotification: {
@@ -944,11 +1250,20 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(2),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 2]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 2]);
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.listEmailLogs({ page: 1, limit: 20 }, freelancerId),
     );
 
@@ -963,8 +1278,14 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
 
   it('orders results newest first', async () => {
     const cls = new ClsService();
-    const older = createMockEmailNotification({ id: 'old', createdAt: new Date('2026-04-28T00:00:00.000Z') });
-    const newer = createMockEmailNotification({ id: 'new', createdAt: new Date('2026-04-30T00:00:00.000Z') });
+    const older = createMockEmailNotification({
+      id: 'old',
+      createdAt: new Date('2026-04-28T00:00:00.000Z'),
+    });
+    const newer = createMockEmailNotification({
+      id: 'new',
+      createdAt: new Date('2026-04-30T00:00:00.000Z'),
+    });
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createMockEmailNotification()),
@@ -973,11 +1294,20 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(2),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([[newer, older], 2]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([[newer, older], 2]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.listEmailLogs({}, freelancerId),
     );
 
@@ -990,7 +1320,9 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
 
   it('applies type filter', async () => {
     const cls = new ClsService();
-    const items = [createMockEmailNotification({ type: NotificationType.PAYMENT_RELEASED })];
+    const items = [
+      createMockEmailNotification({ type: NotificationType.PAYMENT_RELEASED }),
+    ];
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createMockEmailNotification()),
@@ -999,12 +1331,25 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
-      () => service.listEmailLogs({ type: NotificationType.PAYMENT_RELEASED }, freelancerId),
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
+      () =>
+        service.listEmailLogs(
+          { type: NotificationType.PAYMENT_RELEASED },
+          freelancerId,
+        ),
     );
 
     expect(prisma.emailNotification.findMany).toHaveBeenCalledWith(
@@ -1018,7 +1363,9 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
 
   it('applies status filter', async () => {
     const cls = new ClsService();
-    const items = [createMockEmailNotification({ status: NotificationStatus.FAILED })];
+    const items = [
+      createMockEmailNotification({ status: NotificationStatus.FAILED }),
+    ];
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createMockEmailNotification()),
@@ -1027,12 +1374,25 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
-      () => service.listEmailLogs({ status: NotificationStatus.FAILED }, freelancerId),
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
+      () =>
+        service.listEmailLogs(
+          { status: NotificationStatus.FAILED },
+          freelancerId,
+        ),
     );
 
     expect(prisma.emailNotification.findMany).toHaveBeenCalledWith(
@@ -1055,11 +1415,20 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.listEmailLogs({ agreementId }, freelancerId),
     );
 
@@ -1074,7 +1443,9 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
 
   it('applies recipientEmail filter', async () => {
     const cls = new ClsService();
-    const items = [createMockEmailNotification({ recipientEmail: 'specific@example.com' })];
+    const items = [
+      createMockEmailNotification({ recipientEmail: 'specific@example.com' }),
+    ];
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createMockEmailNotification()),
@@ -1083,12 +1454,25 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
-      () => service.listEmailLogs({ recipientEmail: 'specific@example.com' }, freelancerId),
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
+      () =>
+        service.listEmailLogs(
+          { recipientEmail: 'specific@example.com' },
+          freelancerId,
+        ),
     );
 
     expect(prisma.emailNotification.findMany).toHaveBeenCalledWith(
@@ -1111,11 +1495,20 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.listEmailLogs(
           { from: '2026-01-01T00:00:00.000Z', to: '2026-12-31T23:59:59.999Z' },
@@ -1146,11 +1539,20 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.listEmailLogs({}, freelancerId),
     );
 
@@ -1177,12 +1579,20 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     // Run without userId in CLS context so default parameter resolves undefined
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date() },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+      },
       () => service.listEmailLogs({}),
     );
 
@@ -1208,11 +1618,20 @@ describe('EmailNotificationsService — listEmailLogs (US4)', () => {
         count: jest.fn().mockResolvedValue(22),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 22]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 22]);
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.listEmailLogs({ page: 1, limit: 10 }, freelancerId),
     );
 
@@ -1248,7 +1667,9 @@ describe('EmailNotificationsService — non-disclosure (US3)', () => {
     expect(contextStr).not.toContain('hash');
     expect(context.freelancer).not.toHaveProperty('passwordHash');
     expect(context.freelancer).not.toHaveProperty('password');
-    expect((context.freelancer as Record<string, unknown> | undefined)?.passwordHash).toBeUndefined();
+    expect(
+      (context.freelancer as Record<string, unknown> | undefined)?.passwordHash,
+    ).toBeUndefined();
   });
 
   it('does not expose token hashes in template context', async () => {
@@ -1274,7 +1695,11 @@ describe('EmailNotificationsService — non-disclosure (US3)', () => {
 
   it('does not expose another freelancer agreement in logs', async () => {
     const cls = new ClsService();
-    const items = [createMockEmailNotification({ agreementId: 'other-freelancer-agreement' })];
+    const items = [
+      createMockEmailNotification({
+        agreementId: 'other-freelancer-agreement',
+      }),
+    ];
     const prisma = createPrismaMock({
       emailNotification: {
         create: jest.fn().mockResolvedValue(createMockEmailNotification()),
@@ -1283,11 +1708,20 @@ describe('EmailNotificationsService — non-disclosure (US3)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () => service.listEmailLogs({}, freelancerId),
     );
 
@@ -1311,7 +1745,9 @@ describe('EmailNotificationsService — non-disclosure (US3)', () => {
         count: jest.fn().mockResolvedValue(1),
       },
     });
-    (prisma.$transaction as jest.Mock) = jest.fn().mockResolvedValue([items, 1]);
+    (prisma.$transaction as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue([items, 1]);
     const service = new EmailNotificationsService(prisma, cls);
 
     await service.listEmailLogs({});
@@ -1333,9 +1769,9 @@ describe('EmailNotificationsService — provider error sanitization (US3)', () =
     const service = new EmailNotificationsService(prisma, cls);
 
     const appEx = new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
-    const sanitized = (service as unknown as { sanitizeError: (error: unknown) => string }).sanitizeError(
-      appEx,
-    );
+    const sanitized = (
+      service as unknown as { sanitizeError: (error: unknown) => string }
+    ).sanitizeError(appEx);
 
     expect(sanitized).toBe(ErrorCode.AGREEMENT_NOT_FOUND);
     expect(sanitized).not.toContain('secret');
@@ -1348,9 +1784,9 @@ describe('EmailNotificationsService — provider error sanitization (US3)', () =
     const service = new EmailNotificationsService(prisma, cls);
 
     const longMessage = 'x'.repeat(500);
-    const sanitized = (service as unknown as { sanitizeError: (error: unknown) => string }).sanitizeError(
-      new Error(longMessage),
-    );
+    const sanitized = (
+      service as unknown as { sanitizeError: (error: unknown) => string }
+    ).sanitizeError(new Error(longMessage));
 
     expect(sanitized.length).toBeLessThanOrEqual(300);
     expect(sanitized).not.toContain('API_KEY');
@@ -1361,16 +1797,18 @@ describe('EmailNotificationsService — provider error sanitization (US3)', () =
     const prisma = createPrismaMock();
     const service = new EmailNotificationsService(prisma, cls);
 
-    const sanitized = (service as unknown as { sanitizeError: (error: unknown) => string }).sanitizeError(
-      null,
-    );
+    const sanitized = (
+      service as unknown as { sanitizeError: (error: unknown) => string }
+    ).sanitizeError(null);
 
     expect(sanitized).toBe(ErrorCode.EMAIL_SEND_FAILED);
   });
 
   it('failed notification errorMessage never contains API keys or secrets', async () => {
     const cls = new ClsService();
-    const createdRecord = createMockEmailNotification({ status: NotificationStatus.PENDING });
+    const createdRecord = createMockEmailNotification({
+      status: NotificationStatus.PENDING,
+    });
     const failedRecord = createMockEmailNotification({
       status: NotificationStatus.FAILED,
       errorMessage: 'Email provider is not configured; preview stored.',
@@ -1386,7 +1824,14 @@ describe('EmailNotificationsService — provider error sanitization (US3)', () =
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -1420,7 +1865,14 @@ describe('EmailNotificationsService — provider error sanitization (US3)', () =
     const service = new EmailNotificationsService(prisma, cls);
 
     const result = await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.sendNotification({
           agreementId,
@@ -1441,10 +1893,16 @@ describe('EmailNotificationsService — provider error sanitization (US3)', () =
 describe('EmailNotificationsService — enqueue methods (US1)', () => {
   it('enqueueAiReviewOpenedForFreelancer sends notification without throwing', async () => {
     const cls = new ClsService();
-    const sentRecord = createMockEmailNotification({ status: NotificationStatus.SENT });
+    const sentRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+    });
     const prisma = createPrismaMock({
       emailNotification: {
-        create: jest.fn().mockResolvedValue(createMockEmailNotification({ status: NotificationStatus.PENDING })),
+        create: jest
+          .fn()
+          .mockResolvedValue(
+            createMockEmailNotification({ status: NotificationStatus.PENDING }),
+          ),
         update: jest.fn().mockResolvedValue(sentRecord),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
@@ -1453,7 +1911,14 @@ describe('EmailNotificationsService — enqueue methods (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.enqueueAiReviewOpenedForFreelancer({
           agreementId,
@@ -1467,10 +1932,16 @@ describe('EmailNotificationsService — enqueue methods (US1)', () => {
 
   it('enqueueAiReviewRecommendationAcceptedForClient sends notification without throwing', async () => {
     const cls = new ClsService();
-    const sentRecord = createMockEmailNotification({ status: NotificationStatus.SENT });
+    const sentRecord = createMockEmailNotification({
+      status: NotificationStatus.SENT,
+    });
     const prisma = createPrismaMock({
       emailNotification: {
-        create: jest.fn().mockResolvedValue(createMockEmailNotification({ status: NotificationStatus.PENDING })),
+        create: jest
+          .fn()
+          .mockResolvedValue(
+            createMockEmailNotification({ status: NotificationStatus.PENDING }),
+          ),
         update: jest.fn().mockResolvedValue(sentRecord),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
@@ -1479,7 +1950,14 @@ describe('EmailNotificationsService — enqueue methods (US1)', () => {
     const service = new EmailNotificationsService(prisma, cls);
 
     await cls.run(
-      { actorType: ActorType.FREELANCER, correlationId: 'corr-1', locale: Locale.AR, requestId: 'req-1', startedAt: new Date(), userId: freelancerId },
+      {
+        actorType: ActorType.FREELANCER,
+        correlationId: 'corr-1',
+        locale: Locale.AR,
+        requestId: 'req-1',
+        startedAt: new Date(),
+        userId: freelancerId,
+      },
       () =>
         service.enqueueAiReviewRecommendationAcceptedForClient({
           agreementId,

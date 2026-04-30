@@ -19,7 +19,11 @@ function createPrismaMock() {
         totalAmount: { toString: () => '100' },
         currency: 'SAR',
         status: 'DRAFT',
-        client: { name: 'Client', email: 'client@example.com', companyName: null },
+        client: {
+          name: 'Client',
+          email: 'client@example.com',
+          companyName: null,
+        },
         freelancer: { name: 'FL', email: 'f@f.com' },
       }),
     },

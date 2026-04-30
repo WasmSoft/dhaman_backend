@@ -37,7 +37,10 @@ describe('ClientPortalController — deliveries (US4)', () => {
 
       const result = await controller.getDelivery(VALID_TOKEN, DELIVERY_UUID);
 
-      expect(serviceMock.getDelivery).toHaveBeenCalledWith(VALID_TOKEN, DELIVERY_UUID);
+      expect(serviceMock.getDelivery).toHaveBeenCalledWith(
+        VALID_TOKEN,
+        DELIVERY_UUID,
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -76,9 +79,15 @@ describe('ClientPortalController — deliveries (US4)', () => {
 
       serviceMock.acceptDelivery.mockResolvedValue(mockResponse);
 
-      const result = await controller.acceptDelivery(VALID_TOKEN, DELIVERY_UUID);
+      const result = await controller.acceptDelivery(
+        VALID_TOKEN,
+        DELIVERY_UUID,
+      );
 
-      expect(serviceMock.acceptDelivery).toHaveBeenCalledWith(VALID_TOKEN, DELIVERY_UUID);
+      expect(serviceMock.acceptDelivery).toHaveBeenCalledWith(
+        VALID_TOKEN,
+        DELIVERY_UUID,
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -133,7 +142,11 @@ describe('ClientPortalController — deliveries (US4)', () => {
 
       serviceMock.requestDeliveryChanges.mockResolvedValue(mockResponse);
 
-      const result = await controller.requestDeliveryChanges(VALID_TOKEN, DELIVERY_UUID, dto);
+      const result = await controller.requestDeliveryChanges(
+        VALID_TOKEN,
+        DELIVERY_UUID,
+        dto,
+      );
 
       expect(serviceMock.requestDeliveryChanges).toHaveBeenCalledWith(
         VALID_TOKEN,

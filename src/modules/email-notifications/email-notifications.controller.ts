@@ -70,12 +70,42 @@ export class EmailsController {
   })
   @ApiQuery({ name: 'type', required: false, enum: NotificationType })
   @ApiQuery({ name: 'status', required: false, enum: NotificationStatus })
-  @ApiQuery({ name: 'agreementId', required: false, type: String, description: 'Agreement UUID filter.' })
-  @ApiQuery({ name: 'recipientEmail', required: false, type: String, description: 'Recipient email filter.' })
-  @ApiQuery({ name: 'from', required: false, type: String, description: 'ISO date lower bound.' })
-  @ApiQuery({ name: 'to', required: false, type: String, description: 'ISO date upper bound.' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default 1).' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Page size (default 20, max 100).' })
+  @ApiQuery({
+    name: 'agreementId',
+    required: false,
+    type: String,
+    description: 'Agreement UUID filter.',
+  })
+  @ApiQuery({
+    name: 'recipientEmail',
+    required: false,
+    type: String,
+    description: 'Recipient email filter.',
+  })
+  @ApiQuery({
+    name: 'from',
+    required: false,
+    type: String,
+    description: 'ISO date lower bound.',
+  })
+  @ApiQuery({
+    name: 'to',
+    required: false,
+    type: String,
+    description: 'ISO date upper bound.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default 1).',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Page size (default 20, max 100).',
+  })
   @ApiResponse({
     status: 200,
     description: 'Email logs returned successfully.',

@@ -49,7 +49,11 @@ export class PaymentsController {
       'Returns payment rows and summary totals for an agreement owned by the authenticated freelancer. Valid transitions: WAITING→RESERVED, RESERVED→CLIENT_REVIEW, CLIENT_REVIEW→READY_TO_RELEASE/AI_REVIEW/ON_HOLD, AI_REVIEW→READY_TO_RELEASE/ON_HOLD, READY_TO_RELEASE→RELEASED, ON_HOLD→CLIENT_REVIEW',
   })
   @ApiParam({ name: 'agreementId', description: 'Agreement UUID' })
-  @ApiResponse({ status: 200, description: 'Agreement payments listed', type: PaymentListResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Agreement payments listed',
+    type: PaymentListResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'AGREEMENT_NOT_FOUND' })
   listByAgreementId(
     @Param('agreementId', ParseUuidPipe) agreementId: string,
@@ -65,8 +69,15 @@ export class PaymentsController {
       'Documents the future WAITING to RESERVED transition for milestone funding.',
   })
   @ApiBody({ type: FundMilestoneDto })
-  @ApiResponse({ status: 201, description: 'Payment funded in demo mode', type: PaymentResponseDto })
-  @ApiResponse({ status: 400, description: 'PAYMENT_INVALID_AMOUNT or PAYMENT_DEMO_MODE_ONLY' })
+  @ApiResponse({
+    status: 201,
+    description: 'Payment funded in demo mode',
+    type: PaymentResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'PAYMENT_INVALID_AMOUNT or PAYMENT_DEMO_MODE_ONLY',
+  })
   @ApiResponse({ status: 404, description: 'PAYMENT_NOT_FOUND' })
   @ApiResponse({ status: 409, description: 'PAYMENT_ALREADY_RESERVED' })
   fundMilestone(
@@ -84,9 +95,16 @@ export class PaymentsController {
       'Documents the future READY_TO_RELEASE to RELEASED transition.',
   })
   @ApiBody({ type: ReleasePaymentDto })
-  @ApiResponse({ status: 200, description: 'Payment released in demo mode', type: PaymentResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment released in demo mode',
+    type: PaymentResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'PAYMENT_NOT_FOUND' })
-  @ApiResponse({ status: 409, description: 'PAYMENT_NOT_READY_TO_RELEASE or PAYMENT_ALREADY_RELEASED' })
+  @ApiResponse({
+    status: 409,
+    description: 'PAYMENT_NOT_READY_TO_RELEASE or PAYMENT_ALREADY_RELEASED',
+  })
   release(
     @Body() dto: ReleasePaymentDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -97,7 +115,11 @@ export class PaymentsController {
   @Get('payments/:id')
   @ApiOperation({ summary: 'Get payment details' })
   @ApiParam({ name: 'id', description: 'Payment UUID' })
-  @ApiResponse({ status: 200, description: 'Payment details returned', type: PaymentResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment details returned',
+    type: PaymentResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'PAYMENT_NOT_FOUND' })
   getById(
     @Param('id', ParseUuidPipe) id: string,
@@ -109,7 +131,11 @@ export class PaymentsController {
   @Get('payments/:id/receipt')
   @ApiOperation({ summary: 'Get payment receipt' })
   @ApiParam({ name: 'id', description: 'Payment UUID' })
-  @ApiResponse({ status: 200, description: 'Payment receipt returned', type: PaymentReceiptResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment receipt returned',
+    type: PaymentReceiptResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'PAYMENT_NOT_FOUND' })
   getReceipt(
     @Param('id', ParseUuidPipe) id: string,
@@ -129,9 +155,16 @@ export class PaymentsController {
   @ApiParam({ name: 'token', description: 'Portal access token' })
   @ApiParam({ name: 'paymentId', description: 'Payment UUID' })
   @ApiBody({ type: PortalFundPaymentDto })
-  @ApiResponse({ status: 201, description: 'Payment funded via portal', type: PaymentResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Payment funded via portal',
+    type: PaymentResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'PAYMENT_INVALID_AMOUNT' })
-  @ApiResponse({ status: 401, description: 'PORTAL_TOKEN_INVALID or PORTAL_TOKEN_EXPIRED' })
+  @ApiResponse({
+    status: 401,
+    description: 'PORTAL_TOKEN_INVALID or PORTAL_TOKEN_EXPIRED',
+  })
   @ApiResponse({ status: 403, description: 'PORTAL_ACTION_NOT_ALLOWED' })
   @ApiResponse({ status: 404, description: 'PAYMENT_NOT_FOUND' })
   @ApiResponse({ status: 409, description: 'PAYMENT_ALREADY_RESERVED' })
@@ -155,16 +188,30 @@ export class PaymentsController {
   @ApiParam({ name: 'token', description: 'Portal access token' })
   @ApiParam({ name: 'paymentId', description: 'Payment UUID' })
   @ApiBody({ type: PortalReleaseConfirmationDto })
-  @ApiResponse({ status: 200, description: 'Payment released via portal', type: PaymentResponseDto })
-  @ApiResponse({ status: 401, description: 'PORTAL_TOKEN_INVALID or PORTAL_TOKEN_EXPIRED' })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment released via portal',
+    type: PaymentResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'PORTAL_TOKEN_INVALID or PORTAL_TOKEN_EXPIRED',
+  })
   @ApiResponse({ status: 403, description: 'PORTAL_ACTION_NOT_ALLOWED' })
   @ApiResponse({ status: 404, description: 'PAYMENT_NOT_FOUND' })
-  @ApiResponse({ status: 409, description: 'PAYMENT_NOT_READY_TO_RELEASE or PAYMENT_ALREADY_RELEASED' })
+  @ApiResponse({
+    status: 409,
+    description: 'PAYMENT_NOT_READY_TO_RELEASE or PAYMENT_ALREADY_RELEASED',
+  })
   portalReleaseConfirmation(
     @Param('token') token: string,
     @Param('paymentId', ParseUuidPipe) paymentId: string,
     @Body() dto: PortalReleaseConfirmationDto,
   ) {
-    return this.paymentsService.portalReleaseConfirmation(token, paymentId, dto);
+    return this.paymentsService.portalReleaseConfirmation(
+      token,
+      paymentId,
+      dto,
+    );
   }
 }

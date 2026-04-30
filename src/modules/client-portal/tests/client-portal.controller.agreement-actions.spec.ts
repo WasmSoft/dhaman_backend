@@ -63,7 +63,9 @@ describe('ClientPortalController — agreement actions (US2)', () => {
     });
 
     it('should propagate AGREEMENT_NOT_CHANGEABLE from service', async () => {
-      const dto = { reason: 'The milestones need adjustment for the timeline.' };
+      const dto = {
+        reason: 'The milestones need adjustment for the timeline.',
+      };
       serviceMock.requestChanges.mockRejectedValue(
         new AppException({ code: ErrorCode.AGREEMENT_NOT_CHANGEABLE }),
       );
@@ -89,7 +91,9 @@ describe('ClientPortalController — agreement actions (US2)', () => {
     });
 
     it('should not call other service methods when requestChanges fails', async () => {
-      const dto = { reason: 'The milestones need adjustment for the timeline.' };
+      const dto = {
+        reason: 'The milestones need adjustment for the timeline.',
+      };
       serviceMock.requestChanges.mockRejectedValue(
         new AppException({ code: ErrorCode.AGREEMENT_NOT_CHANGEABLE }),
       );
@@ -120,7 +124,10 @@ describe('ClientPortalController — agreement actions (US2)', () => {
 
       const result = await controller.rejectAgreement(VALID_TOKEN, dto);
 
-      expect(serviceMock.rejectAgreement).toHaveBeenCalledWith(VALID_TOKEN, dto);
+      expect(serviceMock.rejectAgreement).toHaveBeenCalledWith(
+        VALID_TOKEN,
+        dto,
+      );
       expect(result).toEqual(mockResponse);
     });
 

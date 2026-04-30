@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { PortalMilestoneSummaryDto, PortalPaymentScheduleItemDto } from './portal-invite-response.dto';
+import {
+  PortalMilestoneSummaryDto,
+  PortalPaymentScheduleItemDto,
+} from './portal-invite-response.dto';
 
 export class PortalDeliverySummaryDto {
   @ApiProperty({ description: 'Delivery identifier' })
@@ -15,7 +18,9 @@ export class PortalDeliverySummaryDto {
   @ApiProperty({ description: 'Delivery status', example: 'SUBMITTED' })
   status!: string;
 
-  @ApiPropertyOptional({ description: 'Submitted timestamp in ISO 8601 format' })
+  @ApiPropertyOptional({
+    description: 'Submitted timestamp in ISO 8601 format',
+  })
   submittedAt?: string;
 
   @ApiPropertyOptional({ description: 'Delivery notes' })
@@ -35,7 +40,10 @@ export class PortalChangeRequestSummaryDto {
   @ApiProperty({ description: 'Change request description' })
   description!: string;
 
-  @ApiPropertyOptional({ description: 'Requested amount as Decimal-safe string', example: '500.00' })
+  @ApiPropertyOptional({
+    description: 'Requested amount as Decimal-safe string',
+    example: '500.00',
+  })
   requestedAmount?: string;
 
   @ApiProperty({ description: 'Creation timestamp in ISO 8601 format' })
@@ -77,42 +85,69 @@ export class PortalWorkspaceResponseDto {
   @ApiProperty({ description: 'Agreement identifier' })
   agreementId!: string;
 
-  @ApiProperty({ description: 'Agreement title', example: 'Brand Identity Design' })
+  @ApiProperty({
+    description: 'Agreement title',
+    example: 'Brand Identity Design',
+  })
   title!: string;
 
   @ApiProperty({ description: 'Agreement status', example: 'ACTIVE' })
   status!: string;
 
-  @ApiProperty({ description: 'Total amount as Decimal-safe string', example: '5000.00' })
+  @ApiProperty({
+    description: 'Total amount as Decimal-safe string',
+    example: '5000.00',
+  })
   totalAmount!: string;
 
   @ApiProperty({ description: 'Currency code', example: 'SAR' })
   currency!: string;
 
-  @ApiProperty({ description: 'Freelancer display name', example: 'Ahmed Hassan' })
+  @ApiProperty({
+    description: 'Freelancer display name',
+    example: 'Ahmed Hassan',
+  })
   freelancerName!: string;
 
-  @ApiProperty({ description: 'Milestones list', type: [PortalMilestoneSummaryDto] })
+  @ApiProperty({
+    description: 'Milestones list',
+    type: [PortalMilestoneSummaryDto],
+  })
   @Type(() => PortalMilestoneSummaryDto)
   milestones!: PortalMilestoneSummaryDto[];
 
-  @ApiProperty({ description: 'Payments list', type: [PortalPaymentScheduleItemDto] })
+  @ApiProperty({
+    description: 'Payments list',
+    type: [PortalPaymentScheduleItemDto],
+  })
   @Type(() => PortalPaymentScheduleItemDto)
   payments!: PortalPaymentScheduleItemDto[];
 
-  @ApiProperty({ description: 'Deliveries list', type: [PortalDeliverySummaryDto] })
+  @ApiProperty({
+    description: 'Deliveries list',
+    type: [PortalDeliverySummaryDto],
+  })
   @Type(() => PortalDeliverySummaryDto)
   deliveries!: PortalDeliverySummaryDto[];
 
-  @ApiProperty({ description: 'Change requests list', type: [PortalChangeRequestSummaryDto] })
+  @ApiProperty({
+    description: 'Change requests list',
+    type: [PortalChangeRequestSummaryDto],
+  })
   @Type(() => PortalChangeRequestSummaryDto)
   changeRequests!: PortalChangeRequestSummaryDto[];
 
-  @ApiProperty({ description: 'AI reviews list', type: [PortalAiReviewSummaryDto] })
+  @ApiProperty({
+    description: 'AI reviews list',
+    type: [PortalAiReviewSummaryDto],
+  })
   @Type(() => PortalAiReviewSummaryDto)
   aiReviews!: PortalAiReviewSummaryDto[];
 
-  @ApiProperty({ description: 'Timeline events list', type: [PortalTimelineEventDto] })
+  @ApiProperty({
+    description: 'Timeline events list',
+    type: [PortalTimelineEventDto],
+  })
   @Type(() => PortalTimelineEventDto)
   timeline!: PortalTimelineEventDto[];
 }

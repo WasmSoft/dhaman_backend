@@ -25,7 +25,8 @@ export class EmailPreviewResponseDto {
 
   @ApiProperty({
     description: 'Rendered HTML body for preview.',
-    example: '<html dir="rtl"><body><h1>دعوة لمراجعة الاتفاق</h1></body></html>',
+    example:
+      '<html dir="rtl"><body><h1>دعوة لمراجعة الاتفاق</h1></body></html>',
   })
   previewHtml!: string;
 

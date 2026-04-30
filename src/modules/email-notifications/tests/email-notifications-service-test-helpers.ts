@@ -1,4 +1,10 @@
-import { AgreementStatus, NotificationType, NotificationStatus, TimelineActorRole, TimelineEventType } from '@prisma/client';
+import {
+  AgreementStatus,
+  NotificationType,
+  NotificationStatus,
+  TimelineActorRole,
+  TimelineEventType,
+} from '@prisma/client';
 import { ClsService } from '../../../common/cls/cls.service';
 import { ActorType } from '../../../common/enums/actor-type.enum';
 import { Locale } from '../../../common/enums/locale.enum';
@@ -19,14 +25,16 @@ const DEFAULT_CLS_CONTEXT = {
   userId: freelancerId,
 };
 
-export function createClsService(overrides?: Record<string, unknown>): ClsService {
+export function createClsService(
+  overrides?: Record<string, unknown>,
+): ClsService {
   const clsService = new ClsService();
 
   clsService.run(
     {
       ...DEFAULT_CLS_CONTEXT,
       ...overrides,
-    } as Parameters<ClsService['run']>[0],
+    },
     () => {
       // context is active
     },
@@ -35,20 +43,22 @@ export function createClsService(overrides?: Record<string, unknown>): ClsServic
   return clsService;
 }
 
-export function createMockAgreement(overrides?: Partial<{
-  id: string;
-  title: string;
-  description: string;
-  serviceType: string;
-  totalAmount: string;
-  currency: string;
-  status: AgreementStatus;
-  clientName: string;
-  clientEmail: string;
-  clientCompanyName: string | null;
-  freelancerName: string;
-  freelancerEmail: string;
-}>): {
+export function createMockAgreement(
+  overrides?: Partial<{
+    id: string;
+    title: string;
+    description: string;
+    serviceType: string;
+    totalAmount: string;
+    currency: string;
+    status: AgreementStatus;
+    clientName: string;
+    clientEmail: string;
+    clientCompanyName: string | null;
+    freelancerName: string;
+    freelancerEmail: string;
+  }>,
+): {
   id: string;
   title: string;
   description: string;
@@ -95,19 +105,21 @@ export function createMockAgreement(overrides?: Partial<{
   };
 }
 
-export function createMockEmailNotification(overrides?: Partial<{
-  id: string;
-  agreementId: string | null;
-  recipientEmail: string;
-  type: NotificationType;
-  subject: string;
-  status: NotificationStatus;
-  providerMessageId: string | null;
-  errorMessage: string | null;
-  previewHtml: string | null;
-  sentAt: Date | null;
-  createdAt: Date;
-}>): {
+export function createMockEmailNotification(
+  overrides?: Partial<{
+    id: string;
+    agreementId: string | null;
+    recipientEmail: string;
+    type: NotificationType;
+    subject: string;
+    status: NotificationStatus;
+    providerMessageId: string | null;
+    errorMessage: string | null;
+    previewHtml: string | null;
+    sentAt: Date | null;
+    createdAt: Date;
+  }>,
+): {
   id: string;
   agreementId: string | null;
   recipientEmail: string;
@@ -129,7 +141,8 @@ export function createMockEmailNotification(overrides?: Partial<{
     status: NotificationStatus.PENDING,
     providerMessageId: null,
     errorMessage: null,
-    previewHtml: '<html lang="ar" dir="rtl"><body><h1>دعوة اتفاق جديدة</h1></body></html>',
+    previewHtml:
+      '<html lang="ar" dir="rtl"><body><h1>دعوة اتفاق جديدة</h1></body></html>',
     sentAt: null,
     createdAt: new Date('2026-04-30T00:00:00.000Z'),
     ...overrides,

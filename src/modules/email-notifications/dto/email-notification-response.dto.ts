@@ -62,7 +62,8 @@ export class EmailNotificationResponseDto {
   @ApiProperty({
     description:
       'Rendered HTML stored for preview/fallback diagnostics when available, otherwise null.',
-    example: '<html dir="rtl"><body><h1>دعوة لمراجعة الاتفاق</h1></body></html>',
+    example:
+      '<html dir="rtl"><body><h1>دعوة لمراجعة الاتفاق</h1></body></html>',
     nullable: true,
   })
   previewHtml!: string | null;

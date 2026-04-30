@@ -71,16 +71,21 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
 
   describe('approve survives email failure', () => {
     const sentAgreement = makeMockAgreement({
-      status: 'SENT' as AgreementStatus,
+      status: 'SENT',
       freelancer: { email: 'ahmed@example.com', name: 'Ahmed' },
     });
 
     it('should complete approval when email notification throws', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
-      emailMock.sendNotification.mockRejectedValue(new Error('Email service down'));
+      emailMock.sendNotification.mockRejectedValue(
+        new Error('Email service down'),
+      );
 
       const result = await service.approve('any-token');
 
@@ -92,9 +97,14 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
     it('should record timeline event despite email failure', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
-      emailMock.sendNotification.mockRejectedValue(new Error('Email service down'));
+      emailMock.sendNotification.mockRejectedValue(
+        new Error('Email service down'),
+      );
 
       await service.approve('any-token');
 
@@ -109,7 +119,7 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
 
   describe('requestChanges survives email failure', () => {
     const sentAgreement = makeMockAgreement({
-      status: 'SENT' as AgreementStatus,
+      status: 'SENT',
       freelancer: { email: 'ahmed@example.com', name: 'Ahmed' },
     });
     const dto = { reason: 'The milestones need adjustment for the timeline.' };
@@ -117,9 +127,11 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
     it('should complete change request when email fails', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
-      emailMock.sendNotification.mockRejectedValue(new Error('Email service down'));
+      emailMock.sendNotification.mockRejectedValue(
+        new Error('Email service down'),
+      );
 
       const result = await service.requestChanges('any-token', dto);
 
@@ -129,13 +141,19 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
     it('should record timeline event despite email failure on change request', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
-      emailMock.sendNotification.mockRejectedValue(new Error('Email service down'));
+      emailMock.sendNotification.mockRejectedValue(
+        new Error('Email service down'),
+      );
 
       await service.requestChanges('any-token', dto);
 
-      assertTimelineEventExists(timelineMock, 'AGREEMENT_CHANGES_REQUESTED', 'CLIENT');
+      assertTimelineEventExists(
+        timelineMock,
+        'AGREEMENT_CHANGES_REQUESTED',
+        'CLIENT',
+      );
     });
   });
 
@@ -145,7 +163,7 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
 
   describe('rejectAgreement survives email failure', () => {
     const sentAgreement = makeMockAgreement({
-      status: 'SENT' as AgreementStatus,
+      status: 'SENT',
       freelancer: { email: 'ahmed@example.com', name: 'Ahmed' },
     });
     const dto = { reason: 'Budget does not match our current requirements.' };
@@ -153,9 +171,11 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
     it('should complete rejection when email fails', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
-      emailMock.sendNotification.mockRejectedValue(new Error('Email service down'));
+      emailMock.sendNotification.mockRejectedValue(
+        new Error('Email service down'),
+      );
 
       const result = await service.rejectAgreement('any-token', dto);
 
@@ -165,9 +185,11 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
     it('should record timeline event despite email failure on rejection', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CANCELLED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CANCELLED' }),
       );
-      emailMock.sendNotification.mockRejectedValue(new Error('Email service down'));
+      emailMock.sendNotification.mockRejectedValue(
+        new Error('Email service down'),
+      );
 
       await service.rejectAgreement('any-token', dto);
 
@@ -182,14 +204,19 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
   describe('survives timeline failure', () => {
     it('should complete approval even when timeline event throws', async () => {
       const sentAgreement = makeMockAgreement({
-        status: 'SENT' as AgreementStatus,
+        status: 'SENT',
         freelancer: { email: 'ahmed@example.com', name: 'Ahmed' },
       });
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
-      timelineMock.createEvent.mockRejectedValue(new Error('Timeline DB error'));
+      timelineMock.createEvent.mockRejectedValue(
+        new Error('Timeline DB error'),
+      );
 
       const result = await service.approve('any-token');
 
@@ -199,13 +226,15 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
 
     it('should complete change request when timeline event throws', async () => {
       const sentAgreement = makeMockAgreement({
-        status: 'SENT' as AgreementStatus,
+        status: 'SENT',
       });
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'CHANGE_REQUESTED' as AgreementStatus }),
+        makeMockAgreement({ status: 'CHANGE_REQUESTED' }),
       );
-      timelineMock.createEvent.mockRejectedValue(new Error('Timeline DB error'));
+      timelineMock.createEvent.mockRejectedValue(
+        new Error('Timeline DB error'),
+      );
 
       const result = await service.requestChanges('any-token', {
         reason: 'The milestones need adjustment for the timeline.',
@@ -222,12 +251,15 @@ describe('ClientPortalService — notification failure resilience (US3)', () => 
   describe('missing freelancer email', () => {
     it('should complete approval even when freelancer has no email', async () => {
       const sentAgreement = makeMockAgreement({
-        status: 'SENT' as AgreementStatus,
+        status: 'SENT',
         freelancer: { email: null, name: 'Ahmed' },
       });
       prismaMock.agreement.findUnique.mockResolvedValue(sentAgreement);
       prismaMock.agreement.update.mockResolvedValue(
-        makeMockAgreement({ status: 'APPROVED' as AgreementStatus, approvedAt: new Date() }),
+        makeMockAgreement({
+          status: 'APPROVED',
+          approvedAt: new Date(),
+        }),
       );
 
       const result = await service.approve('any-token');

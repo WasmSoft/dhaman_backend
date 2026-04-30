@@ -77,7 +77,10 @@ describe('ClientPortalService — delivery flow (US3)', () => {
 
       const result = await service.acceptDelivery('any-token', 'd1');
 
-      expect(deliveriesMock.acceptDeliveryFromPortal).toHaveBeenCalledWith('any-token', 'd1');
+      expect(deliveriesMock.acceptDeliveryFromPortal).toHaveBeenCalledWith(
+        'any-token',
+        'd1',
+      );
       expect(result.status).toBe('ACCEPTED');
     });
 
@@ -127,7 +130,11 @@ describe('ClientPortalService — delivery flow (US3)', () => {
         message: 'Changes requested.',
       });
 
-      const result = await service.requestDeliveryChanges('any-token', 'd1', dto);
+      const result = await service.requestDeliveryChanges(
+        'any-token',
+        'd1',
+        dto,
+      );
 
       expect(deliveriesMock.requestChangesFromPortal).toHaveBeenCalledWith(
         'any-token',

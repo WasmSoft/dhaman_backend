@@ -16,7 +16,10 @@ import { PaymentsService } from '../payments/payments.service';
 import { DeliveriesService } from '../deliveries/deliveries.service';
 import { TimelineEventsService } from '../timeline-events/timeline-events.service';
 import { EmailNotificationsService } from '../email-notifications/email-notifications.service';
-import { PortalRequestChangesDto, PortalRejectAgreementDto } from './dto/portal-request.dto';
+import {
+  PortalRequestChangesDto,
+  PortalRejectAgreementDto,
+} from './dto/portal-request.dto';
 import { PortalFundPaymentDto } from '../payments/dto/payments.dto';
 import { PortalReleaseConfirmationDto } from '../payments/dto/payments.dto';
 
@@ -25,13 +28,9 @@ const APPROVABLE_STATUSES = new Set<AgreementStatus>([
   AgreementStatus.CHANGE_REQUESTED,
 ]);
 
-const CHANGEABLE_STATUSES = new Set<AgreementStatus>([
-  AgreementStatus.SENT,
-]);
+const CHANGEABLE_STATUSES = new Set<AgreementStatus>([AgreementStatus.SENT]);
 
-const REJECTABLE_STATUSES = new Set<AgreementStatus>([
-  AgreementStatus.SENT,
-]);
+const REJECTABLE_STATUSES = new Set<AgreementStatus>([AgreementStatus.SENT]);
 
 const RAW_TOKEN_BYTES = 32;
 const TOKEN_PREVIEW_LENGTH = 8;
@@ -175,13 +174,14 @@ export class ClientPortalService {
       serviceType: agreement.serviceType,
       totalAmount: String(agreement.totalAmount),
       currency: agreement.currency,
-      expectedDeliveryDate: agreement.expectedDeliveryDate?.toISOString() ?? undefined,
+      expectedDeliveryDate:
+        agreement.expectedDeliveryDate?.toISOString() ?? undefined,
       status: agreement.status,
       sentAt: agreement.sentAt?.toISOString() ?? undefined,
       freelancer: { name: agreement.freelancer.name },
       client: {
-        name: agreement.client.name,
-        email: agreement.client.email ?? undefined,
+        name: agreement.client?.name ?? '',
+        email: agreement.client?.email ?? undefined,
       },
       policy: agreement.policy
         ? {
@@ -261,7 +261,7 @@ export class ClientPortalService {
             description: `Client approved agreement "${agreement.title}" via portal.`,
             metadata: { previousStatus: agreement.status },
           },
-          tx as any,
+          tx,
         );
       } catch (e) {
         // Timeline failure is logged and non-blocking per spec
@@ -337,7 +337,7 @@ export class ClientPortalService {
               requestedChanges: dto.requestedChanges ?? [],
             },
           },
-          tx as any,
+          tx,
         );
       } catch {
         // Timeline failure is non-blocking per spec
@@ -414,7 +414,7 @@ export class ClientPortalService {
             description: `Client rejected agreement: ${dto.reason}`,
             metadata: { reason: dto.reason },
           },
-          tx as any,
+          tx,
         );
       } catch {
         // Timeline failure is non-blocking per spec
@@ -679,7 +679,9 @@ export class ClientPortalService {
       },
     });
 
-    const milestoneIds = [...new Set(payments.map((p) => p.milestoneId).filter(Boolean))];
+    const milestoneIds = [
+      ...new Set(payments.map((p) => p.milestoneId).filter(Boolean)),
+    ];
     const milestones = await this.prisma.milestone.findMany({
       where: { id: { in: milestoneIds as string[] } },
       select: { id: true, title: true },
@@ -705,16 +707,28 @@ export class ClientPortalService {
 
   // AR: يفوض تمويل الدفعة إلى خدمة المدفوعات بعد التحقق من ملكية الاتفاق.
   // EN: Delegates payment funding to PaymentsService after verifying agreement ownership.
-  async fundPayment(token: string, paymentId: string, dto: PortalFundPaymentDto) {
+  async fundPayment(
+    token: string,
+    paymentId: string,
+    dto: PortalFundPaymentDto,
+  ) {
     this.getPortalContext();
     return this.paymentsService.portalFund(token, paymentId, dto);
   }
 
   // AR: يفوض تحرير الدفعة إلى خدمة المدفوعات بعد التحقق من ملكية الاتفاق.
   // EN: Delegates payment release to PaymentsService after verifying agreement ownership.
-  async releasePayment(token: string, paymentId: string, dto: PortalReleaseConfirmationDto) {
+  async releasePayment(
+    token: string,
+    paymentId: string,
+    dto: PortalReleaseConfirmationDto,
+  ) {
     this.getPortalContext();
-    return this.paymentsService.portalReleaseConfirmation(token, paymentId, dto);
+    return this.paymentsService.portalReleaseConfirmation(
+      token,
+      paymentId,
+      dto,
+    );
   }
 
   // AR: يعيد سجل المدفوعات للاتفاق المرتبط بالرمز.
@@ -738,7 +752,9 @@ export class ClientPortalService {
       },
     });
 
-    const milestoneIds = [...new Set(payments.map((p) => p.milestoneId).filter(Boolean))];
+    const milestoneIds = [
+      ...new Set(payments.map((p) => p.milestoneId).filter(Boolean)),
+    ];
     const milestones = await this.prisma.milestone.findMany({
       where: { id: { in: milestoneIds as string[] } },
       select: { id: true, title: true },

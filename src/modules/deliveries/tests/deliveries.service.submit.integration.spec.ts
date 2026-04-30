@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DeliveryStatus, PaymentStatus, TimelineActorRole } from '@prisma/client';
+import {
+  DeliveryStatus,
+  PaymentStatus,
+  TimelineActorRole,
+} from '@prisma/client';
 import { DeliveriesService } from '../deliveries.service';
 import {
   buildPrismaMock,
@@ -31,11 +35,17 @@ describe('DeliveriesService — Submit Integration', () => {
     emailMock = buildEmailServiceMock();
     clsMock = buildClsServiceMock();
 
-    prismaMock.delivery.create = jest.fn().mockResolvedValue(makeMockDelivery());
+    prismaMock.delivery.create = jest
+      .fn()
+      .mockResolvedValue(makeMockDelivery());
     prismaMock.milestone.findUnique = jest.fn().mockResolvedValue({
       id: 'milestone-1',
       agreementId: 'agreement-1',
-      agreement: { id: 'agreement-1', freelancerId: 'freelancer-1', status: 'ACTIVE' },
+      agreement: {
+        id: 'agreement-1',
+        freelancerId: 'freelancer-1',
+        status: 'ACTIVE',
+      },
     });
     prismaMock.$transaction = jest.fn((cb: any) => cb(prismaMock));
     prismaMock.payment = {
@@ -45,21 +55,43 @@ describe('DeliveriesService — Submit Integration', () => {
         status: PaymentStatus.RESERVED,
       }),
       findUnique: jest.fn(),
-    } as any;
+    };
 
     prismaMock.delivery.findUnique.mockResolvedValue(
-      makeMockDelivery({ deliveryUrl: 'https://example.com/work', status: DeliveryStatus.DRAFT }),
+      makeMockDelivery({
+        deliveryUrl: 'https://example.com/work',
+        status: DeliveryStatus.DRAFT,
+      }),
     );
     prismaMock.delivery.update.mockResolvedValue(submittedDelivery);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeliveriesService,
-        { provide: require('../../../infrastructure/prisma/prisma.service').PrismaService, useValue: prismaMock },
-        { provide: require('../../payments/payments.service').PaymentsService, useValue: paymentsMock },
-        { provide: require('../../timeline-events/timeline-events.service').TimelineEventsService, useValue: timelineMock },
-        { provide: require('../../email-notifications/email-notifications.service').EmailNotificationsService, useValue: emailMock },
-        { provide: require('../../../common/cls/cls.service').ClsService, useValue: clsMock },
+        {
+          provide: require('../../../infrastructure/prisma/prisma.service')
+            .PrismaService,
+          useValue: prismaMock,
+        },
+        {
+          provide: require('../../payments/payments.service').PaymentsService,
+          useValue: paymentsMock,
+        },
+        {
+          provide: require('../../timeline-events/timeline-events.service')
+            .TimelineEventsService,
+          useValue: timelineMock,
+        },
+        {
+          provide:
+            require('../../email-notifications/email-notifications.service')
+              .EmailNotificationsService,
+          useValue: emailMock,
+        },
+        {
+          provide: require('../../../common/cls/cls.service').ClsService,
+          useValue: clsMock,
+        },
       ],
     }).compile();
 
@@ -94,7 +126,9 @@ describe('DeliveriesService — Submit Integration', () => {
   });
 
   it('should not block submit when email fails', async () => {
-    emailMock.enqueueDeliverySubmittedForClient.mockRejectedValue(new Error('email error'));
+    emailMock.enqueueDeliverySubmittedForClient.mockRejectedValue(
+      new Error('email error'),
+    );
     const result = await (service as any).submitDelivery('delivery-1', {});
     expect(result.status).toBe(DeliveryStatus.SUBMITTED);
     expect(paymentsMock.transitionToClientReview).toHaveBeenCalled();

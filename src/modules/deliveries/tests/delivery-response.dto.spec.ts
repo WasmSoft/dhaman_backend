@@ -38,7 +38,10 @@ describe('DeliveryResponseDto', () => {
     // We accept small validation noise from descriptive decorators
     const errors = await validate(dto);
     const nonNestedErrors = errors.filter(
-      (e) => e.property !== 'milestone' && e.property !== 'payment' && e.property !== 'timeline',
+      (e) =>
+        e.property !== 'milestone' &&
+        e.property !== 'payment' &&
+        e.property !== 'timeline',
     );
     expect(nonNestedErrors.length).toBe(0);
   });
@@ -73,7 +76,10 @@ describe('DeliveryResponseDto', () => {
     });
     const errors = await validate(dto);
     const nonNestedErrors = errors.filter(
-      (e) => e.property !== 'milestone' && e.property !== 'payment' && e.property !== 'timeline',
+      (e) =>
+        e.property !== 'milestone' &&
+        e.property !== 'payment' &&
+        e.property !== 'timeline',
     );
     expect(nonNestedErrors.length).toBe(0);
   });
@@ -107,7 +113,10 @@ describe('DeliveryResponseDto', () => {
     });
     const errors = await validate(dto);
     const nonNestedErrors = errors.filter(
-      (e) => e.property !== 'milestone' && e.property !== 'payment' && e.property !== 'timeline',
+      (e) =>
+        e.property !== 'milestone' &&
+        e.property !== 'payment' &&
+        e.property !== 'timeline',
     );
     expect(nonNestedErrors.length).toBe(0);
   });

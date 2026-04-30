@@ -25,11 +25,30 @@ describe('DeliveriesService — Read Integration', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeliveriesService,
-        { provide: require('../../../infrastructure/prisma/prisma.service').PrismaService, useValue: prismaMock },
-        { provide: require('../../payments/payments.service').PaymentsService, useValue: paymentsMock },
-        { provide: require('../../timeline-events/timeline-events.service').TimelineEventsService, useValue: timelineMock },
-        { provide: require('../../email-notifications/email-notifications.service').EmailNotificationsService, useValue: emailMock },
-        { provide: require('../../../common/cls/cls.service').ClsService, useValue: clsMock },
+        {
+          provide: require('../../../infrastructure/prisma/prisma.service')
+            .PrismaService,
+          useValue: prismaMock,
+        },
+        {
+          provide: require('../../payments/payments.service').PaymentsService,
+          useValue: paymentsMock,
+        },
+        {
+          provide: require('../../timeline-events/timeline-events.service')
+            .TimelineEventsService,
+          useValue: timelineMock,
+        },
+        {
+          provide:
+            require('../../email-notifications/email-notifications.service')
+              .EmailNotificationsService,
+          useValue: emailMock,
+        },
+        {
+          provide: require('../../../common/cls/cls.service').ClsService,
+          useValue: clsMock,
+        },
       ],
     }).compile();
 

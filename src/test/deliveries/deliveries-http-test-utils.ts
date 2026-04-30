@@ -99,18 +99,24 @@ export async function createDeliveriesHttpTestApp(
     .compile();
 
   const app = moduleRef.createNestApplication();
-  const errorTranslator = app.get<ErrorTranslatorService>(ErrorTranslatorService);
+  const errorTranslator = app.get<ErrorTranslatorService>(
+    ErrorTranslatorService,
+  );
 
   app.use((req: Request, _res: Response, next: NextFunction) => {
     const isPortalRequest = req.path.includes('/portal/');
     clsService.run(
       {
-        actorType: isPortalRequest ? ActorType.CLIENT_PORTAL : ActorType.FREELANCER,
+        actorType: isPortalRequest
+          ? ActorType.CLIENT_PORTAL
+          : ActorType.FREELANCER,
         agreementId: isPortalRequest ? TEST_AGREEMENT_ID : undefined,
         correlationId: TEST_CORRELATION_ID,
         locale: Locale.EN,
         portalTokenId: isPortalRequest ? 'portal-token-1' : undefined,
-        portalTokenType: isPortalRequest ? PortalTokenType.DELIVERY_REVIEW : undefined,
+        portalTokenType: isPortalRequest
+          ? PortalTokenType.DELIVERY_REVIEW
+          : undefined,
         requestId: TEST_REQUEST_ID,
         startedAt: new Date(),
         userId: isPortalRequest ? undefined : TEST_USER_ID,

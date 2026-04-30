@@ -479,7 +479,8 @@ export class AiPlanService {
     }
 
     const language = dto.language ?? DEFAULT_AI_PLAN_LANGUAGE;
-    const projectDescription = dto.projectDescription ?? agreement.description;
+    const projectDescription =
+      dto.projectDescription ?? agreement.description ?? agreement.title;
     const budget = agreement.totalAmount
       ? Number(agreement.totalAmount)
       : undefined;

@@ -47,9 +47,11 @@ export function makeMockPortalToken(overrides: Record<string, unknown> = {}) {
 }
 
 export function buildPrismaMock(overrides: Record<string, unknown> = {}) {
-  const txAgreementUpdate = jest.fn().mockImplementation(({ data }) =>
-    Promise.resolve(makeMockAgreement({ status: data.status })),
-  );
+  const txAgreementUpdate = jest
+    .fn()
+    .mockImplementation(({ data }) =>
+      Promise.resolve(makeMockAgreement({ status: data.status })),
+    );
 
   return {
     agreement: {
@@ -165,7 +167,9 @@ export function makeUnknownTokenFixture() {
 }
 
 /** Expired token — expiresAt is in the past */
-export function makeExpiredTokenFixture(overrides: Record<string, unknown> = {}) {
+export function makeExpiredTokenFixture(
+  overrides: Record<string, unknown> = {},
+) {
   return makeMockPortalToken({
     tokenHash: 'expired-sha256-hash',
     expiresAt: new Date('2020-01-01'),
@@ -175,7 +179,9 @@ export function makeExpiredTokenFixture(overrides: Record<string, unknown> = {})
 }
 
 /** Revoked token — revokedAt is set */
-export function makeRevokedTokenFixture(overrides: Record<string, unknown> = {}) {
+export function makeRevokedTokenFixture(
+  overrides: Record<string, unknown> = {},
+) {
   return makeMockPortalToken({
     tokenHash: 'revoked-sha256-hash',
     expiresAt: null,
@@ -216,8 +222,7 @@ export function assertTimelineEventExists(
 ) {
   const matching = timelineMock.createEvent.mock.calls.filter(
     ([payload]: any) =>
-      payload.type === expectedType &&
-      payload.actorRole === expectedActorRole,
+      payload.type === expectedType && payload.actorRole === expectedActorRole,
   );
   expect(matching.length).toBe(1);
   const [payload] = matching[0];

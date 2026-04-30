@@ -106,11 +106,12 @@ describe('ClientPortalService — token security (US1)', () => {
   describe('createPortalToken security', () => {
     it('should store only tokenHash, never raw token', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(makeMockAgreement());
-      prismaMock.portalToken.create.mockResolvedValue(
-        makeValidTokenFixture(),
-      );
+      prismaMock.portalToken.create.mockResolvedValue(makeValidTokenFixture());
 
-      const result = await service.createPortalToken('agreement-1', 'AGREEMENT_INVITE');
+      const result = await service.createPortalToken(
+        'agreement-1',
+        'AGREEMENT_INVITE',
+      );
 
       // Raw token must be 64 hex chars (32 bytes)
       expect(result.rawToken).toHaveLength(64);
@@ -119,7 +120,9 @@ describe('ClientPortalService — token security (US1)', () => {
       // Stored hash must NOT equal raw token
       expect(createCall.data.tokenHash).not.toBe(result.rawToken);
       // Preview must be first 8 chars of raw token
-      expect(createCall.data.tokenPreview).toBe(result.rawToken.substring(0, 8));
+      expect(createCall.data.tokenPreview).toBe(
+        result.rawToken.substring(0, 8),
+      );
       // Hash must be sha256 hex (64 chars)
       expect(createCall.data.tokenHash).toHaveLength(64);
     });
@@ -136,7 +139,9 @@ describe('ClientPortalService — token security (US1)', () => {
 
     it('should throw PORTAL_TOKEN_CREATE_FAILED when persistence fails', async () => {
       prismaMock.agreement.findUnique.mockResolvedValue(makeMockAgreement());
-      prismaMock.portalToken.create.mockRejectedValue(new Error('DB connection lost'));
+      prismaMock.portalToken.create.mockRejectedValue(
+        new Error('DB connection lost'),
+      );
 
       await expect(
         service.createPortalToken('agreement-1', 'AGREEMENT_INVITE'),
@@ -152,9 +157,13 @@ describe('ClientPortalService — token security (US1)', () => {
         makeValidTokenFixture({ expiresAt: futureDate }),
       );
 
-      const result = await service.createPortalToken('agreement-1', 'AGREEMENT_INVITE', {
-        expiresAt: futureDate,
-      });
+      const result = await service.createPortalToken(
+        'agreement-1',
+        'AGREEMENT_INVITE',
+        {
+          expiresAt: futureDate,
+        },
+      );
 
       const createCall = prismaMock.portalToken.create.mock.calls[0][0];
       expect(createCall.data.expiresAt).toEqual(futureDate);
@@ -185,7 +194,10 @@ describe('ClientPortalService — token security (US1)', () => {
     },
     { name: 'getPortal', call: () => service.getPortal('token') },
     { name: 'getPayments', call: () => service.getPayments('token') },
-    { name: 'getPaymentHistory', call: () => service.getPaymentHistory('token') },
+    {
+      name: 'getPaymentHistory',
+      call: () => service.getPaymentHistory('token'),
+    },
     { name: 'getTimeline', call: () => service.getTimeline('token') },
   ];
 
@@ -206,9 +218,7 @@ describe('ClientPortalService — token security (US1)', () => {
   it('acceptDelivery should throw PORTAL_TOKEN_INVALID when context missing', async () => {
     clsMock.getContext.mockReturnValue({});
 
-    await expect(
-      service.acceptDelivery('token', 'd1'),
-    ).rejects.toMatchObject({
+    await expect(service.acceptDelivery('token', 'd1')).rejects.toMatchObject({
       code: ErrorCode.PORTAL_TOKEN_INVALID,
     });
   });

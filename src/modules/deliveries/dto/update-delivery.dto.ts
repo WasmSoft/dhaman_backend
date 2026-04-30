@@ -9,7 +9,8 @@ import {
 
 export class UpdateDeliveryDto {
   @ApiPropertyOptional({
-    description: 'Updated public delivery evidence URL / تحديث رابط التسليم العام',
+    description:
+      'Updated public delivery evidence URL / تحديث رابط التسليم العام',
     example: 'https://example.com/deliveries/revision-2-preview',
   })
   @IsOptional()

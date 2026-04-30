@@ -1,9 +1,6 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import {
-  TimelineActorRole,
-  TimelineEventType,
-} from '@prisma/client';
+import { TimelineActorRole, TimelineEventType } from '@prisma/client';
 import { TimelineQueryDto } from '../../modules/timeline-events/dto/timeline-query.dto';
 
 // AR: يتحقق من أن مرشحات الاستعلام وقواعد الصفحات تولد أخطاء مستقرة.
@@ -25,7 +22,7 @@ describe('TimelineQueryDto — type filter', () => {
 
   it('accepts every declared TimelineEventType enum value', async () => {
     for (const type of Object.values(TimelineEventType)) {
-      const errors = await validateDto({ type } as Partial<TimelineQueryDto>);
+      const errors = await validateDto({ type });
       expect(errors).toHaveLength(0);
     }
   });
@@ -120,7 +117,9 @@ describe('TimelineQueryDto — date filters', () => {
     });
     // DTO-level cross-field validation may produce errors if implemented
     if (errors.length > 0) {
-      expect(errors.some((e) => e.property === 'from' || e.property === 'to')).toBe(true);
+      expect(
+        errors.some((e) => e.property === 'from' || e.property === 'to'),
+      ).toBe(true);
     }
     // If no DTO-level cross-field error, the validation is deferred to the service layer
   });

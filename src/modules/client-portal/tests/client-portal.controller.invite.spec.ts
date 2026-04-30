@@ -1,7 +1,10 @@
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { AppException } from '../../../common/errors/app-exception';
 import { createTestModule } from './client-portal.controller.test-utils';
-import { VALID_TOKEN, INVALID_TOKEN } from './client-portal.controller.fixtures';
+import {
+  VALID_TOKEN,
+  INVALID_TOKEN,
+} from './client-portal.controller.fixtures';
 import type { ClientPortalService } from '../client-portal.service';
 import type { ClientPortalController } from '../client-portal.controller';
 

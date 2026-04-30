@@ -16,11 +16,21 @@ describe('Deliveries Dashboard HTTP', () => {
 
   beforeAll(async () => {
     serviceMock = {
-      createDelivery: jest.fn().mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
-      listDeliveries: jest.fn().mockResolvedValue({ deliveries: [], total: 0, page: 1, limit: 20 }),
-      getDeliveryById: jest.fn().mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
-      updateDelivery: jest.fn().mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
-      submitDelivery: jest.fn().mockResolvedValue({ id: VALID_DELIVERY, status: 'SUBMITTED' }),
+      createDelivery: jest
+        .fn()
+        .mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
+      listDeliveries: jest
+        .fn()
+        .mockResolvedValue({ deliveries: [], total: 0, page: 1, limit: 20 }),
+      getDeliveryById: jest
+        .fn()
+        .mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
+      updateDelivery: jest
+        .fn()
+        .mockResolvedValue({ id: VALID_DELIVERY, status: 'DRAFT' }),
+      submitDelivery: jest
+        .fn()
+        .mockResolvedValue({ id: VALID_DELIVERY, status: 'SUBMITTED' }),
       acceptDeliveryFromPortal: jest.fn(),
       requestChangesFromPortal: jest.fn(),
     };
@@ -39,7 +49,9 @@ describe('Deliveries Dashboard HTTP', () => {
       const res = await httpRequest
         .post(`/api/v1/milestones/${VALID_MILESTONE}/deliveries`)
         .set('Authorization', TEST_AUTH_HEADER)
-        .send({ summary: 'Completed the homepage redesign with responsive nav.' });
+        .send({
+          summary: 'Completed the homepage redesign with responsive nav.',
+        });
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
     });
@@ -118,7 +130,9 @@ describe('Deliveries Dashboard HTTP', () => {
     });
 
     it('should return 401 without auth', async () => {
-      const res = await httpRequest.post(`/api/v1/deliveries/${VALID_DELIVERY}/submit`).send({});
+      const res = await httpRequest
+        .post(`/api/v1/deliveries/${VALID_DELIVERY}/submit`)
+        .send({});
       expect(res.status).toBe(401);
     });
   });

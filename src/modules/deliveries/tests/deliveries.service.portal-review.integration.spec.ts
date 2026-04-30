@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DeliveryStatus, PaymentStatus, TimelineActorRole } from '@prisma/client';
+import {
+  DeliveryStatus,
+  PaymentStatus,
+  TimelineActorRole,
+} from '@prisma/client';
 import { DeliveriesService } from '../deliveries.service';
 import {
   buildPrismaMock,
@@ -28,26 +32,51 @@ describe('DeliveriesService — Portal Review Integration', () => {
     emailMock = buildEmailServiceMock();
     clsMock = buildClsServiceMock();
 
-    prismaMock.delivery.create = jest.fn().mockResolvedValue(makeMockDelivery());
+    prismaMock.delivery.create = jest
+      .fn()
+      .mockResolvedValue(makeMockDelivery());
     prismaMock.milestone.findUnique = jest.fn().mockResolvedValue({
       id: 'milestone-1',
       agreementId: 'agreement-1',
-      agreement: { id: 'agreement-1', freelancerId: 'freelancer-1', status: 'ACTIVE' },
+      agreement: {
+        id: 'agreement-1',
+        freelancerId: 'freelancer-1',
+        status: 'ACTIVE',
+      },
     });
     prismaMock.$transaction = jest.fn((cb: any) => cb(prismaMock));
     prismaMock.payment = {
       findFirst: jest.fn(),
       findUnique: jest.fn(),
-    } as any;
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeliveriesService,
-        { provide: require('../../../infrastructure/prisma/prisma.service').PrismaService, useValue: prismaMock },
-        { provide: require('../../payments/payments.service').PaymentsService, useValue: paymentsMock },
-        { provide: require('../../timeline-events/timeline-events.service').TimelineEventsService, useValue: timelineMock },
-        { provide: require('../../email-notifications/email-notifications.service').EmailNotificationsService, useValue: emailMock },
-        { provide: require('../../../common/cls/cls.service').ClsService, useValue: clsMock },
+        {
+          provide: require('../../../infrastructure/prisma/prisma.service')
+            .PrismaService,
+          useValue: prismaMock,
+        },
+        {
+          provide: require('../../payments/payments.service').PaymentsService,
+          useValue: paymentsMock,
+        },
+        {
+          provide: require('../../timeline-events/timeline-events.service')
+            .TimelineEventsService,
+          useValue: timelineMock,
+        },
+        {
+          provide:
+            require('../../email-notifications/email-notifications.service')
+              .EmailNotificationsService,
+          useValue: emailMock,
+        },
+        {
+          provide: require('../../../common/cls/cls.service').ClsService,
+          useValue: clsMock,
+        },
       ],
     }).compile();
 
@@ -59,9 +88,14 @@ describe('DeliveriesService — Portal Review Integration', () => {
       prismaMock.delivery.findUnique.mockResolvedValue(
         makeMockDelivery({ status: DeliveryStatus.SUBMITTED }),
       );
-      prismaMock.portalToken.findUnique.mockResolvedValue(makeMockPortalToken());
+      prismaMock.portalToken.findUnique.mockResolvedValue(
+        makeMockPortalToken(),
+      );
       prismaMock.delivery.update.mockResolvedValue(
-        makeMockDelivery({ status: DeliveryStatus.ACCEPTED, acceptedAt: new Date() }),
+        makeMockDelivery({
+          status: DeliveryStatus.ACCEPTED,
+          acceptedAt: new Date(),
+        }),
       );
       prismaMock.payment.findFirst.mockResolvedValue({
         id: 'payment-1',
@@ -71,9 +105,13 @@ describe('DeliveriesService — Portal Review Integration', () => {
     });
 
     it('should complete full accept workflow with payment, timeline, and acceptance timing', async () => {
-      const result = await (service as any).acceptDeliveryFromPortal(token, 'delivery-1', {
-        note: 'Approved.',
-      });
+      const result = await (service as any).acceptDeliveryFromPortal(
+        token,
+        'delivery-1',
+        {
+          note: 'Approved.',
+        },
+      );
 
       expect(result.status).toBe(DeliveryStatus.ACCEPTED);
       expect(result.acceptedAt).toBeTruthy();
@@ -100,7 +138,8 @@ describe('DeliveriesService — Portal Review Integration', () => {
 
   describe('requestChangesFromPortal', () => {
     const dto = {
-      reason: 'The mobile navigation still overlaps the header and needs adjustment.',
+      reason:
+        'The mobile navigation still overlaps the header and needs adjustment.',
       requestedCriteria: ['Mobile navigation'],
     };
 
@@ -108,7 +147,9 @@ describe('DeliveriesService — Portal Review Integration', () => {
       prismaMock.delivery.findUnique.mockResolvedValue(
         makeMockDelivery({ status: DeliveryStatus.CLIENT_REVIEW }),
       );
-      prismaMock.portalToken.findUnique.mockResolvedValue(makeMockPortalToken());
+      prismaMock.portalToken.findUnique.mockResolvedValue(
+        makeMockPortalToken(),
+      );
       prismaMock.delivery.update.mockResolvedValue(
         makeMockDelivery({
           status: DeliveryStatus.CHANGES_REQUESTED,
@@ -119,7 +160,11 @@ describe('DeliveriesService — Portal Review Integration', () => {
     });
 
     it('should complete full change-request workflow with feedback, timeline, and freelancer notification', async () => {
-      const result = await (service as any).requestChangesFromPortal(token, 'delivery-1', dto);
+      const result = await (service as any).requestChangesFromPortal(
+        token,
+        'delivery-1',
+        dto,
+      );
 
       expect(result.status).toBe(DeliveryStatus.CHANGES_REQUESTED);
       expect(result.changesRequestedAt).toBeTruthy();
@@ -137,7 +182,9 @@ describe('DeliveriesService — Portal Review Integration', () => {
         expect.anything(),
       );
 
-      expect(emailMock.enqueueDeliveryChangesRequestedForFreelancer).toHaveBeenCalledWith(
+      expect(
+        emailMock.enqueueDeliveryChangesRequestedForFreelancer,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           deliveryId: 'delivery-1',
           reason: dto.reason,

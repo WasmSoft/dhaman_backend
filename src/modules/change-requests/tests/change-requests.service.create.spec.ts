@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  ChangeRequestStatus,
-  TimelineEventType,
-} from '@prisma/client';
+import { ChangeRequestStatus, TimelineEventType } from '@prisma/client';
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { ChangeRequestsService } from '../change-requests.service';
 import {

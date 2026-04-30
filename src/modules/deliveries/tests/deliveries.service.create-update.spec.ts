@@ -30,11 +30,30 @@ describe('DeliveriesService — Create / Update', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeliveriesService,
-        { provide: require('../../../infrastructure/prisma/prisma.service').PrismaService, useValue: prismaMock },
-        { provide: require('../../payments/payments.service').PaymentsService, useValue: paymentsMock },
-        { provide: require('../../timeline-events/timeline-events.service').TimelineEventsService, useValue: timelineMock },
-        { provide: require('../../email-notifications/email-notifications.service').EmailNotificationsService, useValue: emailMock },
-        { provide: require('../../../common/cls/cls.service').ClsService, useValue: clsMock },
+        {
+          provide: require('../../../infrastructure/prisma/prisma.service')
+            .PrismaService,
+          useValue: prismaMock,
+        },
+        {
+          provide: require('../../payments/payments.service').PaymentsService,
+          useValue: paymentsMock,
+        },
+        {
+          provide: require('../../timeline-events/timeline-events.service')
+            .TimelineEventsService,
+          useValue: timelineMock,
+        },
+        {
+          provide:
+            require('../../email-notifications/email-notifications.service')
+              .EmailNotificationsService,
+          useValue: emailMock,
+        },
+        {
+          provide: require('../../../common/cls/cls.service').ClsService,
+          useValue: clsMock,
+        },
       ],
     }).compile();
 
@@ -43,7 +62,9 @@ describe('DeliveriesService — Create / Update', () => {
 
   describe('createDelivery', () => {
     const milestone = makeMockMilestone();
-    const dto = { summary: 'Completed the homepage redesign with responsive navigation.' };
+    const dto = {
+      summary: 'Completed the homepage redesign with responsive navigation.',
+    };
 
     beforeEach(() => {
       prismaMock.milestone.findUnique.mockResolvedValue(milestone);
@@ -59,33 +80,46 @@ describe('DeliveriesService — Create / Update', () => {
 
     it('should reject when milestone not found', async () => {
       prismaMock.milestone.findUnique.mockResolvedValue(null);
-      await expect((service as any).createDelivery('milestone-1', dto))
-        .rejects.toMatchObject({ code: ErrorCode.MILESTONE_NOT_FOUND });
+      await expect(
+        (service as any).createDelivery('milestone-1', dto),
+      ).rejects.toMatchObject({ code: ErrorCode.MILESTONE_NOT_FOUND });
     });
 
     it('should reject when an editable delivery already exists', async () => {
       prismaMock.delivery.findFirst.mockResolvedValue(makeMockDelivery());
-      await expect((service as any).createDelivery('milestone-1', dto))
-        .rejects.toMatchObject({ code: ErrorCode.DELIVERY_ALREADY_EXISTS });
+      await expect(
+        (service as any).createDelivery('milestone-1', dto),
+      ).rejects.toMatchObject({ code: ErrorCode.DELIVERY_ALREADY_EXISTS });
     });
 
     it('should reject when agreement is cancelled', async () => {
       prismaMock.milestone.findUnique.mockResolvedValue(
-        makeMockMilestone({ agreement: { id: 'agreement-1', freelancerId: 'freelancer-1', status: 'CANCELLED' } }),
+        makeMockMilestone({
+          agreement: {
+            id: 'agreement-1',
+            freelancerId: 'freelancer-1',
+            status: 'CANCELLED',
+          },
+        }),
       );
-      await expect((service as any).createDelivery('milestone-1', dto))
-        .rejects.toMatchObject({ code: ErrorCode.AGREEMENT_NOT_ACTIVE });
+      await expect(
+        (service as any).createDelivery('milestone-1', dto),
+      ).rejects.toMatchObject({ code: ErrorCode.AGREEMENT_NOT_ACTIVE });
     });
   });
 
   describe('updateDelivery', () => {
-    const dto = { summary: 'Updated assets and fixed the mobile spacing issue.' };
+    const dto = {
+      summary: 'Updated assets and fixed the mobile spacing issue.',
+    };
 
     beforeEach(() => {
       prismaMock.delivery.findUnique.mockResolvedValue(makeMockDelivery());
-      prismaMock.delivery.update.mockResolvedValue(makeMockDelivery({
-        summary: dto.summary,
-      }));
+      prismaMock.delivery.update.mockResolvedValue(
+        makeMockDelivery({
+          summary: dto.summary,
+        }),
+      );
     });
 
     it('should update an editable draft delivery', async () => {
@@ -95,24 +129,27 @@ describe('DeliveriesService — Create / Update', () => {
 
     it('should reject when delivery not found', async () => {
       prismaMock.delivery.findUnique.mockResolvedValue(null);
-      await expect((service as any).updateDelivery('delivery-1', dto))
-        .rejects.toMatchObject({ code: ErrorCode.DELIVERY_NOT_FOUND });
+      await expect(
+        (service as any).updateDelivery('delivery-1', dto),
+      ).rejects.toMatchObject({ code: ErrorCode.DELIVERY_NOT_FOUND });
     });
 
     it('should reject when delivery is not editable (accepted)', async () => {
       prismaMock.delivery.findUnique.mockResolvedValue(
         makeMockDelivery({ status: DeliveryStatus.ACCEPTED }),
       );
-      await expect((service as any).updateDelivery('delivery-1', dto))
-        .rejects.toMatchObject({ code: ErrorCode.DELIVERY_NOT_EDITABLE });
+      await expect(
+        (service as any).updateDelivery('delivery-1', dto),
+      ).rejects.toMatchObject({ code: ErrorCode.DELIVERY_NOT_EDITABLE });
     });
 
     it('should reject when delivery is disputed', async () => {
       prismaMock.delivery.findUnique.mockResolvedValue(
         makeMockDelivery({ status: DeliveryStatus.DISPUTED }),
       );
-      await expect((service as any).updateDelivery('delivery-1', dto))
-        .rejects.toMatchObject({ code: ErrorCode.DELIVERY_NOT_EDITABLE });
+      await expect(
+        (service as any).updateDelivery('delivery-1', dto),
+      ).rejects.toMatchObject({ code: ErrorCode.DELIVERY_NOT_EDITABLE });
     });
   });
 });

@@ -48,12 +48,64 @@ describe('ClientPortalController — workspace (US3)', () => {
         totalAmount: '10000.00',
         currency: 'SAR',
         freelancerName: 'Ahmed',
-        milestones: [{ id: 'm1', order: 1, title: 'Phase 1', description: undefined, amount: '5000.00', currency: 'SAR', status: 'COMPLETED', dueDate: '2026-02-01T00:00:00.000Z' }],
-        payments: [{ milestoneId: 'm1', milestoneTitle: 'Phase 1', amount: '5000.00', currency: 'SAR', status: 'RELEASED' }],
-        deliveries: [{ id: 'd1', milestoneId: 'm1', milestoneTitle: 'Phase 1', status: 'ACCEPTED', submittedAt: '2026-02-01T00:00:00.000Z', notes: undefined }],
-        changeRequests: [{ id: 'cr1', title: 'Extra page', description: 'Need more', requestedAmount: '1000.00', status: 'DRAFT', createdAt: '2026-01-15T00:00:00.000Z' }],
-        aiReviews: [{ id: 'ai1', status: 'COMPLETED', conclusion: 'Fair delivery', createdAt: '2026-02-10T00:00:00.000Z' }],
-        timeline: [{ id: 't1', eventType: 'AGREEMENT_APPROVED', actorRole: 'CLIENT', description: 'Approved', occurredAt: '2026-01-15T00:00:00.000Z' }],
+        milestones: [
+          {
+            id: 'm1',
+            order: 1,
+            title: 'Phase 1',
+            description: undefined,
+            amount: '5000.00',
+            currency: 'SAR',
+            status: 'COMPLETED',
+            dueDate: '2026-02-01T00:00:00.000Z',
+          },
+        ],
+        payments: [
+          {
+            milestoneId: 'm1',
+            milestoneTitle: 'Phase 1',
+            amount: '5000.00',
+            currency: 'SAR',
+            status: 'RELEASED',
+          },
+        ],
+        deliveries: [
+          {
+            id: 'd1',
+            milestoneId: 'm1',
+            milestoneTitle: 'Phase 1',
+            status: 'ACCEPTED',
+            submittedAt: '2026-02-01T00:00:00.000Z',
+            notes: undefined,
+          },
+        ],
+        changeRequests: [
+          {
+            id: 'cr1',
+            title: 'Extra page',
+            description: 'Need more',
+            requestedAmount: '1000.00',
+            status: 'DRAFT',
+            createdAt: '2026-01-15T00:00:00.000Z',
+          },
+        ],
+        aiReviews: [
+          {
+            id: 'ai1',
+            status: 'COMPLETED',
+            conclusion: 'Fair delivery',
+            createdAt: '2026-02-10T00:00:00.000Z',
+          },
+        ],
+        timeline: [
+          {
+            id: 't1',
+            eventType: 'AGREEMENT_APPROVED',
+            actorRole: 'CLIENT',
+            description: 'Approved',
+            occurredAt: '2026-01-15T00:00:00.000Z',
+          },
+        ],
       };
 
       serviceMock.getPortal.mockResolvedValue(mockResponse);

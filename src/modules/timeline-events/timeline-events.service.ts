@@ -366,11 +366,7 @@ export class TimelineEventsService {
   // AR: يتحقق من أن نطاق التاريخ غير معكوس قبل متابعة الاستعلام.
   // EN: Validates that the date range is not reversed before proceeding with the query.
   private validateDateRange(query: TimelineQueryDto): void {
-    if (
-      query.from &&
-      query.to &&
-      new Date(query.from) > new Date(query.to)
-    ) {
+    if (query.from && query.to && new Date(query.from) > new Date(query.to)) {
       throw new AppException({ code: ErrorCode.VALIDATION_ERROR });
     }
   }
@@ -464,9 +460,7 @@ export class TimelineEventsService {
 
   // AR: يتحقق من وجود مفاتيح محظورة بشكل متكرر داخل كائنات وقيم مصفوفات البيانات الوصفية.
   // EN: Recursively checks for forbidden metadata keys inside objects and array values.
-  private checkForbiddenMetadataKeys(
-    obj: Record<string, unknown>,
-  ): void {
+  private checkForbiddenMetadataKeys(obj: Record<string, unknown>): void {
     for (const key of Object.keys(obj)) {
       if (this.isPortalForbiddenMetadataKey(key)) {
         throw new AppException({ code: ErrorCode.TIMELINE_METADATA_INVALID });
@@ -488,4 +482,3 @@ export class TimelineEventsService {
     }
   }
 }
-

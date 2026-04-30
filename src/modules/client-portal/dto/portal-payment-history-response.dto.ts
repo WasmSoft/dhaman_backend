@@ -12,7 +12,10 @@ export class PortalPaymentRecordDto {
   @ApiProperty({ description: 'Milestone title', example: 'Logo design' })
   milestoneTitle!: string;
 
-  @ApiProperty({ description: 'Amount as Decimal-safe string', example: '2500.00' })
+  @ApiProperty({
+    description: 'Amount as Decimal-safe string',
+    example: '2500.00',
+  })
   amount!: string;
 
   @ApiProperty({ description: 'Currency code', example: 'SAR' })

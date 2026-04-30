@@ -61,14 +61,18 @@ describe('PaymentsService phase 6 additions', () => {
 
     it('generates unique receipt numbers across repeated calls', () => {
       const receipts = new Set(
-        Array.from({ length: 20 }, () => (service as any).generateReceiptNumber()),
+        Array.from({ length: 20 }, () =>
+          (service as any).generateReceiptNumber(),
+        ),
       );
 
       expect(receipts.size).toBe(20);
     });
 
     it('generates transaction references in the expected format', () => {
-      const reference = (service as any).generateTransactionReference() as string;
+      const reference = (
+        service as any
+      ).generateTransactionReference() as string;
 
       expect(reference).toMatch(/^TXN-[a-z0-9]{24}$/);
     });
@@ -89,7 +93,9 @@ describe('PaymentsService phase 6 additions', () => {
       clsServiceMock.getContext.mockReturnValue(undefined);
 
       await expect(
-        service.portalFund('payment-token', 'payment-id', { amount: '1500.00' }),
+        service.portalFund('payment-token', 'payment-id', {
+          amount: '1500.00',
+        }),
       ).rejects.toMatchObject({ code: ErrorCode.PORTAL_TOKEN_INVALID });
       expect(mockPrisma.payment.findUnique).not.toHaveBeenCalled();
     });
@@ -102,7 +108,9 @@ describe('PaymentsService phase 6 additions', () => {
       });
 
       await expect(
-        service.portalFund('release-token', 'payment-id', { amount: '1500.00' }),
+        service.portalFund('release-token', 'payment-id', {
+          amount: '1500.00',
+        }),
       ).rejects.toMatchObject({ code: ErrorCode.PORTAL_ACTION_NOT_ALLOWED });
       expect(mockPrisma.payment.findUnique).not.toHaveBeenCalled();
     });
@@ -137,7 +145,9 @@ describe('PaymentsService phase 6 additions', () => {
     });
 
     it('listByAgreementId rejects when the authenticated user is missing', async () => {
-      await expect(service.listByAgreementId('agreement-id')).rejects.toMatchObject({
+      await expect(
+        service.listByAgreementId('agreement-id'),
+      ).rejects.toMatchObject({
         code: ErrorCode.UNAUTHORIZED,
       });
     });

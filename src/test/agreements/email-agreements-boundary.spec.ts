@@ -1,4 +1,8 @@
-import { NotificationStatus, NotificationType, AgreementStatus } from '@prisma/client';
+import {
+  NotificationStatus,
+  NotificationType,
+  AgreementStatus,
+} from '@prisma/client';
 import { ClsService } from '../../common/cls/cls.service';
 import { Locale } from '../../common/enums/locale.enum';
 import { ActorType } from '../../common/enums/actor-type.enum';
@@ -37,7 +41,11 @@ function createMockAgreement(status: AgreementStatus = AgreementStatus.DRAFT) {
     totalAmount: { toString: () => '100' },
     currency: 'SAR',
     status,
-    client: { name: 'Test Client', email: 'client@example.com', companyName: null },
+    client: {
+      name: 'Test Client',
+      email: 'client@example.com',
+      companyName: null,
+    },
     freelancer: { name: 'FL', email: 'f@f.com' },
   };
 }
@@ -51,7 +59,8 @@ function createMockNotification(status: NotificationStatus) {
     subject: '...',
     status,
     providerMessageId: status === NotificationStatus.SENT ? 'demo_123' : null,
-    errorMessage: status === NotificationStatus.FAILED ? 'provider unavailable' : null,
+    errorMessage:
+      status === NotificationStatus.FAILED ? 'provider unavailable' : null,
     previewHtml: null,
     sentAt: status === NotificationStatus.SENT ? NOW : null,
     createdAt: NOW,
@@ -64,9 +73,15 @@ describe('Email notifications — agreement invite boundary', () => {
     const prisma = createPrismaMock();
     const service = new EmailNotificationsService(prisma as never, cls);
 
-    prisma.agreement.findFirst.mockResolvedValue(createMockAgreement(AgreementStatus.DRAFT));
-    prisma.emailNotification.create.mockResolvedValue(createMockNotification(NotificationStatus.PENDING));
-    prisma.emailNotification.update.mockResolvedValue(createMockNotification(NotificationStatus.SENT));
+    prisma.agreement.findFirst.mockResolvedValue(
+      createMockAgreement(AgreementStatus.DRAFT),
+    );
+    prisma.emailNotification.create.mockResolvedValue(
+      createMockNotification(NotificationStatus.PENDING),
+    );
+    prisma.emailNotification.update.mockResolvedValue(
+      createMockNotification(NotificationStatus.SENT),
+    );
 
     const result = await cls.run(
       {
@@ -90,9 +105,15 @@ describe('Email notifications — agreement invite boundary', () => {
     const prisma = createPrismaMock();
     const service = new EmailNotificationsService(prisma as never, cls);
 
-    prisma.agreement.findFirst.mockResolvedValue(createMockAgreement(AgreementStatus.SENT));
-    prisma.emailNotification.create.mockResolvedValue(createMockNotification(NotificationStatus.PENDING));
-    prisma.emailNotification.update.mockResolvedValue(createMockNotification(NotificationStatus.FAILED));
+    prisma.agreement.findFirst.mockResolvedValue(
+      createMockAgreement(AgreementStatus.SENT),
+    );
+    prisma.emailNotification.create.mockResolvedValue(
+      createMockNotification(NotificationStatus.PENDING),
+    );
+    prisma.emailNotification.update.mockResolvedValue(
+      createMockNotification(NotificationStatus.FAILED),
+    );
 
     const result = await cls.run(
       {
@@ -162,8 +183,12 @@ describe('Email notifications — sendNotification non-blocking boundary', () =>
     const service = new EmailNotificationsService(prisma as never, cls);
 
     prisma.agreement.findFirst.mockResolvedValue(createMockAgreement());
-    prisma.emailNotification.create.mockResolvedValue(createMockNotification(NotificationStatus.PENDING));
-    prisma.emailNotification.update.mockResolvedValue(createMockNotification(NotificationStatus.FAILED));
+    prisma.emailNotification.create.mockResolvedValue(
+      createMockNotification(NotificationStatus.PENDING),
+    );
+    prisma.emailNotification.update.mockResolvedValue(
+      createMockNotification(NotificationStatus.FAILED),
+    );
 
     const result = await cls.run(
       {

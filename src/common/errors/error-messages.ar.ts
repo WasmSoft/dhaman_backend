@@ -52,17 +52,13 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.DELIVERY_ALREADY_ACCEPTED]: 'تم قبول التسليم مسبقاً',
   [ErrorCode.DELIVERY_ALREADY_EXISTS]:
     'يوجد تسليم قابل للتعديل لهذه المرحلة بالفعل',
-  [ErrorCode.DELIVERY_NOT_EDITABLE]:
-    'لا يمكن تعديل التسليم في حالته الحالية',
+  [ErrorCode.DELIVERY_NOT_EDITABLE]: 'لا يمكن تعديل التسليم في حالته الحالية',
   [ErrorCode.DELIVERY_NOT_SUBMITTABLE]:
     'لا يمكن إرسال التسليم في حالته الحالية',
-  [ErrorCode.DELIVERY_EVIDENCE_REQUIRED]:
-    'يجب إضافة دليل أو رابط للتسليم',
-  [ErrorCode.DELIVERY_NOT_REVIEWABLE]:
-    'التسليم غير جاهز لمراجعة العميل',
+  [ErrorCode.DELIVERY_EVIDENCE_REQUIRED]: 'يجب إضافة دليل أو رابط للتسليم',
+  [ErrorCode.DELIVERY_NOT_REVIEWABLE]: 'التسليم غير جاهز لمراجعة العميل',
   [ErrorCode.AGREEMENT_NOT_ACTIVE]: 'الاتفاق غير نشط',
-  [ErrorCode.PAYMENT_NOT_RESERVED]:
-    'يجب حجز الدفعة قبل مراجعة التسليم',
+  [ErrorCode.PAYMENT_NOT_RESERVED]: 'يجب حجز الدفعة قبل مراجعة التسليم',
   [ErrorCode.PORTAL_TOKEN_INVALID]: 'رمز بوابة العميل غير صالح',
   [ErrorCode.PORTAL_TOKEN_EXPIRED]: 'انتهت صلاحية رمز بوابة العميل',
   [ErrorCode.PORTAL_TOKEN_REVOKED]: 'تم إلغاء رمز بوابة العميل',
@@ -85,10 +81,8 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
     'لا يمكن قبول طلب التغيير في حالته الحالية.',
   [ErrorCode.CHANGE_REQUEST_NOT_DECLINABLE]:
     'لا يمكن رفض طلب التغيير في حالته الحالية.',
-  [ErrorCode.CHANGE_REQUEST_NOT_APPROVED]:
-    'يجب قبول طلب التغيير قبل تمويله.',
-  [ErrorCode.PAYMENT_NOT_FUNDABLE]:
-    'لا يمكن تمويل الدفعة في حالتها الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVED]: 'يجب قبول طلب التغيير قبل تمويله.',
+  [ErrorCode.PAYMENT_NOT_FUNDABLE]: 'لا يمكن تمويل الدفعة في حالتها الحالية.',
   [ErrorCode.AI_REVIEW_NOT_ELIGIBLE_FOR_CHANGE_REQUEST]:
     'لا يمكن إنشاء طلب تغيير من مراجعة الذكاء الاصطناعي هذه.',
   [ErrorCode.EMAIL_SEND_FAILED]: 'فشل إرسال البريد الإلكتروني',

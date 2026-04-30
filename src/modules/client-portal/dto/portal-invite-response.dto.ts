@@ -2,12 +2,18 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class PortalInviteFreelancerDto {
-  @ApiProperty({ description: 'Freelancer display name', example: 'Ahmed Hassan' })
+  @ApiProperty({
+    description: 'Freelancer display name',
+    example: 'Ahmed Hassan',
+  })
   name!: string;
 }
 
 export class PortalInviteClientDto {
-  @ApiProperty({ description: 'Client display name', example: 'Sara Al-Rashid' })
+  @ApiProperty({
+    description: 'Client display name',
+    example: 'Sara Al-Rashid',
+  })
   name!: string;
 
   @ApiPropertyOptional({
@@ -50,7 +56,10 @@ export class PortalMilestoneSummaryDto {
   @ApiPropertyOptional({ description: 'Milestone description' })
   description?: string;
 
-  @ApiProperty({ description: 'Amount as Decimal-safe string', example: '2500.00' })
+  @ApiProperty({
+    description: 'Amount as Decimal-safe string',
+    example: '2500.00',
+  })
   amount!: string;
 
   @ApiProperty({ description: 'Currency code', example: 'SAR' })
@@ -70,7 +79,10 @@ export class PortalPaymentScheduleItemDto {
   @ApiProperty({ description: 'Milestone title', example: 'Logo design' })
   milestoneTitle!: string;
 
-  @ApiProperty({ description: 'Payment amount as Decimal-safe string', example: '2500.00' })
+  @ApiProperty({
+    description: 'Payment amount as Decimal-safe string',
+    example: '2500.00',
+  })
   amount!: string;
 
   @ApiProperty({ description: 'Currency code', example: 'SAR' })
@@ -84,7 +96,10 @@ export class PortalInviteResponseDto {
   @ApiProperty({ description: 'Agreement identifier' })
   agreementId!: string;
 
-  @ApiProperty({ description: 'Agreement title', example: 'Brand Identity Design' })
+  @ApiProperty({
+    description: 'Agreement title',
+    example: 'Brand Identity Design',
+  })
   title!: string;
 
   @ApiProperty({ description: 'Agreement description' })
@@ -93,13 +108,18 @@ export class PortalInviteResponseDto {
   @ApiProperty({ description: 'Service type', example: 'Graphic Design' })
   serviceType!: string;
 
-  @ApiProperty({ description: 'Total amount as Decimal-safe string', example: '5000.00' })
+  @ApiProperty({
+    description: 'Total amount as Decimal-safe string',
+    example: '5000.00',
+  })
   totalAmount!: string;
 
   @ApiProperty({ description: 'Currency code', example: 'SAR' })
   currency!: string;
 
-  @ApiPropertyOptional({ description: 'Expected delivery date in ISO 8601 format' })
+  @ApiPropertyOptional({
+    description: 'Expected delivery date in ISO 8601 format',
+  })
   expectedDeliveryDate?: string;
 
   @ApiProperty({ description: 'Agreement status', example: 'SENT' })
@@ -108,7 +128,10 @@ export class PortalInviteResponseDto {
   @ApiPropertyOptional({ description: 'Sent timestamp in ISO 8601 format' })
   sentAt?: string;
 
-  @ApiProperty({ description: 'Freelancer summary', type: PortalInviteFreelancerDto })
+  @ApiProperty({
+    description: 'Freelancer summary',
+    type: PortalInviteFreelancerDto,
+  })
   @Type(() => PortalInviteFreelancerDto)
   freelancer!: PortalInviteFreelancerDto;
 
@@ -116,15 +139,24 @@ export class PortalInviteResponseDto {
   @Type(() => PortalInviteClientDto)
   client!: PortalInviteClientDto;
 
-  @ApiPropertyOptional({ description: 'Policy summary', type: PortalPolicySummaryDto })
+  @ApiPropertyOptional({
+    description: 'Policy summary',
+    type: PortalPolicySummaryDto,
+  })
   @Type(() => PortalPolicySummaryDto)
   policy?: PortalPolicySummaryDto;
 
-  @ApiProperty({ description: 'Milestone list', type: [PortalMilestoneSummaryDto] })
+  @ApiProperty({
+    description: 'Milestone list',
+    type: [PortalMilestoneSummaryDto],
+  })
   @Type(() => PortalMilestoneSummaryDto)
   milestones!: PortalMilestoneSummaryDto[];
 
-  @ApiProperty({ description: 'Payment schedule', type: [PortalPaymentScheduleItemDto] })
+  @ApiProperty({
+    description: 'Payment schedule',
+    type: [PortalPaymentScheduleItemDto],
+  })
   @Type(() => PortalPaymentScheduleItemDto)
   paymentSchedule!: PortalPaymentScheduleItemDto[];
 }
