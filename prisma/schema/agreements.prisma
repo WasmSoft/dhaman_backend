@@ -1,6 +1,7 @@
 enum AgreementStatus {
   DRAFT
   SENT
+  CHANGE_REQUESTED
   APPROVED
   ACTIVE
   COMPLETED

@@ -80,11 +80,19 @@ The tables below define implementation-time expectations for success behavior, c
 
 | Endpoint | Success | Possible Errors | Side Effects | Testing Cases |
 | --- | --- | --- | --- | --- |
-| `GET /api/v1/portal/:token` | Returns portal agreement context | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `PORTAL_AGREEMENT_NOT_FOUND` | none | valid token, expired token |
-| `POST /api/v1/portal/:token/approve` | Approves portal action | `PORTAL_TOKEN_INVALID`, `PORTAL_ACTION_NOT_ALLOWED` | Timeline event, payment or agreement transition may occur | valid approve |
-| `POST /api/v1/portal/:token/request-changes` | Requests agreement changes | `PORTAL_TOKEN_INVALID`, `VALIDATION_ERROR`, `PORTAL_ACTION_NOT_ALLOWED` | Timeline event, notification may be triggered | valid change request |
-| `GET /api/v1/portal/:token/payments` | Returns portal payment summary | `PORTAL_TOKEN_INVALID`, `PORTAL_AGREEMENT_NOT_FOUND` | none | valid token fetch |
-| `GET /api/v1/portal/:token/deliveries/:deliveryId` | Returns portal delivery details | `PORTAL_TOKEN_INVALID`, `DELIVERY_NOT_FOUND`, `PORTAL_ACTION_NOT_ALLOWED` | none | valid delivery fetch |
+| `GET /api/v1/portal/:token/invite` | Returns agreement invite summary | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `AGREEMENT_NOT_FOUND` | none | valid token, expired token, agreement not found |
+| `POST /api/v1/portal/:token/approve` | Approves agreement | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `AGREEMENT_NOT_APPROVABLE` | Timeline event `AGREEMENT_APPROVED`, email notification | valid approve, invalid state |
+| `POST /api/v1/portal/:token/request-changes` | Requests agreement changes | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `VALIDATION_ERROR`, `AGREEMENT_NOT_CHANGEABLE` | Timeline event `AGREEMENT_CHANGES_REQUESTED`, email notification | valid change request, invalid state |
+| `POST /api/v1/portal/:token/reject` | Rejects agreement invitation | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `VALIDATION_ERROR`, `AGREEMENT_NOT_REJECTABLE` | Timeline event `AGREEMENT_REJECTED`, email notification | valid reject, invalid state |
+| `GET /api/v1/portal/:token` | Returns full portal workspace | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `AGREEMENT_NOT_FOUND` | none | valid token, empty sub-resources |
+| `GET /api/v1/portal/:token/deliveries/:deliveryId` | Returns portal delivery detail | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `DELIVERY_NOT_FOUND` | none | valid delivery fetch, cross-agreement masking |
+| `POST /api/v1/portal/:token/deliveries/:deliveryId/accept` | Accepts delivery | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `DELIVERY_NOT_FOUND`, `DELIVERY_NOT_REVIEWABLE` | Delegates to deliveries module | valid accept, cross-agreement masking |
+| `POST /api/v1/portal/:token/deliveries/:deliveryId/request-changes` | Requests delivery changes | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `VALIDATION_ERROR`, `DELIVERY_NOT_FOUND`, `DELIVERY_NOT_REVIEWABLE` | Delegates to deliveries module | valid change request, cross-agreement masking |
+| `GET /api/v1/portal/:token/payments` | Returns portal payment plan | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED` | none | valid token fetch |
+| `POST /api/v1/portal/:token/payments/:id/fund` | Demo-funds a payment | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `VALIDATION_ERROR`, `PAYMENT_NOT_FOUND`, `PAYMENT_NOT_FUNDABLE` | Delegates to payments module | valid fund, cross-agreement masking |
+| `POST /api/v1/portal/:token/payments/:id/release` | Client confirms payment release | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `VALIDATION_ERROR`, `PAYMENT_NOT_FOUND`, `PAYMENT_NOT_READY_TO_RELEASE` | Delegates to payments module | valid release, cross-agreement masking |
+| `GET /api/v1/portal/:token/payment-history` | Returns demo payment history | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED` | none | valid token fetch |
+| `GET /api/v1/portal/:token/timeline` | Returns client-safe timeline | `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED` | none | valid token fetch, client-safe fields |
 
 ## AI Plan
 

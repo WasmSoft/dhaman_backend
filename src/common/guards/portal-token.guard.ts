@@ -1,4 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { ClsService } from '../cls/cls.service';
 import { ActorType } from '../enums/actor-type.enum';
 import { ErrorCode } from '../enums/error-code.enum';
@@ -21,7 +22,7 @@ export class PortalTokenGuard implements CanActivate {
     }
 
     const portalToken = await this.prisma.portalToken.findUnique({
-      where: { token },
+      where: { tokenHash: createHash('sha256').update(token).digest('hex') },
       select: {
         id: true,
         agreementId: true,

@@ -104,4 +104,11 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
     'Dashboard analytics could not be calculated.',
   [ErrorCode.TIMELINE_EVENT_TYPE_INVALID]: 'Timeline event type is invalid.',
   [ErrorCode.TIMELINE_METADATA_INVALID]: 'Timeline metadata is invalid.',
+  [ErrorCode.PORTAL_TOKEN_CREATE_FAILED]: 'Could not create portal link.',
+  [ErrorCode.AGREEMENT_NOT_APPROVABLE]:
+    'Agreement cannot be approved in its current state.',
+  [ErrorCode.AGREEMENT_NOT_CHANGEABLE]:
+    'Agreement changes cannot be requested in its current state.',
+  [ErrorCode.AGREEMENT_NOT_REJECTABLE]:
+    'Agreement cannot be rejected in its current state.',
 };
