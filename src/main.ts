@@ -14,6 +14,7 @@ async function bootstrap() {
     new Set([
       'https://panel.dhaman.wasmsoft.com',
       'http://localhost:3000',
+      'http://localhost:3032',
       'http://localhost:3083',
       ...(process.env.FRONTEND_URL
         ?.split(',')
