@@ -567,6 +567,121 @@ export class AgreementsService {
     return this.mapToResponse(updated);
   }
 
+  async recalculateTotalAmount(
+    tx: Prisma.TransactionClient,
+    agreementId: string,
+  ): Promise<{ agreementId: string; totalAmount: number }> {
+    const freelancerId = this.getFreelancerId();
+
+    const agreement = await tx.agreement.findFirst({
+      where: { id: agreementId, freelancerId },
+    });
+
+    if (!agreement) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    if (agreement.status !== PrismaAgreementStatus.DRAFT) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED });
+    }
+
+    const milestoneAggregate = await tx.milestone.aggregate({
+      where: { agreementId },
+      _sum: { amount: true },
+    });
+    const totalAmount = Number(milestoneAggregate._sum.amount ?? 0);
+
+    const updated = await tx.agreement.update({
+      where: { id: agreement.id },
+      data: { totalAmount },
+    });
+
+    return {
+      agreementId: updated.id,
+      totalAmount: Number(updated.totalAmount),
+    };
+  }
+
+  async checkCompletionStatus(
+    tx: Prisma.TransactionClient,
+    agreementId: string,
+  ): Promise<{
+    agreementId: string;
+    completed: boolean;
+    status: PrismaAgreementStatus;
+    timelineEventCreated: boolean;
+  }> {
+    const freelancerId = this.getFreelancerId();
+
+    const agreement = await tx.agreement.findFirst({
+      where: { id: agreementId, freelancerId },
+    });
+
+    if (!agreement) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    if (agreement.status !== PrismaAgreementStatus.ACTIVE) {
+      return {
+        agreementId: agreement.id,
+        completed: false,
+        status: agreement.status,
+        timelineEventCreated: false,
+      };
+    }
+
+    const milestones = await tx.milestone.findMany({
+      where: { agreementId: agreement.id },
+      select: { status: true, paymentStatus: true },
+    });
+
+    if (
+      milestones.length === 0 ||
+      milestones.some(
+        (milestone) =>
+          milestone.status !== PrismaMilestoneStatus.ACCEPTED ||
+          milestone.paymentStatus !== PrismaPaymentStatus.RELEASED,
+      )
+    ) {
+      return {
+        agreementId: agreement.id,
+        completed: false,
+        status: agreement.status,
+        timelineEventCreated: false,
+      };
+    }
+
+    const completedAgreement = await tx.agreement.update({
+      where: { id: agreement.id },
+      data: { status: PrismaAgreementStatus.COMPLETED },
+    });
+
+    await this.timelineEvents.createEvent(
+      {
+        agreementId: agreement.id,
+        type: TimelineEventType.AGREEMENT_COMPLETED,
+        actorRole: TimelineActorRole.FREELANCER,
+        actorId: freelancerId,
+        title: 'Agreement completed',
+        description: 'Agreement completed after all milestones were accepted and released.',
+        metadata: {
+          titleEn: 'Agreement completed',
+          titleAr: 'تم إكمال الاتفاقية',
+          descriptionEn: 'Agreement completed after all milestones were accepted and released.',
+          descriptionAr: 'تم إكمال الاتفاقية بعد قبول وتحرير جميع المراحل.',
+        },
+      },
+      tx,
+    );
+
+    return {
+      agreementId: completedAgreement.id,
+      completed: true,
+      status: completedAgreement.status,
+      timelineEventCreated: true,
+    };
+  }
+
   private getFreelancerId(): string {
     const id = this.cls.get('userId');
     if (!id) {

@@ -970,3 +970,177 @@ describe('AgreementsService.archive', () => {
     expect(result.status).toBe(AgreementStatus.CANCELLED);
   });
 });
+
+describe('AgreementsService helper methods', () => {
+  let service: AgreementsService;
+  let clsService: { get: jest.Mock };
+
+  beforeEach(async () => {
+    clsService = { get: jest.fn().mockReturnValue(FREELANCER_ID) };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AgreementsService,
+        {
+          provide: PrismaService,
+          useValue: {
+            agreement: { findFirst: jest.fn(), update: jest.fn() },
+            milestone: { aggregate: jest.fn(), findMany: jest.fn() },
+            userSettings: { findFirst: jest.fn() },
+            $transaction: jest.fn(),
+          },
+        },
+        { provide: ClsService, useValue: clsService },
+        { provide: ClientsService, useValue: { getById: jest.fn() } },
+        { provide: TimelineEventsService, useValue: { createEvent: jest.fn() } },
+        {
+          provide: EmailNotificationsService,
+          useValue: {
+            enqueueAgreementInvite: jest.fn(),
+            enqueueAgreementActivatedForClient: jest.fn(),
+            enqueueAgreementCancelledForClient: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get(AgreementsService);
+  });
+
+  function makeTx() {
+    return {
+      agreement: { findFirst: jest.fn(), update: jest.fn() },
+      milestone: { aggregate: jest.fn(), findMany: jest.fn() },
+    } as any;
+  }
+
+  it('recalculates draft totals from milestone sums', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.DRAFT });
+    tx.milestone.aggregate.mockResolvedValue({ _sum: { amount: 1250 } });
+    tx.agreement.update.mockResolvedValue({ id: AGREEMENT_ID, totalAmount: 1250 });
+
+    const result = await service.recalculateTotalAmount(tx, AGREEMENT_ID);
+
+    expect(tx.agreement.update).toHaveBeenCalledWith({
+      where: { id: AGREEMENT_ID },
+      data: { totalAmount: 1250 },
+    });
+    expect(result).toEqual({ agreementId: AGREEMENT_ID, totalAmount: 1250 });
+  });
+
+  it('recalculates zero totals when no milestones exist', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.DRAFT });
+    tx.milestone.aggregate.mockResolvedValue({ _sum: { amount: null } });
+    tx.agreement.update.mockResolvedValue({ id: AGREEMENT_ID, totalAmount: 0 });
+
+    const result = await service.recalculateTotalAmount(tx, AGREEMENT_ID);
+
+    expect(result.totalAmount).toBe(0);
+  });
+
+  it('rejects recalculation for non-draft agreements', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+
+    await expect(service.recalculateTotalAmount(tx, AGREEMENT_ID)).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED,
+    });
+  });
+
+  it('rejects recalculation without CLS userId', async () => {
+    clsService.get.mockReturnValueOnce(null);
+    const tx = makeTx();
+
+    await expect(service.recalculateTotalAmount(tx, AGREEMENT_ID)).rejects.toMatchObject({
+      code: ErrorCode.UNAUTHORIZED,
+    });
+  });
+
+  it('rejects recalculation for foreign agreements', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue(null);
+
+    await expect(service.recalculateTotalAmount(tx, AGREEMENT_ID)).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_NOT_FOUND,
+    });
+  });
+
+  it('completes active agreements when all milestones are accepted and released', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+    tx.milestone.findMany.mockResolvedValue([
+      { status: 'ACCEPTED', paymentStatus: PrismaPaymentStatus.RELEASED },
+      { status: 'ACCEPTED', paymentStatus: PrismaPaymentStatus.RELEASED },
+    ]);
+    tx.agreement.update.mockResolvedValue({ id: AGREEMENT_ID, status: AgreementStatus.COMPLETED });
+
+    const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
+
+    expect(result).toEqual({
+      agreementId: AGREEMENT_ID,
+      completed: true,
+      status: AgreementStatus.COMPLETED,
+      timelineEventCreated: true,
+    });
+  });
+
+  it('returns a no-op for pending milestones', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+    tx.milestone.findMany.mockResolvedValue([{ status: 'ACTIVE', paymentStatus: PrismaPaymentStatus.RELEASED }]);
+
+    const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
+
+    expect(result).toEqual({
+      agreementId: AGREEMENT_ID,
+      completed: false,
+      status: AgreementStatus.ACTIVE,
+      timelineEventCreated: false,
+    });
+  });
+
+  it('returns a no-op for unpaid milestones', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+    tx.milestone.findMany.mockResolvedValue([{ status: 'ACCEPTED', paymentStatus: PrismaPaymentStatus.WAITING }]);
+
+    const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
+
+    expect(result.completed).toBe(false);
+  });
+
+  it('returns a no-op for agreements without milestones', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+    tx.milestone.findMany.mockResolvedValue([]);
+
+    const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
+
+    expect(result.completed).toBe(false);
+  });
+
+  it('returns a no-op for completed agreements', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.COMPLETED });
+
+    const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
+
+    expect(result).toEqual({
+      agreementId: AGREEMENT_ID,
+      completed: false,
+      status: AgreementStatus.COMPLETED,
+      timelineEventCreated: false,
+    });
+  });
+
+  it('rejects completion checks for foreign agreements', async () => {
+    const tx = makeTx();
+    tx.agreement.findFirst.mockResolvedValue(null);
+
+    await expect(service.checkCompletionStatus(tx, AGREEMENT_ID)).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_NOT_FOUND,
+    });
+  });
+});
