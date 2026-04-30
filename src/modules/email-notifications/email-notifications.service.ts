@@ -642,6 +642,46 @@ export class EmailNotificationsService {
     return this.toNotificationResponse(record);
   }
 
+  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بأن التسليم تم إرساله للمراجعة.
+  // EN: Creates a pending notification record to inform the client that a delivery was submitted for review.
+  async enqueueDeliverySubmittedForClient(input: {
+    agreementId: string;
+    deliveryId: string;
+    milestoneId: string;
+    milestoneTitle: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.DELIVERY_SUBMITTED,
+        subject: `Delivery submitted for "${input.milestoneTitle}"`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل طلب تعديلات على التسليم.
+  // EN: Creates a pending notification record to inform the freelancer that changes were requested.
+  async enqueueDeliveryChangesRequestedForFreelancer(input: {
+    agreementId: string;
+    deliveryId: string;
+    milestoneId: string;
+    milestoneTitle: string;
+    reason: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.DELIVERY_CHANGES_REQUESTED,
+        subject: `Changes requested for "${input.milestoneTitle}"`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  private placeholder(action: string, details?: Record<string, unknown>) {
   private async createResendTimelineEvidence(
     agreementId: string,
     notification: EmailNotificationResponseDto,
