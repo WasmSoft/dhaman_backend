@@ -7,5 +7,8 @@ if (existsSync('.env')) {
 }
 
 export default defineConfig({
+  migrations: {
+    seed: 'ts-node --project tsconfig.json prisma/seed.ts',
+  },
   schema: 'prisma/schema',
 });

@@ -4,7 +4,7 @@ import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 export class RegisterDto {
   @ApiProperty({
     description: 'Freelancer display name.',
-    example: 'Sara Ahmed',
+    example: 'Demo Admin',
     minLength: 2,
     maxLength: 100,
   })
@@ -15,14 +15,14 @@ export class RegisterDto {
 
   @ApiProperty({
     description: 'Freelancer login email address.',
-    example: 'sara@example.com',
+    example: 'demo@demo.com',
   })
   @IsEmail()
   email!: string;
 
   @ApiProperty({
     description: 'Account password for email/password login.',
-    example: 'Str0ngPassw0rd!',
+    example: 'temporary123',
     minLength: 8,
     maxLength: 128,
   })

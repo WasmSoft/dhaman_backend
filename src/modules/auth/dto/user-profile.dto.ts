@@ -10,13 +10,13 @@ export class UserProfileDto {
 
   @ApiProperty({
     description: 'Freelancer display name.',
-    example: 'Sara Ahmed',
+    example: 'Demo Admin',
   })
   name!: string;
 
   @ApiProperty({
     description: 'Freelancer email address.',
-    example: 'sara@example.com',
+    example: 'demo@demo.com',
   })
   email!: string;
 
