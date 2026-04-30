@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClsModule } from '../../common/cls/cls.module';
 import { PrismaModule } from '../../infrastructure/prisma/prisma.module';
+import { AgreementPoliciesModule } from '../agreement-policies/agreement-policies.module';
 import { ClientsModule } from '../clients/clients.module';
 import { EmailNotificationsModule } from '../email-notifications/email-notifications.module';
 import { TimelineEventsModule } from '../timeline-events/timeline-events.module';
@@ -11,6 +12,7 @@ import { AgreementsService } from './agreements.service';
   imports: [
     PrismaModule,
     ClsModule,
+    AgreementPoliciesModule,
     ClientsModule,
     TimelineEventsModule,
     EmailNotificationsModule,

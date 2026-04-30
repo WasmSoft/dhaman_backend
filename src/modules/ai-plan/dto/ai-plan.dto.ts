@@ -129,35 +129,39 @@ export class GeneratedMilestoneDto {
 export class GeneratedPoliciesDto {
   @ApiProperty({
     description: 'سياسة التأخير / Delay policy',
+    nullable: true,
     example: 'يتم تمديد الموعد فقط عند موافقة الطرفين كتابياً.',
   })
   @IsString()
   @IsNotEmpty()
-  delayPolicy!: string;
+  delayPolicy!: string | null;
 
   @ApiProperty({
     description: 'سياسة الإلغاء / Cancellation policy',
+    nullable: true,
     example: 'تستحق المبالغ الخاصة بالمراحل المقبولة قبل الإلغاء.',
   })
   @IsString()
   @IsNotEmpty()
-  cancellationPolicy!: string;
+  cancellationPolicy!: string | null;
 
   @ApiProperty({
     description: 'سياسة الطلبات الإضافية / Extra request policy',
+    nullable: true,
     example: 'أي طلب خارج النطاق يحتاج عرض تكلفة منفصل.',
   })
   @IsString()
   @IsNotEmpty()
-  extraRequestPolicy!: string;
+  extraRequestPolicy!: string | null;
 
   @ApiProperty({
     description: 'سياسة المراجعة / Review policy',
+    nullable: true,
     example: 'للعميل جولتا مراجعة لكل مرحلة قبل الاعتماد النهائي.',
   })
   @IsString()
   @IsNotEmpty()
-  reviewPolicy!: string;
+  reviewPolicy!: string | null;
 }
 
 export class GeneratedPlanResponseDto {

@@ -1,10 +1,10 @@
 model AgreementPolicy {
   id                       String   @id @default(uuid())
   agreementId              String   @unique
-  delayPolicy              String
-  cancellationPolicy       String
-  extraRequestPolicy       String
-  reviewPolicy             String
+  delayPolicy              String?
+  cancellationPolicy       String?
+  extraRequestPolicy       String?
+  reviewPolicy             String?
   clientReviewPeriodDays   Int
   freelancerDelayGraceDays Int
   createdAt                DateTime @default(now())

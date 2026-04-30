@@ -8,11 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { ErrorResponseDto } from '../../common/dto/error-response.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import {
-  DefaultPoliciesResponseDto,
-  SettingsResponseDto,
-} from './dto/settings-response.dto';
-import { UpdateDefaultPoliciesDto } from './dto/update-default-policies.dto';
+import { SettingsResponseDto } from './dto/settings-response.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { SettingsService } from './settings.service';
 
@@ -51,35 +47,5 @@ export class SettingsController {
   @ApiResponse({ status: 500, type: ErrorResponseDto })
   updateSettings(@Body() dto: UpdateSettingsDto) {
     return this.settingsService.updateSettings(dto);
-  }
-
-  @Get('default-policies')
-  @ApiOperation({
-    summary: 'Get default agreement policies',
-    description:
-      'Returns the authenticated freelancer default agreement policy text used to prefill future agreements.',
-  })
-  @ApiResponse({ status: 200, type: DefaultPoliciesResponseDto })
-  @ApiResponse({ status: 401, type: ErrorResponseDto })
-  @ApiResponse({ status: 404, type: ErrorResponseDto })
-  @ApiResponse({ status: 500, type: ErrorResponseDto })
-  getDefaultPolicies() {
-    return this.settingsService.getDefaultPolicies();
-  }
-
-  @Patch('default-policies')
-  @ApiOperation({
-    summary: 'Update default agreement policies',
-    description:
-      'Updates default agreement policy text used only for future agreements and does not change existing agreement policies.',
-  })
-  @ApiBody({ type: UpdateDefaultPoliciesDto })
-  @ApiResponse({ status: 200, type: DefaultPoliciesResponseDto })
-  @ApiResponse({ status: 400, type: ErrorResponseDto })
-  @ApiResponse({ status: 401, type: ErrorResponseDto })
-  @ApiResponse({ status: 404, type: ErrorResponseDto })
-  @ApiResponse({ status: 500, type: ErrorResponseDto })
-  updateDefaultPolicies(@Body() dto: UpdateDefaultPoliciesDto) {
-    return this.settingsService.updateDefaultPolicies(dto);
   }
 }

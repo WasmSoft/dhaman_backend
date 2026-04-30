@@ -8,9 +8,7 @@ import {
 import { PaymentsService } from '../payments.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClsService } from '../../../common/cls/cls.service';
-import {
-  PaymentOperationType,
-} from '@prisma/client';
+import { PaymentOperationType } from '@prisma/client';
 
 function makeMockPayment(overrides: Record<string, unknown> = {}) {
   return {
@@ -107,19 +105,28 @@ describe('PaymentsService', () => {
 
     it('should reject self-transitions', () => {
       expect(() =>
-        (service as any).validateTransition(PaymentStatus.WAITING, PaymentStatus.WAITING),
+        (service as any).validateTransition(
+          PaymentStatus.WAITING,
+          PaymentStatus.WAITING,
+        ),
       ).toThrow();
     });
 
     it('should reject terminal RELEASED transitions', () => {
       expect(() =>
-        (service as any).validateTransition(PaymentStatus.RELEASED, PaymentStatus.CLIENT_REVIEW),
+        (service as any).validateTransition(
+          PaymentStatus.RELEASED,
+          PaymentStatus.CLIENT_REVIEW,
+        ),
       ).toThrow();
     });
 
     it('should throw PAYMENT_INVALID_TRANSITION error code', () => {
       try {
-        (service as any).validateTransition(PaymentStatus.WAITING, PaymentStatus.RELEASED);
+        (service as any).validateTransition(
+          PaymentStatus.WAITING,
+          PaymentStatus.RELEASED,
+        );
       } catch (e: any) {
         expect(e.code).toBe(ErrorCode.PAYMENT_INVALID_TRANSITION);
       }
@@ -159,7 +166,10 @@ describe('PaymentsService', () => {
     it('should reject when payment not found', async () => {
       mockPrisma.payment.findFirst.mockResolvedValue(null);
       await expect(
-        service.fundMilestone({ milestoneId: 'milestone-1', amount: '1000.00' }),
+        service.fundMilestone({
+          milestoneId: 'milestone-1',
+          amount: '1000.00',
+        }),
       ).rejects.toMatchObject({ code: ErrorCode.PAYMENT_NOT_FOUND });
     });
 
@@ -168,7 +178,10 @@ describe('PaymentsService', () => {
         makeMockPayment({ status: PaymentStatus.RESERVED }),
       );
       await expect(
-        service.fundMilestone({ milestoneId: 'milestone-1', amount: '1000.00' }),
+        service.fundMilestone({
+          milestoneId: 'milestone-1',
+          amount: '1000.00',
+        }),
       ).rejects.toMatchObject({ code: ErrorCode.PAYMENT_ALREADY_RESERVED });
     });
 
@@ -179,7 +192,10 @@ describe('PaymentsService', () => {
     });
 
     it('should sync milestone paymentStatus to RESERVED', async () => {
-      await service.fundMilestone({ milestoneId: 'milestone-1', amount: '1000.00' }, 'user-1');
+      await service.fundMilestone(
+        { milestoneId: 'milestone-1', amount: '1000.00' },
+        'user-1',
+      );
       expect(mockPrisma.milestone.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: { paymentStatus: PaymentStatus.RESERVED },
@@ -188,7 +204,10 @@ describe('PaymentsService', () => {
     });
 
     it('should create PAYMENT_RESERVED timeline event', async () => {
-      await service.fundMilestone({ milestoneId: 'milestone-1', amount: '1000.00' }, 'user-1');
+      await service.fundMilestone(
+        { milestoneId: 'milestone-1', amount: '1000.00' },
+        'user-1',
+      );
       expect(mockTimeline.createEvent).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Payment Reserved' }),
         mockPrisma,
@@ -197,7 +216,11 @@ describe('PaymentsService', () => {
 
     it('should include complete metadata in PAYMENT_RESERVED timeline event', async () => {
       await service.fundMilestone(
-        { milestoneId: 'milestone-1', amount: '1000.00', paymentMethodLabel: 'Bank Transfer' },
+        {
+          milestoneId: 'milestone-1',
+          amount: '1000.00',
+          paymentMethodLabel: 'Bank Transfer',
+        },
         'user-1',
       );
       expect(mockTimeline.createEvent).toHaveBeenCalledWith(
@@ -220,10 +243,15 @@ describe('PaymentsService', () => {
     });
 
     it('should default paymentMethodLabel to Demo Bank Transfer', async () => {
-      await service.fundMilestone({ milestoneId: 'milestone-1', amount: '1000.00' }, 'user-1');
+      await service.fundMilestone(
+        { milestoneId: 'milestone-1', amount: '1000.00' },
+        'user-1',
+      );
       expect(mockPrisma.payment.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ paymentMethodLabel: 'Demo Bank Transfer' }),
+          data: expect.objectContaining({
+            paymentMethodLabel: 'Demo Bank Transfer',
+          }),
         }),
       );
     });
@@ -243,7 +271,9 @@ describe('PaymentsService', () => {
   // ============================================================
 
   describe('releasePayment', () => {
-    const readyPayment = makeMockPayment({ status: PaymentStatus.READY_TO_RELEASE });
+    const readyPayment = makeMockPayment({
+      status: PaymentStatus.READY_TO_RELEASE,
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -351,7 +381,10 @@ describe('PaymentsService', () => {
     });
 
     it('should NOT generate new receipt/reference during release', async () => {
-      const result = await service.releasePayment({ paymentId: 'payment-1' }, 'user-1');
+      const result = await service.releasePayment(
+        { paymentId: 'payment-1' },
+        'user-1',
+      );
       expect(mockPrisma.payment.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -370,7 +403,10 @@ describe('PaymentsService', () => {
       mockPrisma.payment.findUnique.mockResolvedValue(
         makeMockPayment({
           status: PaymentStatus.READY_TO_RELEASE,
-          milestone: { title: 'Test Milestone', status: MilestoneStatus.ACCEPTED },
+          milestone: {
+            title: 'Test Milestone',
+            status: MilestoneStatus.ACCEPTED,
+          },
         }),
       );
       await service.releasePayment({ paymentId: 'payment-1' }, 'user-1');
@@ -382,7 +418,10 @@ describe('PaymentsService', () => {
     });
 
     it('should set releasedAt ISO string in response', async () => {
-      const result = await service.releasePayment({ paymentId: 'payment-1' }, 'user-1');
+      const result = await service.releasePayment(
+        { paymentId: 'payment-1' },
+        'user-1',
+      );
       expect(result.releasedAt).toBeDefined();
       expect(typeof result.releasedAt).toBe('string');
     });
@@ -446,7 +485,10 @@ describe('PaymentsService', () => {
       });
       mockPrisma.payment.findUnique.mockResolvedValue(funded);
 
-      const result = await service.getPaymentReceipt('payment-1', 'freelancer-1');
+      const result = await service.getPaymentReceipt(
+        'payment-1',
+        'freelancer-1',
+      );
       expect(result.receiptNumber).toBe('DHM-20260429-ABC123');
     });
 
@@ -473,7 +515,10 @@ describe('PaymentsService', () => {
       });
       mockPrisma.payment.findUnique.mockResolvedValue(funded);
 
-      const result = await service.getPaymentReceipt('payment-1', 'freelancer-1');
+      const result = await service.getPaymentReceipt(
+        'payment-1',
+        'freelancer-1',
+      );
       expect(result.milestoneTitle).toBe('Test Milestone');
     });
 
@@ -486,7 +531,10 @@ describe('PaymentsService', () => {
       });
       mockPrisma.payment.findUnique.mockResolvedValue(funded);
 
-      const result = await service.getPaymentReceipt('payment-1', 'freelancer-1');
+      const result = await service.getPaymentReceipt(
+        'payment-1',
+        'freelancer-1',
+      );
       expect(result.paymentId).toBe('payment-1');
       expect(result.receiptNumber).toBeDefined();
       expect(result.transactionReference).toBeDefined();
@@ -527,7 +575,10 @@ describe('PaymentsService', () => {
         }),
       ]);
 
-      const result = await service.getAgreementPayments('agreement-1', 'freelancer-1');
+      const result = await service.getAgreementPayments(
+        'agreement-1',
+        'freelancer-1',
+      );
       expect(result.payments).toHaveLength(3);
       expect(result.totalPending).toBe('1000.00');
       expect(result.totalFunded).toBe('2000.00');
@@ -537,7 +588,10 @@ describe('PaymentsService', () => {
 
     it('should return empty list and zero totals for agreement with no payments', async () => {
       mockPrisma.payment.findMany.mockResolvedValue([]);
-      const result = await service.getAgreementPayments('agreement-1', 'freelancer-1');
+      const result = await service.getAgreementPayments(
+        'agreement-1',
+        'freelancer-1',
+      );
       expect(result.payments).toHaveLength(0);
       expect(result.totalFunded).toBe('0.00');
       expect(result.totalReleased).toBe('0.00');
@@ -558,7 +612,10 @@ describe('PaymentsService', () => {
         makeMockPayment({ id: 'p3', status: PaymentStatus.WAITING }),
       ]);
 
-      const result = await service.getAgreementPayments('agreement-1', 'freelancer-1');
+      const result = await service.getAgreementPayments(
+        'agreement-1',
+        'freelancer-1',
+      );
       expect(result.totalPending).toBe('3000.00');
       expect(result.totalFunded).toBe('0.00');
       expect(result.totalReleased).toBe('0.00');
@@ -566,11 +623,24 @@ describe('PaymentsService', () => {
 
     it('should handle all-released payments', async () => {
       mockPrisma.payment.findMany.mockResolvedValue([
-        makeMockPayment({ id: 'p1', status: PaymentStatus.RELEASED, receiptNumber: 'DHM-A', transactionReference: 'TXN-A' }),
-        makeMockPayment({ id: 'p2', status: PaymentStatus.RELEASED, receiptNumber: 'DHM-B', transactionReference: 'TXN-B' }),
+        makeMockPayment({
+          id: 'p1',
+          status: PaymentStatus.RELEASED,
+          receiptNumber: 'DHM-A',
+          transactionReference: 'TXN-A',
+        }),
+        makeMockPayment({
+          id: 'p2',
+          status: PaymentStatus.RELEASED,
+          receiptNumber: 'DHM-B',
+          transactionReference: 'TXN-B',
+        }),
       ]);
 
-      const result = await service.getAgreementPayments('agreement-1', 'freelancer-1');
+      const result = await service.getAgreementPayments(
+        'agreement-1',
+        'freelancer-1',
+      );
       expect(result.totalPending).toBe('0.00');
       expect(result.totalFunded).toBe('2000.00');
       expect(result.totalReleased).toBe('2000.00');
@@ -578,10 +648,18 @@ describe('PaymentsService', () => {
 
     it('should count RESERVED as funded but not released', async () => {
       mockPrisma.payment.findMany.mockResolvedValue([
-        makeMockPayment({ id: 'p1', status: PaymentStatus.RESERVED, receiptNumber: 'DHM-A', transactionReference: 'TXN-A' }),
+        makeMockPayment({
+          id: 'p1',
+          status: PaymentStatus.RESERVED,
+          receiptNumber: 'DHM-A',
+          transactionReference: 'TXN-A',
+        }),
       ]);
 
-      const result = await service.getAgreementPayments('agreement-1', 'freelancer-1');
+      const result = await service.getAgreementPayments(
+        'agreement-1',
+        'freelancer-1',
+      );
       expect(result.totalFunded).toBe('1000.00');
       expect(result.totalReleased).toBe('0.00');
       expect(result.totalPending).toBe('0.00');
@@ -594,7 +672,10 @@ describe('PaymentsService', () => {
         makeMockPayment({ id: 'p3', status: PaymentStatus.NOT_REQUIRED }),
       ]);
 
-      const result = await service.getAgreementPayments('agreement-1', 'freelancer-1');
+      const result = await service.getAgreementPayments(
+        'agreement-1',
+        'freelancer-1',
+      );
       expect(result.totalFunded).toBe('0.00');
       expect(result.totalReleased).toBe('0.00');
       expect(result.totalPending).toBe('0.00');
@@ -619,7 +700,10 @@ describe('PaymentsService', () => {
     });
 
     it('should transition RESERVED -> CLIENT_REVIEW', async () => {
-      const result = await service.transitionToClientReview('payment-1', 'user-1');
+      const result = await service.transitionToClientReview(
+        'payment-1',
+        'user-1',
+      );
       expect(result.status).toBe(PaymentStatus.CLIENT_REVIEW);
     });
 
@@ -699,7 +783,10 @@ describe('PaymentsService', () => {
         status: PaymentStatus.CLIENT_REVIEW,
       });
 
-      const result = await service.transitionToClientReview('payment-1', 'user-1');
+      const result = await service.transitionToClientReview(
+        'payment-1',
+        'user-1',
+      );
       expect(result.status).toBe(PaymentStatus.CLIENT_REVIEW);
       // Should NOT try to update milestone since it doesn't exist
       expect(mockPrisma.milestone.update).not.toHaveBeenCalled();
@@ -711,7 +798,9 @@ describe('PaymentsService', () => {
   // ============================================================
 
   describe('transitionToAiReview', () => {
-    const reviewPayment = makeMockPayment({ status: PaymentStatus.CLIENT_REVIEW });
+    const reviewPayment = makeMockPayment({
+      status: PaymentStatus.CLIENT_REVIEW,
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -818,7 +907,8 @@ describe('PaymentsService', () => {
       jest.clearAllMocks();
       mockPrisma.payment.update.mockImplementation((args: any) =>
         Promise.resolve({
-          ...mockPrisma.payment.findUnique.mock.calls[0]?.[0]?.result ?? makeMockPayment(),
+          ...(mockPrisma.payment.findUnique.mock.calls[0]?.[0]?.result ??
+            makeMockPayment()),
           id: args.where.id,
           status: PaymentStatus.READY_TO_RELEASE,
           ...args.data,
@@ -831,7 +921,10 @@ describe('PaymentsService', () => {
       mockPrisma.payment.findUnique.mockResolvedValue(
         makeMockPayment({ status: PaymentStatus.CLIENT_REVIEW }),
       );
-      const result = await service.transitionToReadyToRelease('payment-1', 'user-1');
+      const result = await service.transitionToReadyToRelease(
+        'payment-1',
+        'user-1',
+      );
       expect(result.status).toBe(PaymentStatus.READY_TO_RELEASE);
     });
 
@@ -839,7 +932,10 @@ describe('PaymentsService', () => {
       mockPrisma.payment.findUnique.mockResolvedValue(
         makeMockPayment({ status: PaymentStatus.AI_REVIEW }),
       );
-      const result = await service.transitionToReadyToRelease('payment-1', 'user-1');
+      const result = await service.transitionToReadyToRelease(
+        'payment-1',
+        'user-1',
+      );
       expect(result.status).toBe(PaymentStatus.READY_TO_RELEASE);
     });
 
@@ -910,7 +1006,8 @@ describe('PaymentsService', () => {
       jest.clearAllMocks();
       mockPrisma.payment.update.mockImplementation((args: any) =>
         Promise.resolve({
-          ...mockPrisma.payment.findUnique.mock.calls[0]?.[0]?.result ?? makeMockPayment(),
+          ...(mockPrisma.payment.findUnique.mock.calls[0]?.[0]?.result ??
+            makeMockPayment()),
           id: args.where.id,
           status: PaymentStatus.ON_HOLD,
           ...args.data,
@@ -1155,7 +1252,9 @@ describe('PaymentsService', () => {
   // ============================================================
 
   describe('portalReleaseConfirmation', () => {
-    const readyPayment = makeMockPayment({ status: PaymentStatus.READY_TO_RELEASE });
+    const readyPayment = makeMockPayment({
+      status: PaymentStatus.READY_TO_RELEASE,
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
