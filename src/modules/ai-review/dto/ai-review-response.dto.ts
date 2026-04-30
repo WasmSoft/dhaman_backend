@@ -38,7 +38,8 @@ export class AiReviewResponseDto {
   status!: AIReviewStatus;
 
   @ApiProperty({
-    description: 'Delivery-to-criteria match score from 0 to 100 when available.',
+    description:
+      'Delivery-to-criteria match score from 0 to 100 when available.',
     example: 72,
     nullable: true,
   })

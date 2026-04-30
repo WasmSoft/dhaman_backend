@@ -1,4 +1,4 @@
-import { ErrorCode } from '../enums/error-code.enum';
+﻿import { ErrorCode } from '../enums/error-code.enum';
 
 export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.INTERNAL_SERVER_ERROR]: 'حدث خطأ داخلي في الخادم',
@@ -13,6 +13,7 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.AUTH_TOKEN_EXPIRED]: 'انتهت صلاحية رمز الدخول',
   [ErrorCode.AUTH_TOKEN_INVALID]: 'رمز الدخول غير صالح',
   [ErrorCode.AUTH_USER_NOT_FOUND]: 'تعذر العثور على المستخدم',
+  [ErrorCode.USER_NOT_FOUND]: 'لم يتم العثور على المستخدم.',
   [ErrorCode.CLIENT_NOT_FOUND]: 'تعذر العثور على العميل',
   [ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS]:
     'البريد الإلكتروني للعميل مستخدم بالفعل',
@@ -103,6 +104,12 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.AGREEMENT_NOT_INVITABLE]:
     'لا يمكن إرسال دعوة لهذا الاتفاق في حالته الحالية',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'تعذر العثور على الإعدادات',
+  [ErrorCode.SETTINGS_CREATE_FAILED]: 'تعذر إنشاء الإعدادات الافتراضية.',
+  [ErrorCode.SETTINGS_UPDATE_FAILED]: 'تعذر تحديث الإعدادات.',
+  [ErrorCode.SETTINGS_INVALID_AI_STRICTNESS]:
+    'قيمة مستوى صرامة الذكاء الاصطناعي غير صالحة.',
+  [ErrorCode.SETTINGS_INVALID_CURRENCY]: 'العملة الافتراضية غير صالحة.',
+  [ErrorCode.SETTINGS_POLICY_INVALID]: 'سياسة الاتفاق الافتراضية غير صالحة.',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'قيمة الإعدادات غير صالحة',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'نطاق التاريخ للوحة التحكم غير صالح.',
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]: 'تعذر حساب بيانات لوحة التحكم.',

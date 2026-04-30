@@ -1,4 +1,8 @@
-import { AIRecommendation, AIReviewStatus, TimelineActorRole } from '@prisma/client';
+import {
+  AIRecommendation,
+  AIReviewStatus,
+  TimelineActorRole,
+} from '@prisma/client';
 import { AiReviewResponseDto } from '../../modules/ai-review/dto';
 import {
   createService,
@@ -27,10 +31,16 @@ describe('AiReviewService reviewPaymentRelease success', () => {
       updatedAt: new Date('2026-04-29T12:00:00.000Z'),
     };
 
-    const openReview = jest.spyOn(service, 'openReview').mockResolvedValue(response);
+    const openReview = jest
+      .spyOn(service, 'openReview')
+      .mockResolvedValue(response);
 
-    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue({ id: 'agreement-1' });
-    (prisma.delivery.findFirst as jest.Mock).mockResolvedValue({ id: 'delivery-1' });
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue({
+      id: 'agreement-1',
+    });
+    (prisma.delivery.findFirst as jest.Mock).mockResolvedValue({
+      id: 'delivery-1',
+    });
 
     await expect(
       service.reviewPaymentRelease(REVIEW_PAYMENT_DTO, 'freelancer-1'),

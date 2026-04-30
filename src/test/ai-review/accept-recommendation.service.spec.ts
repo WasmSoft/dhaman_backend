@@ -31,7 +31,10 @@ function createPrismaMock(): PrismaService {
   };
 
   prisma.$transaction.mockImplementation(async (callback) => callback(prisma));
-  prisma.payment.findFirst.mockResolvedValue({ id: 'payment-1', status: PaymentStatus.AI_REVIEW });
+  prisma.payment.findFirst.mockResolvedValue({
+    id: 'payment-1',
+    status: PaymentStatus.AI_REVIEW,
+  });
 
   return prisma as unknown as PrismaService;
 }
@@ -119,7 +122,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(result.paymentStatus).toBe(PaymentStatus.READY_TO_RELEASE);
     });
@@ -131,7 +138,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(result.paymentStatus).toBe(PaymentStatus.ON_HOLD);
     });
@@ -143,7 +154,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(result.paymentStatus).toBe(PaymentStatus.ON_HOLD);
     });
@@ -151,11 +166,17 @@ describe('AiReviewService acceptRecommendation', () => {
     it('NEEDS_HUMAN_REVIEW -> no change (AI_REVIEW)', async () => {
       const { service, prisma } = createService();
       (prisma.aIReview.findUnique as jest.Mock).mockResolvedValue(
-        createCompletedReview({ recommendation: AIRecommendation.NEEDS_HUMAN_REVIEW }),
+        createCompletedReview({
+          recommendation: AIRecommendation.NEEDS_HUMAN_REVIEW,
+        }),
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(result.paymentStatus).toBe(PaymentStatus.AI_REVIEW);
     });
@@ -168,14 +189,22 @@ describe('AiReviewService acceptRecommendation', () => {
         createCompletedReview({ recommendation: AIRecommendation.ACCEPT }),
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
-      jest.spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome').mockResolvedValue({
-        paymentId: 'payment-1',
-        newStatus: PaymentStatus.READY_TO_RELEASE,
-      });
+      jest
+        .spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome')
+        .mockResolvedValue({
+          paymentId: 'payment-1',
+          newStatus: PaymentStatus.READY_TO_RELEASE,
+        });
 
-      await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
-      expect(paymentsService.transitionPaymentFromAiReviewToOutcome).toHaveBeenCalledWith(
+      expect(
+        paymentsService.transitionPaymentFromAiReviewToOutcome,
+      ).toHaveBeenCalledWith(
         { agreementId: 'agreement-1', milestoneId: 'milestone-1' },
         AIRecommendation.ACCEPT,
         expect.anything(),
@@ -190,14 +219,22 @@ describe('AiReviewService acceptRecommendation', () => {
         createCompletedReview({ recommendation: AIRecommendation.REJECT }),
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
-      jest.spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome').mockResolvedValue({
-        paymentId: 'payment-1',
-        newStatus: PaymentStatus.ON_HOLD,
-      });
+      jest
+        .spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome')
+        .mockResolvedValue({
+          paymentId: 'payment-1',
+          newStatus: PaymentStatus.ON_HOLD,
+        });
 
-      await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
-      expect(paymentsService.transitionPaymentFromAiReviewToOutcome).toHaveBeenCalledWith(
+      expect(
+        paymentsService.transitionPaymentFromAiReviewToOutcome,
+      ).toHaveBeenCalledWith(
         { agreementId: 'agreement-1', milestoneId: 'milestone-1' },
         AIRecommendation.REJECT,
         expect.anything(),
@@ -212,14 +249,22 @@ describe('AiReviewService acceptRecommendation', () => {
         createCompletedReview({ recommendation: AIRecommendation.PARTIAL }),
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
-      jest.spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome').mockResolvedValue({
-        paymentId: 'payment-1',
-        newStatus: PaymentStatus.ON_HOLD,
-      });
+      jest
+        .spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome')
+        .mockResolvedValue({
+          paymentId: 'payment-1',
+          newStatus: PaymentStatus.ON_HOLD,
+        });
 
-      await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
-      expect(paymentsService.transitionPaymentFromAiReviewToOutcome).toHaveBeenCalledWith(
+      expect(
+        paymentsService.transitionPaymentFromAiReviewToOutcome,
+      ).toHaveBeenCalledWith(
         { agreementId: 'agreement-1', milestoneId: 'milestone-1' },
         AIRecommendation.PARTIAL,
         expect.anything(),
@@ -231,18 +276,28 @@ describe('AiReviewService acceptRecommendation', () => {
     it('still calls payment transition but no DB update occurs', async () => {
       const { service, prisma, paymentsService } = createService();
       (prisma.aIReview.findUnique as jest.Mock).mockResolvedValue(
-        createCompletedReview({ recommendation: AIRecommendation.NEEDS_HUMAN_REVIEW }),
+        createCompletedReview({
+          recommendation: AIRecommendation.NEEDS_HUMAN_REVIEW,
+        }),
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
-      jest.spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome').mockResolvedValue({
-        paymentId: 'payment-1',
-        newStatus: PaymentStatus.AI_REVIEW,
-      });
+      jest
+        .spyOn(paymentsService, 'transitionPaymentFromAiReviewToOutcome')
+        .mockResolvedValue({
+          paymentId: 'payment-1',
+          newStatus: PaymentStatus.AI_REVIEW,
+        });
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(result.paymentStatus).toBe(PaymentStatus.AI_REVIEW);
-      expect(paymentsService.transitionPaymentFromAiReviewToOutcome).toHaveBeenCalledWith(
+      expect(
+        paymentsService.transitionPaymentFromAiReviewToOutcome,
+      ).toHaveBeenCalledWith(
         { agreementId: 'agreement-1', milestoneId: 'milestone-1' },
         AIRecommendation.NEEDS_HUMAN_REVIEW,
         expect.anything(),
@@ -256,10 +311,16 @@ describe('AiReviewService acceptRecommendation', () => {
       (prisma.aIReview.findUnique as jest.Mock).mockResolvedValue(
         createCompletedReview(),
       );
-      (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue({ id: 'event-1' });
+      (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue({
+        id: 'event-1',
+      });
 
       await expect(
-        service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1'),
+        service.acceptRecommendation(
+          'review-1',
+          { createChangeRequests: false },
+          'freelancer-1',
+        ),
       ).rejects.toMatchObject({ code: ErrorCode.AI_REVIEW_ALREADY_COMPLETED });
     });
   });
@@ -272,7 +333,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
 
       await expect(
-        service.acceptRecommendation('review-1', { createChangeRequests: false }, 'other-freelancer'),
+        service.acceptRecommendation(
+          'review-1',
+          { createChangeRequests: false },
+          'other-freelancer',
+        ),
       ).rejects.toMatchObject({ code: ErrorCode.AI_REVIEW_NOT_FOUND });
     });
   });
@@ -288,7 +353,11 @@ describe('AiReviewService acceptRecommendation', () => {
         .spyOn(timelineEventsService, 'recordAiReviewRecommendationAccepted')
         .mockResolvedValue(undefined);
 
-      await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(recordSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -309,12 +378,19 @@ describe('AiReviewService acceptRecommendation', () => {
       (prisma.aIReview.findUnique as jest.Mock).mockResolvedValue(
         createCompletedReview({
           recommendation: AIRecommendation.PARTIAL,
-          outOfScopeItems: ['Push notification integration', 'Dark mode support'],
+          outOfScopeItems: [
+            'Push notification integration',
+            'Dark mode support',
+          ],
         }),
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: true }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: true },
+        'freelancer-1',
+      );
 
       expect(prisma.changeRequest.createMany).toHaveBeenCalledWith({
         data: expect.arrayContaining([
@@ -355,7 +431,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(prisma.changeRequest.createMany).not.toHaveBeenCalled();
       expect(result.changeRequestsCreated).toBe(0);
@@ -373,7 +453,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.acceptRecommendation('review-1', { createChangeRequests: true }, 'freelancer-1');
+      const result = await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: true },
+        'freelancer-1',
+      );
 
       expect(prisma.changeRequest.createMany).not.toHaveBeenCalled();
       expect(result.changeRequestsCreated).toBe(0);
@@ -388,10 +472,17 @@ describe('AiReviewService acceptRecommendation', () => {
       );
       (prisma.timelineEvent.findFirst as jest.Mock).mockResolvedValue(null);
       const enqueueSpy = jest
-        .spyOn(emailNotificationsService, 'enqueueAiReviewRecommendationAcceptedForClient')
+        .spyOn(
+          emailNotificationsService,
+          'enqueueAiReviewRecommendationAcceptedForClient',
+        )
         .mockResolvedValue(undefined);
 
-      await service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1');
+      await service.acceptRecommendation(
+        'review-1',
+        { createChangeRequests: false },
+        'freelancer-1',
+      );
 
       expect(enqueueSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -410,7 +501,11 @@ describe('AiReviewService acceptRecommendation', () => {
       (prisma.aIReview.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(
-        service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1'),
+        service.acceptRecommendation(
+          'review-1',
+          { createChangeRequests: false },
+          'freelancer-1',
+        ),
       ).rejects.toMatchObject({ code: ErrorCode.AI_REVIEW_NOT_FOUND });
     });
 
@@ -421,7 +516,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
 
       await expect(
-        service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1'),
+        service.acceptRecommendation(
+          'review-1',
+          { createChangeRequests: false },
+          'freelancer-1',
+        ),
       ).rejects.toMatchObject({ code: ErrorCode.AI_REVIEW_NOT_FOUND });
     });
 
@@ -432,7 +531,11 @@ describe('AiReviewService acceptRecommendation', () => {
       );
 
       await expect(
-        service.acceptRecommendation('review-1', { createChangeRequests: false }, 'freelancer-1'),
+        service.acceptRecommendation(
+          'review-1',
+          { createChangeRequests: false },
+          'freelancer-1',
+        ),
       ).rejects.toMatchObject({ code: ErrorCode.AI_REVIEW_NOT_FOUND });
     });
   });

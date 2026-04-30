@@ -3,8 +3,11 @@ import {
   PaymentStatus as PrismaPaymentStatus,
   MilestoneStatus as PrismaMilestoneStatus,
   AIRecommendation,
+  TimelineActorRole,
+  MilestoneStatus,
   PaymentOperationType,
   PaymentStatus,
+  TimelineEventType,
   Prisma,
   TimelineEventType as PrismaTimelineEventType,
   TimelineActorRole as PrismaTimelineActorRole,
@@ -15,6 +18,9 @@ import { ErrorCode } from '../../common/enums/error-code.enum';
 import { AppException } from '../../common/errors/app-exception';
 import { ClsService } from '../../common/cls/cls.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { AgreementsService } from '../agreements/agreements.service';
+import { FundMilestonePaymentDto, ReleasePaymentDto } from './dto/payments.dto';
+import { TimelineEventsService } from '../timeline-events/timeline-events.service';
 import { TimelineEventsService } from '../timeline-events/timeline-events.service';
 import {
   FundMilestoneDto,
@@ -25,6 +31,7 @@ import {
   PaymentReceiptResponseDto,
   PaymentListResponseDto,
 } from './dto/payments.dto';
+import { TimelineEventsService } from '../timeline-events/timeline-events.service';
 
 const AI_REVIEW_ALLOWED_PAYMENT_STATUSES = new Set<PaymentStatus>([
   PaymentStatus.RESERVED,
@@ -63,6 +70,11 @@ type PaymentWriteClient = Pick<
  */
 @Injectable()
 export class PaymentsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly agreementsService?: AgreementsService,
+    private readonly timelineEventsService?: TimelineEventsService,
+  ) {}
   private readonly validTransitions: Record<PrismaPaymentStatus, PrismaPaymentStatus[]> = {
     [PrismaPaymentStatus.WAITING]: [PrismaPaymentStatus.RESERVED],
     [PrismaPaymentStatus.RESERVED]: [PrismaPaymentStatus.CLIENT_REVIEW],
@@ -87,6 +99,7 @@ export class PaymentsService {
     private readonly prisma: PrismaService,
     private readonly timelineEventsService: TimelineEventsService,
     private readonly clsService: ClsService,
+    private readonly agreementsService?: AgreementsService,
   ) {}
 
   validateTransition(
@@ -222,6 +235,79 @@ export class PaymentsService {
     };
   }
 
+  release(dto: ReleasePaymentDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.findFirst({
+        where: { id: dto.paymentId },
+      });
+
+      if (!payment) {
+        throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+      }
+
+      if (payment.status === PaymentStatus.RELEASED) {
+        throw new AppException({ code: ErrorCode.PAYMENT_ALREADY_RELEASED });
+      }
+
+      if (payment.status !== PaymentStatus.READY_TO_RELEASE) {
+        throw new AppException({
+          code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE,
+        });
+      }
+
+      if (!payment.milestoneId) {
+        throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+      }
+
+      const releasedAt = new Date();
+
+      const releasedPayment = await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: PaymentStatus.RELEASED,
+          releasedAt,
+        },
+      });
+
+      await tx.milestone.update({
+        where: { id: payment.milestoneId },
+        data: {
+          paymentStatus: PaymentStatus.RELEASED,
+          status: MilestoneStatus.ACCEPTED,
+        },
+      });
+
+      await this.timelineEventsService?.createEvent(
+        {
+          agreementId: payment.agreementId,
+          milestoneId: payment.milestoneId ?? undefined,
+          actorRole: TimelineActorRole.FREELANCER,
+          type: TimelineEventType.PAYMENT_RELEASED,
+          title: 'Payment released',
+          description: 'Milestone payment was released.',
+          metadata: {
+            titleEn: 'Payment released',
+            titleAr: 'تم تحرير الدفعة',
+            descriptionEn: 'Milestone payment was released.',
+            descriptionAr: 'تم تحرير دفعة المرحلة.',
+          },
+        },
+        tx,
+      );
+
+      const completion = await this.agreementsService?.checkCompletionStatus(
+        tx,
+        payment.agreementId,
+      );
+
+      return {
+        paymentId: releasedPayment.id,
+        status: releasedPayment.status,
+        completed: completion?.completed ?? false,
+        agreementStatus: completion?.status ?? null,
+        timelineEventCreated: completion?.timelineEventCreated ?? false,
+      };
+    });
   // ============================================================
   // Timeline Metadata Builder
   // ============================================================
@@ -832,18 +918,110 @@ export class PaymentsService {
 
     return this.toPaymentResponseDto(updatedPayment);
   }
+  
+
+  // listByAgreementId(agreementId: string) {
+  //   return this.placeholder('listByAgreementId', { agreementId });
+  // }
+
+  // fundMilestone(dto: FundMilestonePaymentDto) {
+  //   return this.placeholder('fundMilestone', { dto });
+  // }
+
+  release(dto: ReleasePaymentDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.findFirst({
+        where: { id: dto.paymentId },
+      });
+
+      if (!payment) {
+        throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+      }
+
+      if (payment.status === PaymentStatus.RELEASED) {
+        throw new AppException({ code: ErrorCode.PAYMENT_ALREADY_RELEASED });
+      }
+
+      if (payment.status !== PaymentStatus.READY_TO_RELEASE) {
+        throw new AppException({
+          code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE,
+        });
+      }
+
+      if (!payment.milestoneId) {
+        throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+      }
+
+      const releasedAt = new Date();
+
+      const releasedPayment = await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: PaymentStatus.RELEASED,
+          releasedAt,
+        },
+      });
+
+      await tx.milestone.update({
+        where: { id: payment.milestoneId },
+        data: {
+          paymentStatus: PaymentStatus.RELEASED,
+          status: MilestoneStatus.ACCEPTED,
+        },
+      });
+
+      await this.timelineEventsService?.createEvent(
+        {
+          agreementId: payment.agreementId,
+          milestoneId: payment.milestoneId ?? undefined,
+          actorRole: TimelineActorRole.FREELANCER,
+          type: TimelineEventType.PAYMENT_RELEASED,
+          title: 'Payment released',
+          description: 'Milestone payment was released.',
+          metadata: {
+            titleEn: 'Payment released',
+            titleAr: 'تم تحرير الدفعة',
+            descriptionEn: 'Milestone payment was released.',
+            descriptionAr: 'تم تحرير دفعة المرحلة.',
+          },
+        },
+        tx,
+      );
+
+      const completion = await this.agreementsService?.checkCompletionStatus(
+        tx,
+        payment.agreementId,
+      );
+
+      return {
+        paymentId: releasedPayment.id,
+        status: releasedPayment.status,
+        completed: completion?.completed ?? false,
+        agreementStatus: completion?.status ?? null,
+        timelineEventCreated: completion?.timelineEventCreated ?? false,
+      };
+    });
+  }
+
+  // getById(id: string) {
+  //   return this.placeholder('getById', { id });
+  // }
+
+  // getReceipt(id: string) {
+  //   return this.placeholder('getReceipt', { id });
+  // }
 
   // ============================================================
   // Controller Compatibility Aliases
   // ============================================================
 
-  async release(
-    dto: ReleasePaymentDto,
-    actorId?: string,
-    actorRole: PrismaTimelineActorRole = PrismaTimelineActorRole.FREELANCER,
-  ): Promise<PaymentResponseDto> {
-    return this.releasePayment(dto, actorId, actorRole);
-  }
+  // async release(
+  //   dto: ReleasePaymentDto,
+  //   actorId?: string,
+  //   actorRole: PrismaTimelineActorRole = PrismaTimelineActorRole.FREELANCER,
+  // ): Promise<PaymentResponseDto> {
+  //   return this.releasePayment(dto, actorId, actorRole);
+  // }
 
   async getById(
     id: string,

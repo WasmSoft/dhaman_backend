@@ -54,10 +54,17 @@ function createGeminiServiceMock(): GeminiService {
       JSON.stringify({
         matchScore: 72,
         recommendation: 'PARTIAL',
-        completedCriteria: ['Responsive layout', 'Brand colors', 'Portfolio section'],
+        completedCriteria: [
+          'Responsive layout',
+          'Brand colors',
+          'Portfolio section',
+        ],
         missingCriteria: ['Contact form', 'Performance budget'],
-        outOfScopeItems: ['Additional out-of-scope item identified by the mock review.'],
-        reasoning: 'The delivery meets part of the acceptance criteria, but some items still need completion before full acceptance.',
+        outOfScopeItems: [
+          'Additional out-of-scope item identified by the mock review.',
+        ],
+        reasoning:
+          'The delivery meets part of the acceptance criteria, but some items still need completion before full acceptance.',
       }),
     ),
   } as unknown as GeminiService;
@@ -338,7 +345,13 @@ describe('AiReviewService Gemini retry and fallback', () => {
         JSON.stringify({
           matchScore: 85,
           recommendation: 'ACCEPT',
-          completedCriteria: ['Responsive layout', 'Brand colors', 'Portfolio section', 'Contact form', 'Performance budget'],
+          completedCriteria: [
+            'Responsive layout',
+            'Brand colors',
+            'Portfolio section',
+            'Contact form',
+            'Performance budget',
+          ],
           missingCriteria: [],
           outOfScopeItems: [],
           reasoning: 'All criteria are fully met on second attempt.',
@@ -445,11 +458,21 @@ describe('AiReviewService locale-specific prompts', () => {
       status: PaymentStatus.CLIENT_REVIEW,
     });
     (prisma.aIReview.findFirst as jest.Mock).mockResolvedValue(null);
-    (prisma.aIReview.create as jest.Mock).mockResolvedValue(createReviewRecord());
+    (prisma.aIReview.create as jest.Mock).mockResolvedValue(
+      createReviewRecord(),
+    );
     (prisma.aIReview.update as jest.Mock)
-      .mockResolvedValueOnce(createReviewRecord({ status: AIReviewStatus.PROCESSING }))
+      .mockResolvedValueOnce(
+        createReviewRecord({ status: AIReviewStatus.PROCESSING }),
+      )
       .mockImplementationOnce(({ data }) =>
-        Promise.resolve(createReviewRecord({ ...data, status: AIReviewStatus.COMPLETED, recommendation: data.recommendation })),
+        Promise.resolve(
+          createReviewRecord({
+            ...data,
+            status: AIReviewStatus.COMPLETED,
+            recommendation: data.recommendation,
+          }),
+        ),
       );
 
     await service.openReview(
@@ -473,11 +496,21 @@ describe('AiReviewService locale-specific prompts', () => {
       status: PaymentStatus.CLIENT_REVIEW,
     });
     (prisma.aIReview.findFirst as jest.Mock).mockResolvedValue(null);
-    (prisma.aIReview.create as jest.Mock).mockResolvedValue(createReviewRecord());
+    (prisma.aIReview.create as jest.Mock).mockResolvedValue(
+      createReviewRecord(),
+    );
     (prisma.aIReview.update as jest.Mock)
-      .mockResolvedValueOnce(createReviewRecord({ status: AIReviewStatus.PROCESSING }))
+      .mockResolvedValueOnce(
+        createReviewRecord({ status: AIReviewStatus.PROCESSING }),
+      )
       .mockImplementationOnce(({ data }) =>
-        Promise.resolve(createReviewRecord({ ...data, status: AIReviewStatus.COMPLETED, recommendation: data.recommendation })),
+        Promise.resolve(
+          createReviewRecord({
+            ...data,
+            status: AIReviewStatus.COMPLETED,
+            recommendation: data.recommendation,
+          }),
+        ),
       );
 
     await service.openReview(

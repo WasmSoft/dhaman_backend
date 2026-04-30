@@ -31,7 +31,9 @@ import { AiReviewListResponseDto } from './dto/ai-review-list-response.dto';
 const TEST_JWT_SECRET = 'ai-review-test-secret-key';
 const TEST_JWT_EXPIRES_IN = '1h';
 
-function createReviewResponse(overrides: Partial<AiReviewResponseDto> = {}): AiReviewResponseDto {
+function createReviewResponse(
+  overrides: Partial<AiReviewResponseDto> = {},
+): AiReviewResponseDto {
   return {
     id: '31ddf8a4-cb55-4d38-b91b-9cdd15f0b7f1',
     agreementId: 'f7c5b8d4-2c1a-4d2c-9d5e-2a4b6c8d0e2f',
@@ -52,7 +54,11 @@ function createReviewResponse(overrides: Partial<AiReviewResponseDto> = {}): AiR
   };
 }
 
-function expectErrorCode(response: request.Response, code: ErrorCode, status: number): void {
+function expectErrorCode(
+  response: request.Response,
+  code: ErrorCode,
+  status: number,
+): void {
   expect(response.status).toBe(status);
   expect(response.body).toEqual(
     expect.objectContaining({
@@ -121,7 +127,9 @@ describe('AiReviewController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    const requestContextMiddleware = moduleFixture.get(RequestContextMiddleware);
+    const requestContextMiddleware = moduleFixture.get(
+      RequestContextMiddleware,
+    );
     app.use((req: Request, _res: Response, next: NextFunction) => {
       requestContextMiddleware.use(req, _res, next);
     });
@@ -192,7 +200,10 @@ describe('AiReviewController (e2e)', () => {
     it('returns 200 with valid response when authenticated', async () => {
       const token = signToken();
       const review = createReviewResponse();
-      const listResponse: AiReviewListResponseDto = { reviews: [review], total: 1 };
+      const listResponse: AiReviewListResponseDto = {
+        reviews: [review],
+        total: 1,
+      };
 
       aiReviewServiceMock.findAll.mockResolvedValue(listResponse);
 
@@ -276,7 +287,9 @@ describe('AiReviewController (e2e)', () => {
       aiReviewServiceMock.openReview.mockResolvedValue(review);
 
       const response = await request(app.getHttpServer())
-        .post(`/api/v1/portal/${portalToken}/deliveries/${deliveryId}/open-ai-review`)
+        .post(
+          `/api/v1/portal/${portalToken}/deliveries/${deliveryId}/open-ai-review`,
+        )
         .send({ objection: 'Test objection for the portal' })
         .expect(201);
 
@@ -300,7 +313,9 @@ describe('AiReviewController (e2e)', () => {
       );
 
       const response = await request(app.getHttpServer())
-        .post(`/api/v1/portal/${portalToken}/deliveries/${deliveryId}/open-ai-review`)
+        .post(
+          `/api/v1/portal/${portalToken}/deliveries/${deliveryId}/open-ai-review`,
+        )
         .send({ objection: 'Test objection for the portal' })
         .expect(409);
 
@@ -316,7 +331,9 @@ describe('AiReviewController (e2e)', () => {
       );
 
       const response = await request(app.getHttpServer())
-        .post(`/api/v1/portal/${portalToken}/deliveries/${deliveryId}/open-ai-review`)
+        .post(
+          `/api/v1/portal/${portalToken}/deliveries/${deliveryId}/open-ai-review`,
+        )
         .send({ objection: 'Test objection for the portal' })
         .expect(404);
 
@@ -330,7 +347,9 @@ describe('AiReviewController (e2e)', () => {
   describe('POST /api/v1/ai/review-payment-release', () => {
     it('T025: returns 201 with valid JWT and owned agreement', async () => {
       const token = signToken('user-freelancer-1');
-      const review = createReviewResponse({ requestedByRole: TimelineActorRole.FREELANCER });
+      const review = createReviewResponse({
+        requestedByRole: TimelineActorRole.FREELANCER,
+      });
 
       aiReviewServiceMock.reviewPaymentRelease.mockResolvedValue(review);
 
@@ -377,7 +396,9 @@ describe('AiReviewController (e2e)', () => {
   describe('POST /api/v1/ai-reviews/:id/accept-recommendation', () => {
     it('T028: returns 401 without JWT', async () => {
       const response = await request(app.getHttpServer())
-        .post('/api/v1/ai-reviews/31ddf8a4-cb55-4d38-b91b-9cdd15f0b7f1/accept-recommendation')
+        .post(
+          '/api/v1/ai-reviews/31ddf8a4-cb55-4d38-b91b-9cdd15f0b7f1/accept-recommendation',
+        )
         .send({})
         .expect(401);
 

@@ -16,7 +16,9 @@ describe('AiReviewService reviewPaymentRelease errors', () => {
 
   it('throws DELIVERY_NOT_FOUND when the delivery does not match the agreement and milestone', async () => {
     const { service, prisma } = createService();
-    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue({ id: 'agreement-1' });
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue({
+      id: 'agreement-1',
+    });
     (prisma.delivery.findFirst as jest.Mock).mockResolvedValue(null);
 
     await expect(

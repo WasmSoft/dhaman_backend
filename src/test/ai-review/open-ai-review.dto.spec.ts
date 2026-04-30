@@ -39,7 +39,8 @@ describe('OpenAiReviewDto', () => {
 
   it('accepts an omitted relatedCriteria array', async () => {
     const errors = await validateDto({
-      objection: 'The final delivery does not match the agreed acceptance criteria.',
+      objection:
+        'The final delivery does not match the agreed acceptance criteria.',
     });
 
     expect(errors).toHaveLength(0);
@@ -47,19 +48,28 @@ describe('OpenAiReviewDto', () => {
 
   it('rejects non-string items in relatedCriteria', async () => {
     const errors = await validateDto({
-      objection: 'The final delivery does not match the agreed acceptance criteria.',
+      objection:
+        'The final delivery does not match the agreed acceptance criteria.',
       relatedCriteria: ['responsive layout', 5],
     });
 
-    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty('isString');
+    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty(
+      'isString',
+    );
   });
 
   it('rejects relatedCriteria arrays longer than 50 items', async () => {
     const errors = await validateDto({
-      objection: 'The final delivery does not match the agreed acceptance criteria.',
-      relatedCriteria: Array.from({ length: 51 }, (_, index) => `criterion-${index}`),
+      objection:
+        'The final delivery does not match the agreed acceptance criteria.',
+      relatedCriteria: Array.from(
+        { length: 51 },
+        (_, index) => `criterion-${index}`,
+      ),
     });
 
-    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty('arrayMaxSize');
+    expect(constraintsFor(errors, 'relatedCriteria')).toHaveProperty(
+      'arrayMaxSize',
+    );
   });
 });

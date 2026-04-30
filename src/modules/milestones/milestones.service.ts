@@ -12,6 +12,7 @@ import {
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { AppException } from '../../common/errors/app-exception';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { AgreementsService } from '../agreements/agreements.service';
 import { PaymentsService } from '../payments/payments.service';
 import { TimelineEventsService } from '../timeline-events/timeline-events.service';
 import {
@@ -68,6 +69,7 @@ export class MilestonesService {
     private readonly prisma: PrismaService,
     private readonly paymentsService: PaymentsService,
     private readonly timelineEventsService: TimelineEventsService,
+    private readonly agreementsService?: AgreementsService,
   ) {}
 
   // AR: ينشئ مرحلة داخل اتفاق مملوك في حالة مسودة مع دفعة انتظار تجريبية وتحذير إجمالي عند الحاجة.
@@ -130,6 +132,8 @@ export class MilestonesService {
         },
         tx,
       );
+
+      await this.agreementsService?.recalculateTotalAmount(tx, agreement.id);
 
       const summary = await this.calculateAmountSummary(
         agreement.id,
@@ -197,6 +201,13 @@ export class MilestonesService {
         );
       }
 
+      if (dto.amount !== undefined) {
+        await this.agreementsService?.recalculateTotalAmount(
+          tx,
+          milestone.agreement.id,
+        );
+      }
+
       const summary = await this.calculateAmountSummary(
         milestone.agreement.id,
         milestone.agreement.totalAmount,
@@ -244,6 +255,11 @@ export class MilestonesService {
         tx,
       );
       await tx.milestone.delete({ where: { id: milestone.id } });
+
+      await this.agreementsService?.recalculateTotalAmount(
+        tx,
+        milestone.agreement.id,
+      );
 
       return { success: true };
     });

@@ -1,4 +1,8 @@
-import { AIRecommendation, PaymentOperationType, PaymentStatus } from '@prisma/client';
+import {
+  AIRecommendation,
+  PaymentOperationType,
+  PaymentStatus,
+} from '@prisma/client';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { PaymentsService } from '../../modules/payments/payments.service';
 
@@ -171,7 +175,10 @@ describe('PaymentsService transitionPaymentFromAiReviewToOutcome', () => {
   it('uses transaction client when provided', async () => {
     const prisma = createPrismaMock();
     const service = new PaymentsService(prisma as never);
-    const tx = { payment: { findFirst: jest.fn(), update: jest.fn() }, milestone: { update: jest.fn() } };
+    const tx = {
+      payment: { findFirst: jest.fn(), update: jest.fn() },
+      milestone: { update: jest.fn() },
+    };
 
     tx.payment.findFirst.mockResolvedValue({
       id: 'payment-1',

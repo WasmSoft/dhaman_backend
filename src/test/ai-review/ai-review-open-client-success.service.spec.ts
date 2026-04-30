@@ -1,4 +1,8 @@
-import { AIRecommendation, AIReviewStatus, TimelineActorRole } from '@prisma/client';
+import {
+  AIRecommendation,
+  AIReviewStatus,
+  TimelineActorRole,
+} from '@prisma/client';
 import { Locale } from '../../common/enums/locale.enum';
 import {
   createGeminiServiceMock,
@@ -25,7 +29,9 @@ const GEMINI_RESULT = JSON.stringify({
 describe('AiReviewService openReview client success', () => {
   it('opens, processes, and returns a completed review for a client actor using Gemini', async () => {
     const geminiService = createGeminiServiceMock();
-    (geminiService.generateContent as jest.Mock).mockResolvedValue(GEMINI_RESULT);
+    (geminiService.generateContent as jest.Mock).mockResolvedValue(
+      GEMINI_RESULT,
+    );
 
     const { service, prisma } = createService(Locale.EN, geminiService);
     mockSuccessfulOpenReview(prisma);
@@ -59,7 +65,8 @@ describe('AiReviewService openReview client success', () => {
     expect(prisma.timelineEvent.create).toHaveBeenCalledTimes(2);
     expect(prisma.emailNotification.create).toHaveBeenCalledTimes(1);
 
-    const completionUpdate = (prisma.aIReview.update as jest.Mock).mock.calls[1][0].data;
+    const completionUpdate = (prisma.aIReview.update as jest.Mock).mock
+      .calls[1][0].data;
     expect(completionUpdate.rawResponse).toEqual({
       provider: 'gemini',
       response: expect.objectContaining({

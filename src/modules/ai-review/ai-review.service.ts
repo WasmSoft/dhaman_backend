@@ -98,10 +98,10 @@ type ReviewDeliveryRecord = {
     client: {
       id: string;
       email: string;
-    };
+    } | null;
     title: string;
-    description: string;
-    serviceType: string;
+    description: string | null;
+    serviceType: string | null;
     currency: string;
     policy: {
       delayPolicy: string;
@@ -234,7 +234,7 @@ export class AiReviewService {
         data: {
           status: AIReviewStatus.COMPLETED,
           matchScore: result.matchScore,
-          recommendation: result.recommendation as AIRecommendation,
+          recommendation: result.recommendation,
           reasoning: result.reasoning,
           completedCriteria: result.completedCriteria,
           missingCriteria: result.missingCriteria,
@@ -350,10 +350,7 @@ export class AiReviewService {
     };
   }
 
-  async findOne(
-    id: string,
-    userId: string,
-  ): Promise<AiReviewResponseDto> {
+  async findOne(id: string, userId: string): Promise<AiReviewResponseDto> {
     const review = await this.prisma.aIReview.findFirst({
       where: {
         id,
@@ -394,7 +391,10 @@ export class AiReviewService {
       throw new AppException({ code: ErrorCode.AI_REVIEW_NOT_FOUND });
     }
 
-    if (review.status !== AIReviewStatus.COMPLETED || review.recommendation === null) {
+    if (
+      review.status !== AIReviewStatus.COMPLETED ||
+      review.recommendation === null
+    ) {
       throw new AppException({ code: ErrorCode.AI_REVIEW_NOT_FOUND });
     }
 
@@ -468,15 +468,19 @@ export class AiReviewService {
       };
     });
 
-    await this.emailNotificationsService.enqueueAiReviewRecommendationAcceptedForClient({
-      agreementId: review.agreementId,
-      recipientEmail: review.agreement.client.email,
-      recommendation: review.recommendation,
-      paymentStatus: result.paymentStatus,
-    });
+    if (review.agreement.client) {
+      await this.emailNotificationsService.enqueueAiReviewRecommendationAcceptedForClient(
+        {
+          agreementId: review.agreementId,
+          recipientEmail: review.agreement.client.email,
+          recommendation: review.recommendation,
+          paymentStatus: result.paymentStatus,
+        },
+      );
+    }
 
     return {
-      review: this.toResponse(review as unknown as AiReviewRecord),
+      review: this.toResponse(review),
       paymentStatus: result.paymentStatus,
       changeRequestsCreated: result.changeRequestsCreated,
     };
@@ -547,9 +551,7 @@ export class AiReviewService {
     return this.runMockFallback(context, reviewId, 'ai_failure');
   }
 
-  private async tryRealProvider(
-    prompt: string,
-  ): Promise<ReviewResult | null> {
+  private async tryRealProvider(prompt: string): Promise<ReviewResult | null> {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const rawText = await this.geminiService.generateContent(prompt);

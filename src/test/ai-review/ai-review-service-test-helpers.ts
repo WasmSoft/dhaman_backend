@@ -64,8 +64,10 @@ export function createService(
 } {
   const prisma = createPrismaMock();
   const cls = createClsMock(locale);
+  const paymentsService = new PaymentsService(prisma);
   const timelineEventsService = new TimelineEventsService(prisma, cls);
-  const paymentsService = new PaymentsService(prisma, timelineEventsService, cls);
+  const timelineEventsService = new TimelineEventsService(prisma, cls);
+  const paymentsService = new PaymentsService(prisma, timelineEventsService, cls, cls);
   const emailNotificationsService = new EmailNotificationsService(prisma);
   const mockGeminiService = geminiService ?? createGeminiServiceMock();
 
@@ -168,7 +170,9 @@ export const REVIEW_PAYMENT_DTO = {
 };
 
 export function mockSuccessfulOpenReview(prisma: PrismaService) {
-  (prisma.delivery.findUnique as jest.Mock).mockResolvedValue(createDeliveryFixture());
+  (prisma.delivery.findUnique as jest.Mock).mockResolvedValue(
+    createDeliveryFixture(),
+  );
   (prisma.payment.findFirst as jest.Mock).mockResolvedValue({
     id: 'payment-1',
     status: PaymentStatus.CLIENT_REVIEW,
