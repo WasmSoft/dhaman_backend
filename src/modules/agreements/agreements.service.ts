@@ -107,6 +107,7 @@ export class AgreementsService {
     return this.mapToResponse(agreement);
   }
 
+
   async findAll(query: AgreementQueryDto): Promise<AgreementListResponseDto> {
     const freelancerId = this.getFreelancerId();
 
@@ -123,6 +124,7 @@ export class AgreementsService {
     if (query.clientId) {
       where.clientId = query.clientId;
     }
+  
 
     if (query.search) {
       where.OR = [
@@ -160,6 +162,12 @@ export class AgreementsService {
       limit,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  // AR: يعيد إرسال دعوة الاتفاق للعميل بعد تمرير هوية المستخدم من الخادم.
+  // EN: Resends the agreement invite after passing server-owned user identity into the email service.
+  resendInvite(id: string, userId: string) {
+    return this.emailNotifications.resendAgreementInvite(id, userId);
   }
 
   list(query: AgreementQueryDto = {}): Promise<AgreementListResponseDto> {
@@ -370,6 +378,7 @@ export class AgreementsService {
 
     return this.mapToResponse(updated);
   }
+
 
   async activate(id: string): Promise<AgreementResponseDto> {
     const freelancerId = this.getFreelancerId();

@@ -43,6 +43,7 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.PAYMENT_INVALID_AMOUNT]: 'Invalid payment amount',
   [ErrorCode.PAYMENT_DEMO_MODE_ONLY]:
     'Operation is available in demo mode only',
+  [ErrorCode.PAYMENT_INVALID_TRANSITION]: 'Invalid payment state transition',
   [ErrorCode.PAYMENT_MILESTONE_REQUIRED]:
     'Milestone is required for this payment operation',
   [ErrorCode.DELIVERY_NOT_FOUND]: 'Delivery not found',
@@ -50,6 +51,13 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.DELIVERY_URL_OR_FILE_REQUIRED]: 'Delivery URL or file is required',
   [ErrorCode.DELIVERY_NOT_IN_REVIEW]: 'Delivery is not in review state',
   [ErrorCode.DELIVERY_ALREADY_ACCEPTED]: 'Delivery was already accepted',
+  [ErrorCode.DELIVERY_ALREADY_EXISTS]: 'An editable delivery already exists for this milestone',
+  [ErrorCode.DELIVERY_NOT_EDITABLE]: 'Delivery cannot be edited in its current state',
+  [ErrorCode.DELIVERY_NOT_SUBMITTABLE]: 'Delivery cannot be submitted in its current state',
+  [ErrorCode.DELIVERY_EVIDENCE_REQUIRED]: 'Delivery evidence is required',
+  [ErrorCode.DELIVERY_NOT_REVIEWABLE]: 'Delivery is not ready for client review',
+  [ErrorCode.AGREEMENT_NOT_ACTIVE]: 'Agreement is not active',
+  [ErrorCode.PAYMENT_NOT_RESERVED]: 'Payment must be reserved before delivery review',
   [ErrorCode.PORTAL_TOKEN_INVALID]: 'Portal token is invalid',
   [ErrorCode.PORTAL_TOKEN_EXPIRED]: 'Portal token has expired',
   [ErrorCode.PORTAL_TOKEN_REVOKED]: 'Portal token was revoked',
@@ -60,20 +68,40 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.AI_REVIEW_NOT_FOUND]: 'AI review not found',
   [ErrorCode.AI_REVIEW_ALREADY_COMPLETED]: 'AI review was already completed',
   [ErrorCode.AI_INVALID_RESPONSE]: 'AI provider returned an invalid response',
-  [ErrorCode.CHANGE_REQUEST_NOT_FOUND]: 'Change request not found',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_APPROVED]:
-    'Change request was already approved',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_DECLINED]:
-    'Change request was already declined',
-  [ErrorCode.CHANGE_REQUEST_PAYMENT_REQUIRED]:
-    'Change request payment is required',
-  [ErrorCode.CHANGE_REQUEST_INVALID_SCOPE]: 'Change request scope is invalid',
+  [ErrorCode.CHANGE_REQUEST_NOT_FOUND]: 'Change request was not found.',
+  [ErrorCode.CHANGE_REQUEST_AMOUNT_INVALID]:
+    'Change request amount must be greater than zero.',
+  [ErrorCode.CHANGE_REQUEST_NOT_EDITABLE]:
+    'Change request cannot be edited in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_SENDABLE]:
+    'Change request cannot be sent in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVABLE]:
+    'Change request cannot be approved in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_DECLINABLE]:
+    'Change request cannot be declined in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVED]:
+    'Change request must be approved before funding.',
+  [ErrorCode.PAYMENT_NOT_FUNDABLE]:
+    'Payment cannot be funded in its current state.',
+  [ErrorCode.AI_REVIEW_NOT_ELIGIBLE_FOR_CHANGE_REQUEST]:
+    'AI review cannot create a change request.',
   [ErrorCode.EMAIL_SEND_FAILED]: 'Email send failed',
   [ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]: 'Email template not found',
+  [ErrorCode.EMAIL_RENDER_FAILED]: 'Email template could not be rendered',
   [ErrorCode.EMAIL_RECIPIENT_REQUIRED]: 'Recipient email is required',
+  [ErrorCode.CLIENT_EMAIL_MISSING]: 'Client email address is missing',
+  [ErrorCode.EMAIL_TYPE_NOT_SUPPORTED]:
+    'Email notification type is not supported',
+  [ErrorCode.EMAIL_CONTEXT_INCOMPLETE]: 'Email context is incomplete',
+  [ErrorCode.EMAIL_NOTIFICATIONS_DISABLED]:
+    'Email notifications are disabled for this user',
+  [ErrorCode.AGREEMENT_NOT_INVITABLE]:
+    'Agreement cannot be invited in its current state',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'Settings not found',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'Settings value is invalid',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'Dashboard date range is invalid.',
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]:
     'Dashboard analytics could not be calculated.',
+  [ErrorCode.TIMELINE_EVENT_TYPE_INVALID]: 'Timeline event type is invalid.',
+  [ErrorCode.TIMELINE_METADATA_INVALID]: 'Timeline metadata is invalid.',
 };

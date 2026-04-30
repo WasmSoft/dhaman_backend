@@ -1,7 +1,2 @@
-import { IsOptional, IsUUID } from 'class-validator';
-
-export class TimelineQueryDto {
-  @IsOptional()
-  @IsUUID()
-  milestoneId?: string;
-}
+export * from './timeline-event-response.dto';
+export * from './timeline-query.dto';
