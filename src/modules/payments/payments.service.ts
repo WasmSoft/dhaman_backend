@@ -67,7 +67,10 @@ type PaymentWriteClient = Pick<
  */
 @Injectable()
 export class PaymentsService {
-  private readonly validTransitions: Record<PrismaPaymentStatus, PrismaPaymentStatus[]> = {
+  private readonly validTransitions: Record<
+    PrismaPaymentStatus,
+    PrismaPaymentStatus[]
+  > = {
     [PrismaPaymentStatus.WAITING]: [PrismaPaymentStatus.RESERVED],
     [PrismaPaymentStatus.RESERVED]: [PrismaPaymentStatus.CLIENT_REVIEW],
     [PrismaPaymentStatus.CLIENT_REVIEW]: [
@@ -265,10 +268,7 @@ export class PaymentsService {
   // Ownership Guard
   // ============================================================
 
-  private async requireAgreementOwnership(
-    agreementId: string,
-    userId: string,
-  ) {
+  private async requireAgreementOwnership(agreementId: string, userId: string) {
     const agreement = await this.prisma.agreement.findUnique({
       where: { id: agreementId },
       select: { freelancerId: true, currency: true },
@@ -281,10 +281,7 @@ export class PaymentsService {
     return agreement;
   }
 
-  private async requirePaymentOwnership(
-    paymentId: string,
-    userId: string,
-  ) {
+  private async requirePaymentOwnership(paymentId: string, userId: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
       include: {
@@ -409,10 +406,7 @@ export class PaymentsService {
       throw new AppException({ code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE });
     }
 
-    this.validateTransition(
-      payment.status,
-      PrismaPaymentStatus.RELEASED,
-    );
+    this.validateTransition(payment.status, PrismaPaymentStatus.RELEASED);
 
     const now = new Date();
 
@@ -512,13 +506,12 @@ export class PaymentsService {
     let totalPending = new Decimal(0);
 
     for (const p of payments) {
-      const amount = p.amount instanceof Decimal ? p.amount : new Decimal(String(p.amount));
+      const amount =
+        p.amount instanceof Decimal ? p.amount : new Decimal(String(p.amount));
 
       if (p.status === PrismaPaymentStatus.RELEASED) {
         totalReleased = totalReleased.plus(amount);
-      } else if (
-        p.status === PrismaPaymentStatus.WAITING
-      ) {
+      } else if (p.status === PrismaPaymentStatus.WAITING) {
         totalPending = totalPending.plus(amount);
       }
 
@@ -560,10 +553,7 @@ export class PaymentsService {
       throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
     }
 
-    this.validateTransition(
-      payment.status,
-      PrismaPaymentStatus.CLIENT_REVIEW,
-    );
+    this.validateTransition(payment.status, PrismaPaymentStatus.CLIENT_REVIEW);
 
     const previousStatus = payment.status;
 
@@ -618,10 +608,7 @@ export class PaymentsService {
       throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
     }
 
-    this.validateTransition(
-      payment.status,
-      PrismaPaymentStatus.AI_REVIEW,
-    );
+    this.validateTransition(payment.status, PrismaPaymentStatus.AI_REVIEW);
 
     const previousStatus = payment.status;
 
@@ -735,10 +722,7 @@ export class PaymentsService {
       throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
     }
 
-    this.validateTransition(
-      payment.status,
-      PrismaPaymentStatus.ON_HOLD,
-    );
+    this.validateTransition(payment.status, PrismaPaymentStatus.ON_HOLD);
 
     const previousStatus = payment.status;
 
@@ -794,10 +778,7 @@ export class PaymentsService {
       throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
     }
 
-    this.validateTransition(
-      payment.status,
-      PrismaPaymentStatus.CLIENT_REVIEW,
-    );
+    this.validateTransition(payment.status, PrismaPaymentStatus.CLIENT_REVIEW);
 
     const previousStatus = payment.status;
 
@@ -837,7 +818,6 @@ export class PaymentsService {
 
     return this.toPaymentResponseDto(updatedPayment);
   }
-  
 
   // listByAgreementId(agreementId: string) {
   //   return this.placeholder('listByAgreementId', { agreementId });
@@ -867,10 +847,7 @@ export class PaymentsService {
     return this.releasePayment(dto, actorId, actorRole);
   }
 
-  async getById(
-    id: string,
-    userId?: string,
-  ): Promise<PaymentResponseDto> {
+  async getById(id: string, userId?: string): Promise<PaymentResponseDto> {
     if (!userId) {
       throw new AppException({ code: ErrorCode.UNAUTHORIZED });
     }
@@ -1028,10 +1005,7 @@ export class PaymentsService {
       throw new AppException({ code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE });
     }
 
-    this.validateTransition(
-      payment.status,
-      PrismaPaymentStatus.RELEASED,
-    );
+    this.validateTransition(payment.status, PrismaPaymentStatus.RELEASED);
 
     const now = new Date();
 

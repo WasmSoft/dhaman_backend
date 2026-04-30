@@ -57,12 +57,14 @@ describe('AgreementPoliciesService', () => {
     }).compile();
 
     service = module.get(AgreementPoliciesService);
-    prisma = module.get(PrismaService) as jest.Mocked<PrismaService>;
+    prisma = module.get(PrismaService);
   });
 
   describe('copyDefaultsToAgreement', () => {
     it('copies saved defaults into a draft agreement without a policy record', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.findUnique as jest.Mock).mockResolvedValue(null);
       (prisma.userSettings.findUnique as jest.Mock).mockResolvedValue({
         defaultPolicies: {
@@ -113,7 +115,9 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('falls back to baseline values when no saved defaults exist', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.findUnique as jest.Mock).mockResolvedValue(null);
       (prisma.userSettings.findUnique as jest.Mock).mockResolvedValue(null);
       (prisma.agreementPolicy.create as jest.Mock).mockResolvedValue({
@@ -147,7 +151,9 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('normalizes malformed saved defaults before creating the policy', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.findUnique as jest.Mock).mockResolvedValue(null);
       (prisma.userSettings.findUnique as jest.Mock).mockResolvedValue({
         defaultPolicies: {
@@ -188,8 +194,12 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('returns the existing policy unchanged when one already exists', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
-      (prisma.agreementPolicy.findUnique as jest.Mock).mockResolvedValue(mockPolicy);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
+      (prisma.agreementPolicy.findUnique as jest.Mock).mockResolvedValue(
+        mockPolicy,
+      );
 
       const result = await service.copyDefaultsToAgreement(AGREEMENT_ID);
 
@@ -199,14 +209,18 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('is safe to call repeatedly for the same agreement', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.findUnique as jest.Mock)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(mockPolicy);
       (prisma.userSettings.findUnique as jest.Mock).mockResolvedValue({
         defaultPolicies: null,
       });
-      (prisma.agreementPolicy.create as jest.Mock).mockResolvedValue(mockPolicy);
+      (prisma.agreementPolicy.create as jest.Mock).mockResolvedValue(
+        mockPolicy,
+      );
 
       await service.copyDefaultsToAgreement(AGREEMENT_ID);
       await service.copyDefaultsToAgreement(AGREEMENT_ID);
@@ -218,7 +232,9 @@ describe('AgreementPoliciesService', () => {
     it('throws AGREEMENT_NOT_FOUND when the agreement does not exist', async () => {
       (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.copyDefaultsToAgreement(AGREEMENT_ID)).rejects.toMatchObject({
+      await expect(
+        service.copyDefaultsToAgreement(AGREEMENT_ID),
+      ).rejects.toMatchObject({
         code: ErrorCode.AGREEMENT_NOT_FOUND,
       });
 
@@ -233,7 +249,9 @@ describe('AgreementPoliciesService', () => {
         status: AgreementStatus.SENT,
       });
 
-      await expect(service.copyDefaultsToAgreement(AGREEMENT_ID)).rejects.toMatchObject({
+      await expect(
+        service.copyDefaultsToAgreement(AGREEMENT_ID),
+      ).rejects.toMatchObject({
         code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED,
       });
 
@@ -267,7 +285,9 @@ describe('AgreementPoliciesService', () => {
 
       const unauthService = module.get(AgreementPoliciesService);
 
-      await expect(unauthService.copyDefaultsToAgreement(AGREEMENT_ID)).rejects.toMatchObject({
+      await expect(
+        unauthService.copyDefaultsToAgreement(AGREEMENT_ID),
+      ).rejects.toMatchObject({
         code: ErrorCode.UNAUTHORIZED,
       });
     });
@@ -275,7 +295,9 @@ describe('AgreementPoliciesService', () => {
 
   describe('getPolicy', () => {
     it('returns the policy when the freelancer owns the agreement and a policy exists', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.findUnique as jest.Mock).mockResolvedValue(
         mockPolicy,
       );
@@ -291,7 +313,9 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('throws POLICY_NOT_FOUND when the agreement exists but no policy exists', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(service.getPolicy(AGREEMENT_ID)).rejects.toMatchObject({
@@ -329,16 +353,22 @@ describe('AgreementPoliciesService', () => {
 
       const unauthService = module.get(AgreementPoliciesService);
 
-      await expect(unauthService.getPolicy(AGREEMENT_ID)).rejects.toMatchObject({
-        code: ErrorCode.UNAUTHORIZED,
-      });
+      await expect(unauthService.getPolicy(AGREEMENT_ID)).rejects.toMatchObject(
+        {
+          code: ErrorCode.UNAUTHORIZED,
+        },
+      );
     });
   });
 
   describe('upsertPolicy', () => {
     it('creates a policy with defaults when no fields are provided', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
-      (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue(mockPolicy);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
+      (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue(
+        mockPolicy,
+      );
 
       const result = await service.upsertPolicy(AGREEMENT_ID, {});
 
@@ -357,7 +387,9 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('updates only the provided fields and preserves omitted fields', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue({
         ...mockPolicy,
         clientReviewPeriodDays: 14,
@@ -365,15 +397,20 @@ describe('AgreementPoliciesService', () => {
 
       await service.upsertPolicy(AGREEMENT_ID, { clientReviewPeriodDays: 14 });
 
-      const upsertCall = (prisma.agreementPolicy.upsert as jest.Mock).mock.calls[0][0];
+      const upsertCall = (prisma.agreementPolicy.upsert as jest.Mock).mock
+        .calls[0][0];
       expect(upsertCall.update).toEqual({ clientReviewPeriodDays: 14 });
       expect(upsertCall.update).not.toHaveProperty('delayPolicy');
       expect(upsertCall.update).not.toHaveProperty('cancellationPolicy');
     });
 
     it('is idempotent for repeated saves', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
-      (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue(mockPolicy);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
+      (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue(
+        mockPolicy,
+      );
 
       await service.upsertPolicy(AGREEMENT_ID, { clientReviewPeriodDays: 7 });
       await service.upsertPolicy(AGREEMENT_ID, { clientReviewPeriodDays: 7 });
@@ -385,7 +422,9 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('saves explicit null to clear a policy text field', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue({
         ...mockPolicy,
         cancellationPolicy: null,
@@ -395,7 +434,8 @@ describe('AgreementPoliciesService', () => {
         cancellationPolicy: null,
       });
 
-      const upsertCall = (prisma.agreementPolicy.upsert as jest.Mock).mock.calls[0][0];
+      const upsertCall = (prisma.agreementPolicy.upsert as jest.Mock).mock
+        .calls[0][0];
       expect(upsertCall.update.cancellationPolicy).toBeNull();
       expect(result.cancellationPolicy).toBeNull();
     });
@@ -424,7 +464,9 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('throws POLICY_INVALID_CONTENT when any policy text field is empty', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
 
       for (const key of [
         'delayPolicy',
@@ -432,7 +474,9 @@ describe('AgreementPoliciesService', () => {
         'extraRequestPolicy',
         'reviewPolicy',
       ] as const) {
-        await expect(service.upsertPolicy(AGREEMENT_ID, { [key]: '' } as any)).rejects.toMatchObject({
+        await expect(
+          service.upsertPolicy(AGREEMENT_ID, { [key]: '' } as any),
+        ).rejects.toMatchObject({
           code: ErrorCode.POLICY_INVALID_CONTENT,
         });
       }
@@ -440,18 +484,26 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('accepts null for policy text fields', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
       (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue({
         ...mockPolicy,
         delayPolicy: null,
       });
 
-      await expect(service.upsertPolicy(AGREEMENT_ID, { delayPolicy: null })).resolves.toBeDefined();
+      await expect(
+        service.upsertPolicy(AGREEMENT_ID, { delayPolicy: null }),
+      ).resolves.toBeDefined();
     });
 
     it('accepts boundary values for review period and grace days', async () => {
-      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(mockAgreement);
-      (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue(mockPolicy);
+      (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+        mockAgreement,
+      );
+      (prisma.agreementPolicy.upsert as jest.Mock).mockResolvedValue(
+        mockPolicy,
+      );
 
       await expect(
         service.upsertPolicy(AGREEMENT_ID, { clientReviewPeriodDays: 1 }),
@@ -492,7 +544,7 @@ describe('AgreementPoliciesService', () => {
       }).compile();
 
       defaultService = module.get(AgreementPoliciesService);
-      defaultPrisma = module.get(PrismaService) as jest.Mocked<PrismaService>;
+      defaultPrisma = module.get(PrismaService);
     });
 
     it('returns saved default policies when UserSettings has valid defaultPolicies', async () => {
@@ -517,7 +569,9 @@ describe('AgreementPoliciesService', () => {
     });
 
     it('returns fallback values when UserSettings is missing', async () => {
-      (defaultPrisma.userSettings.findUnique as jest.Mock).mockResolvedValue(null);
+      (defaultPrisma.userSettings.findUnique as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       const result = await defaultService.getDefaultPolicies();
 
@@ -574,11 +628,13 @@ describe('AgreementPoliciesService', () => {
       }).compile();
 
       defaultService = module.get(AgreementPoliciesService);
-      defaultPrisma = module.get(PrismaService) as jest.Mocked<PrismaService>;
+      defaultPrisma = module.get(PrismaService);
     });
 
     it('creates settings and returns merged defaults on first save', async () => {
-      (defaultPrisma.userSettings.findUnique as jest.Mock).mockResolvedValue(null);
+      (defaultPrisma.userSettings.findUnique as jest.Mock).mockResolvedValue(
+        null,
+      );
       (defaultPrisma.userSettings.upsert as jest.Mock).mockResolvedValue({
         defaultPolicies: {
           delayPolicy: 'first delay text',
@@ -665,8 +721,12 @@ describe('AgreementPoliciesService', () => {
       });
 
       expect(result.delayPolicy).toBeNull();
-      const upsertCall = (defaultPrisma.userSettings.upsert as jest.Mock).mock.calls[0][0];
-      expect((upsertCall.update.defaultPolicies as Record<string, unknown>).delayPolicy).toBeNull();
+      const upsertCall = (defaultPrisma.userSettings.upsert as jest.Mock).mock
+        .calls[0][0];
+      expect(
+        (upsertCall.update.defaultPolicies as Record<string, unknown>)
+          .delayPolicy,
+      ).toBeNull();
     });
 
     it('returns current template without writing when body is empty', async () => {
@@ -695,7 +755,7 @@ describe('AgreementPoliciesService', () => {
         'reviewPolicy',
       ] as const) {
         await expect(
-          defaultService.updateDefaultPolicies({ [key]: '' } as never),
+          defaultService.updateDefaultPolicies({ [key]: '' }),
         ).rejects.toMatchObject({ code: ErrorCode.POLICY_INVALID_CONTENT });
       }
 

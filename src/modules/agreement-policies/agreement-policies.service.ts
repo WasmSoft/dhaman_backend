@@ -226,14 +226,18 @@ export class AgreementPoliciesService {
 
     const merged: DefaultPoliciesResponseDto = {
       ...current,
-      ...(dto.delayPolicy !== undefined ? { delayPolicy: dto.delayPolicy } : {}),
+      ...(dto.delayPolicy !== undefined
+        ? { delayPolicy: dto.delayPolicy }
+        : {}),
       ...(dto.cancellationPolicy !== undefined
         ? { cancellationPolicy: dto.cancellationPolicy }
         : {}),
       ...(dto.extraRequestPolicy !== undefined
         ? { extraRequestPolicy: dto.extraRequestPolicy }
         : {}),
-      ...(dto.reviewPolicy !== undefined ? { reviewPolicy: dto.reviewPolicy } : {}),
+      ...(dto.reviewPolicy !== undefined
+        ? { reviewPolicy: dto.reviewPolicy }
+        : {}),
       ...(dto.clientReviewPeriodDays !== undefined
         ? { clientReviewPeriodDays: dto.clientReviewPeriodDays }
         : {}),
@@ -292,9 +296,7 @@ export class AgreementPoliciesService {
     };
   }
 
-  private normalizeDefaultPolicies(
-    raw: unknown,
-  ): DefaultPoliciesResponseDto {
+  private normalizeDefaultPolicies(raw: unknown): DefaultPoliciesResponseDto {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
       return { ...this.DEFAULT_POLICIES };
     }

@@ -106,10 +106,10 @@ export class AgreementsService {
       return created;
     });
 
-    const copiedPolicy = await this.agreementPoliciesService.copyDefaultsToAgreement(
-      agreement.id,
-    );
-    agreement.policy = copiedPolicy as unknown as AgreementWithIncludes['policy'];
+    const copiedPolicy =
+      await this.agreementPoliciesService.copyDefaultsToAgreement(agreement.id);
+    agreement.policy =
+      copiedPolicy as unknown as AgreementWithIncludes['policy'];
 
     return this.mapToResponse(agreement);
   }

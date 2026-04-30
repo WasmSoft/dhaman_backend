@@ -2,14 +2,18 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../../../app.module';
+import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'agreement-policies-e2e-secret';
+process.env.JWT_SECRET =
+  process.env.JWT_SECRET || 'agreement-policies-e2e-secret';
 
 describe('Agreement Policies endpoints (e2e)', () => {
   let app: INestApplication;
+  let prisma: PrismaService;
   let jwt: string;
   let otherJwt: string;
   let agreementId: string;
+  let missingPolicyAgreementId: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -17,8 +21,11 @@ describe('Agreement Policies endpoints (e2e)', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
+    prisma = app.get(PrismaService);
 
     const r1 = await request(app.getHttpServer())
       .post('/api/v1/auth/register')
@@ -43,6 +50,16 @@ describe('Agreement Policies endpoints (e2e)', () => {
       .set('Authorization', `Bearer ${jwt}`)
       .send({ title: 'Policy E2E Agreement', currency: 'SAR' });
     agreementId = agr.body.data?.id ?? agr.body.id;
+
+    const missingPolicyAgreement = await request(app.getHttpServer())
+      .post('/api/v1/agreements')
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ title: 'Policy Missing Record', currency: 'SAR' });
+    missingPolicyAgreementId =
+      missingPolicyAgreement.body.data?.id ?? missingPolicyAgreement.body.id;
+    await prisma.agreementPolicy.deleteMany({
+      where: { agreementId: missingPolicyAgreementId },
+    });
   });
 
   afterAll(async () => {
@@ -62,6 +79,15 @@ describe('Agreement Policies endpoints (e2e)', () => {
       .expect(404);
 
     expect(res.body.error?.code ?? res.body.code).toBe('AGREEMENT_NOT_FOUND');
+  });
+
+  it('returns 404 when the policy record is missing', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/api/v1/agreements/${missingPolicyAgreementId}/policies`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .expect(404);
+
+    expect(res.body.error?.code ?? res.body.code).toBe('POLICY_NOT_FOUND');
   });
 
   it('returns baseline policy on GET after agreement creation', async () => {
@@ -99,6 +125,16 @@ describe('Agreement Policies endpoints (e2e)', () => {
     expect(updatedBody.clientReviewPeriodDays).toBe(14);
   });
 
+  it('returns 404 when another freelancer patches the agreement', async () => {
+    const res = await request(app.getHttpServer())
+      .patch(`/api/v1/agreements/${agreementId}/policies`)
+      .set('Authorization', `Bearer ${otherJwt}`)
+      .send({ delayPolicy: 'wrong owner' })
+      .expect(404);
+
+    expect(res.body.error?.code ?? res.body.code).toBe('AGREEMENT_NOT_FOUND');
+  });
+
   it('returns 400 POLICY_INVALID_CONTENT for empty text', async () => {
     const res = await request(app.getHttpServer())
       .patch(`/api/v1/agreements/${agreementId}/policies`)
@@ -106,7 +142,38 @@ describe('Agreement Policies endpoints (e2e)', () => {
       .send({ delayPolicy: '' })
       .expect(400);
 
-    expect(res.body.error?.code ?? res.body.code).toBe('POLICY_INVALID_CONTENT');
+    expect(res.body.error?.code ?? res.body.code).toBe(
+      'POLICY_INVALID_CONTENT',
+    );
+  });
+
+  it('returns 400 POLICY_INVALID_REVIEW_PERIOD for invalid numeric values', async () => {
+    const res = await request(app.getHttpServer())
+      .patch(`/api/v1/agreements/${agreementId}/policies`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ clientReviewPeriodDays: 0 })
+      .expect(400);
+
+    expect(res.body.error?.code ?? res.body.code).toBe(
+      'POLICY_INVALID_REVIEW_PERIOD',
+    );
+  });
+
+  it('returns 409 when the agreement is no longer draft', async () => {
+    await request(app.getHttpServer())
+      .post(`/api/v1/agreements/${agreementId}/approve`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .expect(200);
+
+    const res = await request(app.getHttpServer())
+      .patch(`/api/v1/agreements/${agreementId}/policies`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ delayPolicy: 'should fail after approval' })
+      .expect(409);
+
+    expect(res.body.error?.code ?? res.body.code).toBe(
+      'AGREEMENT_CANNOT_BE_MODIFIED',
+    );
   });
 });
 
@@ -121,7 +188,9 @@ describe('Default policies endpoints (e2e)', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
 
     const r1 = await request(app.getHttpServer())
@@ -252,7 +321,9 @@ describe('Default policies endpoints (e2e)', () => {
       .send({ delayPolicy: '' })
       .expect(400);
 
-    expect(res.body.error?.code ?? res.body.code).toBe('POLICY_INVALID_CONTENT');
+    expect(res.body.error?.code ?? res.body.code).toBe(
+      'POLICY_INVALID_CONTENT',
+    );
   });
 
   it('returns 400 when clientReviewPeriodDays is null', async () => {

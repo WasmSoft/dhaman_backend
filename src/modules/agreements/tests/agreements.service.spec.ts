@@ -1838,7 +1838,7 @@ describe('AgreementsService.create', () => {
     });
     setupCreateTransaction(created);
     agreementPoliciesService.copyDefaultsToAgreement.mockResolvedValue(
-      mockPolicy as never,
+      mockPolicy,
     );
 
     const result = await service.create({ title: 'New' });
@@ -1846,10 +1846,12 @@ describe('AgreementsService.create', () => {
     expect(result.status).toBe(AgreementStatus.DRAFT);
     expect(result.freelancerId).toBe(FREELANCER_ID);
     expect(result.totalAmount).toBe(0);
-    expect(agreementPoliciesService.copyDefaultsToAgreement).toHaveBeenCalledWith(
-      AGREEMENT_ID,
+    expect(
+      agreementPoliciesService.copyDefaultsToAgreement,
+    ).toHaveBeenCalledWith(AGREEMENT_ID);
+    expect(result.policy).toEqual(
+      expect.objectContaining({ id: mockPolicy.id }),
     );
-    expect(result.policy).toEqual(expect.objectContaining({ id: mockPolicy.id }));
   });
 
   it('calls clientsService.getById when clientId is provided', async () => {

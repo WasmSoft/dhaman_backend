@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -25,7 +18,6 @@ import {
 } from './dto/agreement-policies.dto';
 import { AgreementPoliciesService } from './agreement-policies.service';
 
-@ApiTags('Agreement Policies', 'Settings')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller()
@@ -34,30 +26,80 @@ export class AgreementPoliciesController {
     private readonly agreementPoliciesService: AgreementPoliciesService,
   ) {}
 
+  @ApiTags('Agreement Policies')
   @ApiOperation({
     summary: 'Get agreement policy',
-    description: 'Returns the policy attached to an agreement owned by the authenticated freelancer.',
+    description:
+      'Returns the agreement-specific policy for an agreement owned by the authenticated freelancer. ' +
+      'Agreement policies are contract context and can later inform AI Review.',
   })
-  @ApiParam({ name: 'agreementId', type: String, description: 'Agreement identifier.' })
-  @ApiResponse({ status: 200, type: AgreementPolicyResponseDto })
-  @ApiResponse({ status: 401, type: ErrorResponseDto })
-  @ApiResponse({ status: 404, type: ErrorResponseDto })
+  @ApiParam({
+    name: 'agreementId',
+    type: String,
+    description: 'Agreement identifier owned by the authenticated freelancer.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Agreement policy retrieved successfully.',
+    type: AgreementPolicyResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'AGREEMENT_NOT_FOUND: Agreement not found or not owned by the requester; POLICY_NOT_FOUND: No policy record exists for the agreement.',
+    type: ErrorResponseDto,
+  })
   @Get('agreements/:agreementId/policies')
   getPolicy(@Param('agreementId', ParseUuidPipe) agreementId: string) {
     return this.agreementPoliciesService.getPolicy(agreementId);
   }
 
+  @ApiTags('Agreement Policies')
   @ApiOperation({
     summary: 'Update agreement policy',
-    description: 'Creates or updates the policy attached to a draft agreement owned by the authenticated freelancer.',
+    description:
+      'Creates or updates the agreement-specific policy for an owned DRAFT agreement. ' +
+      'Only DRAFT agreements can be changed, and the saved policy feeds later AI Review context.',
   })
-  @ApiParam({ name: 'agreementId', type: String, description: 'Agreement identifier.' })
+  @ApiParam({
+    name: 'agreementId',
+    type: String,
+    description: 'Agreement identifier owned by the authenticated freelancer.',
+  })
   @ApiBody({ type: UpdateAgreementPolicyDto })
-  @ApiResponse({ status: 200, type: AgreementPolicyResponseDto })
-  @ApiResponse({ status: 400, type: ErrorResponseDto })
-  @ApiResponse({ status: 401, type: ErrorResponseDto })
-  @ApiResponse({ status: 404, type: ErrorResponseDto })
-  @ApiResponse({ status: 409, type: ErrorResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Agreement policy saved successfully.',
+    type: AgreementPolicyResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'VALIDATION_ERROR: Request body failed validation; POLICY_INVALID_CONTENT: Policy text is empty or too long; POLICY_INVALID_REVIEW_PERIOD: Review or grace day value is out of range.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'AGREEMENT_NOT_FOUND: Agreement not found or not owned by the requester.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'AGREEMENT_CANNOT_BE_MODIFIED: Agreement is not in DRAFT status.',
+    type: ErrorResponseDto,
+  })
   @Patch('agreements/:agreementId/policies')
   upsertPolicy(
     @Param('agreementId', ParseUuidPipe) agreementId: string,
@@ -66,25 +108,52 @@ export class AgreementPoliciesController {
     return this.agreementPoliciesService.upsertPolicy(agreementId, dto);
   }
 
+  @ApiTags('Settings')
   @ApiOperation({
     summary: 'Get default policy template',
-    description: 'Returns the authenticated freelancer reusable default agreement policy template.',
+    description:
+      'Returns the authenticated freelancer reusable default policy template for future agreements. ' +
+      'These settings are not agreement-specific contract terms.',
   })
-  @ApiResponse({ status: 200, type: DefaultPoliciesResponseDto })
-  @ApiResponse({ status: 401, type: ErrorResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Default policy template retrieved successfully.',
+    type: DefaultPoliciesResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT.',
+    type: ErrorResponseDto,
+  })
   @Get('settings/default-policies')
   getDefaultPolicies(): Promise<DefaultPoliciesResponseDto> {
     return this.agreementPoliciesService.getDefaultPolicies();
   }
 
+  @ApiTags('Settings')
   @ApiOperation({
     summary: 'Update default policy template',
-    description: 'Updates the authenticated freelancer reusable default agreement policy template.',
+    description:
+      'Partially updates the authenticated freelancer reusable default policy template. ' +
+      'Omitted fields preserve their current values.',
   })
   @ApiBody({ type: UpdateDefaultPoliciesDto })
-  @ApiResponse({ status: 200, type: DefaultPoliciesResponseDto })
-  @ApiResponse({ status: 400, type: ErrorResponseDto })
-  @ApiResponse({ status: 401, type: ErrorResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Default policy template saved successfully.',
+    type: DefaultPoliciesResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'VALIDATION_ERROR: Request body failed validation; POLICY_INVALID_CONTENT: Policy text is empty or too long; POLICY_INVALID_REVIEW_PERIOD: Review or grace day value is out of range.',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT.',
+    type: ErrorResponseDto,
+  })
   @Patch('settings/default-policies')
   updateDefaultPolicies(
     @Body() dto: UpdateDefaultPoliciesDto,

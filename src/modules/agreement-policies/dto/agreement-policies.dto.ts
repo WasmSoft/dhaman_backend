@@ -14,8 +14,10 @@ export class UpdateAgreementPolicyDto {
     type: String,
     nullable: true,
     maxLength: 5000,
-    description: 'Policy text describing how freelancer delays are handled.',
-    example: 'في حال التأخير لأكثر من 3 أيام، يحق للعميل طلب تعديل الجدول الزمني.',
+    description:
+      'Agreement delay policy text. Leave it omitted to preserve the current value or send null to clear it.',
+    example:
+      'في حال التأخير لأكثر من 3 أيام، يحق للعميل طلب تعديل الجدول الزمني.',
   })
   @IsOptional()
   @IsString()
@@ -27,7 +29,8 @@ export class UpdateAgreementPolicyDto {
     type: String,
     nullable: true,
     maxLength: 5000,
-    description: 'Policy text describing cancellation rules.',
+    description:
+      'Agreement cancellation policy text. Leave it omitted to preserve the current value or send null to clear it.',
     example: 'يمكن إلغاء الاتفاقية قبل بدء التنفيذ دون رسوم إضافية.',
   })
   @IsOptional()
@@ -40,7 +43,8 @@ export class UpdateAgreementPolicyDto {
     type: String,
     nullable: true,
     maxLength: 5000,
-    description: 'Policy text describing out-of-scope or extra requests.',
+    description:
+      'Agreement extra request policy text. Leave it omitted to preserve the current value or send null to clear it.',
     example: 'أي طلب خارج النطاق المتفق عليه يتطلب عرض سعر وموافقة منفصلة.',
   })
   @IsOptional()
@@ -53,7 +57,8 @@ export class UpdateAgreementPolicyDto {
     type: String,
     nullable: true,
     maxLength: 5000,
-    description: 'Policy text describing client review and revision expectations.',
+    description:
+      'Agreement review policy text. Leave it omitted to preserve the current value or send null to clear it.',
     example: 'لدى العميل 7 أيام لمراجعة التسليم وطلب التعديلات المتفق عليها.',
   })
   @IsOptional()
@@ -66,7 +71,7 @@ export class UpdateAgreementPolicyDto {
     type: Number,
     minimum: 1,
     maximum: 90,
-    description: 'Number of days the client has to review a deliverable.',
+    description: 'Agreement client review period in days, from 1 to 90.',
     example: 7,
   })
   @IsOptional()
@@ -80,7 +85,8 @@ export class UpdateAgreementPolicyDto {
     type: Number,
     minimum: 0,
     maximum: 30,
-    description: 'Number of grace days before freelancer delay rules apply.',
+    description:
+      'Agreement freelancer delay grace period in days, from 0 to 30.',
     example: 3,
   })
   @IsOptional()
@@ -110,15 +116,16 @@ export class AgreementPolicyResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Policy text describing delay handling.',
-    example: 'في حال التأخير لأكثر من 3 أيام، يحق للعميل طلب تعديل الجدول الزمني.',
+    description: 'Agreement policy text describing delay handling.',
+    example:
+      'في حال التأخير لأكثر من 3 أيام، يحق للعميل طلب تعديل الجدول الزمني.',
   })
   delayPolicy: string | null;
 
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Policy text describing cancellation rules.',
+    description: 'Agreement policy text describing cancellation rules.',
     example: null,
   })
   cancellationPolicy: string | null;
@@ -126,7 +133,7 @@ export class AgreementPolicyResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Policy text describing extra request handling.',
+    description: 'Agreement policy text describing extra request handling.',
     example: null,
   })
   extraRequestPolicy: string | null;
@@ -134,7 +141,7 @@ export class AgreementPolicyResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Policy text describing review rules.',
+    description: 'Agreement policy text describing review rules.',
     example: 'لدى العميل 7 أيام لمراجعة التسليم.',
   })
   reviewPolicy: string | null;
@@ -143,7 +150,7 @@ export class AgreementPolicyResponseDto {
     type: Number,
     minimum: 1,
     maximum: 90,
-    description: 'Number of days the client has to review a deliverable.',
+    description: 'Agreement client review period in days, from 1 to 90.',
     example: 7,
   })
   clientReviewPeriodDays: number;
@@ -152,7 +159,8 @@ export class AgreementPolicyResponseDto {
     type: Number,
     minimum: 0,
     maximum: 30,
-    description: 'Number of grace days before delay rules apply.',
+    description:
+      'Agreement freelancer delay grace period in days, from 0 to 30.',
     example: 3,
   })
   freelancerDelayGraceDays: number;
@@ -160,6 +168,7 @@ export class AgreementPolicyResponseDto {
   @ApiProperty({
     type: String,
     description: 'Creation timestamp (ISO 8601).',
+    format: 'date-time',
     example: '2026-04-30T12:00:00.000Z',
   })
   createdAt: string;
@@ -167,6 +176,7 @@ export class AgreementPolicyResponseDto {
   @ApiProperty({
     type: String,
     description: 'Last update timestamp (ISO 8601).',
+    format: 'date-time',
     example: '2026-04-30T12:00:00.000Z',
   })
   updatedAt: string;
@@ -209,7 +219,7 @@ export class DefaultPoliciesResponseDto {
     type: Number,
     minimum: 1,
     maximum: 90,
-    description: 'Default review period in days.',
+    description: 'Default client review period in days, from 1 to 90.',
     example: 7,
   })
   clientReviewPeriodDays: number;
@@ -218,7 +228,7 @@ export class DefaultPoliciesResponseDto {
     type: Number,
     minimum: 0,
     maximum: 30,
-    description: 'Default grace period in days.',
+    description: 'Default freelancer delay grace period in days, from 0 to 30.',
     example: 3,
   })
   freelancerDelayGraceDays: number;
