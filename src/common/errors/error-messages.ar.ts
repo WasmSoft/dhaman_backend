@@ -1,4 +1,4 @@
-import { ErrorCode } from '../enums/error-code.enum';
+﻿import { ErrorCode } from '../enums/error-code.enum';
 
 export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.INTERNAL_SERVER_ERROR]: 'حدث خطأ داخلي في الخادم',
@@ -13,6 +13,7 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.AUTH_TOKEN_EXPIRED]: 'انتهت صلاحية رمز الدخول',
   [ErrorCode.AUTH_TOKEN_INVALID]: 'رمز الدخول غير صالح',
   [ErrorCode.AUTH_USER_NOT_FOUND]: 'تعذر العثور على المستخدم',
+  [ErrorCode.USER_NOT_FOUND]: 'لم يتم العثور على المستخدم.',
   [ErrorCode.CLIENT_NOT_FOUND]: 'تعذر العثور على العميل',
   [ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS]:
     'البريد الإلكتروني للعميل مستخدم بالفعل',
@@ -42,12 +43,26 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.PAYMENT_NOT_READY_TO_RELEASE]: 'الدفعة غير جاهزة للتحرير',
   [ErrorCode.PAYMENT_INVALID_AMOUNT]: 'قيمة الدفعة غير صالحة',
   [ErrorCode.PAYMENT_DEMO_MODE_ONLY]: 'هذه العملية متاحة في وضع المحاكاة فقط',
+  [ErrorCode.PAYMENT_INVALID_TRANSITION]: 'انتقال حالة الدفعة غير صالح',
   [ErrorCode.PAYMENT_MILESTONE_REQUIRED]: 'يجب تحديد المرحلة لهذه العملية',
   [ErrorCode.DELIVERY_NOT_FOUND]: 'تعذر العثور على التسليم',
   [ErrorCode.DELIVERY_ALREADY_SUBMITTED]: 'تم إرسال التسليم مسبقاً',
   [ErrorCode.DELIVERY_URL_OR_FILE_REQUIRED]: 'يجب توفير رابط أو ملف للتسليم',
   [ErrorCode.DELIVERY_NOT_IN_REVIEW]: 'التسليم ليس قيد المراجعة',
   [ErrorCode.DELIVERY_ALREADY_ACCEPTED]: 'تم قبول التسليم مسبقاً',
+  [ErrorCode.DELIVERY_ALREADY_EXISTS]:
+    'يوجد تسليم قابل للتعديل لهذه المرحلة بالفعل',
+  [ErrorCode.DELIVERY_NOT_EDITABLE]:
+    'لا يمكن تعديل التسليم في حالته الحالية',
+  [ErrorCode.DELIVERY_NOT_SUBMITTABLE]:
+    'لا يمكن إرسال التسليم في حالته الحالية',
+  [ErrorCode.DELIVERY_EVIDENCE_REQUIRED]:
+    'يجب إضافة دليل أو رابط للتسليم',
+  [ErrorCode.DELIVERY_NOT_REVIEWABLE]:
+    'التسليم غير جاهز لمراجعة العميل',
+  [ErrorCode.AGREEMENT_NOT_ACTIVE]: 'الاتفاق غير نشط',
+  [ErrorCode.PAYMENT_NOT_RESERVED]:
+    'يجب حجز الدفعة قبل مراجعة التسليم',
   [ErrorCode.PORTAL_TOKEN_INVALID]: 'رمز بوابة العميل غير صالح',
   [ErrorCode.PORTAL_TOKEN_EXPIRED]: 'انتهت صلاحية رمز بوابة العميل',
   [ErrorCode.PORTAL_TOKEN_REVOKED]: 'تم إلغاء رمز بوابة العميل',
@@ -60,17 +75,44 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
     'اكتملت مراجعة الذكاء الاصطناعي مسبقاً',
   [ErrorCode.AI_INVALID_RESPONSE]: 'استجابة الذكاء الاصطناعي غير صالحة',
   [ErrorCode.CHANGE_REQUEST_NOT_FOUND]: 'تعذر العثور على طلب التغيير',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_APPROVED]:
-    'تمت الموافقة على طلب التغيير مسبقاً',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_DECLINED]: 'تم رفض طلب التغيير مسبقاً',
-  [ErrorCode.CHANGE_REQUEST_PAYMENT_REQUIRED]: 'يتطلب طلب التغيير دفعة',
-  [ErrorCode.CHANGE_REQUEST_INVALID_SCOPE]: 'نطاق طلب التغيير غير صالح',
+  [ErrorCode.CHANGE_REQUEST_AMOUNT_INVALID]:
+    'يجب أن تكون قيمة طلب التغيير أكبر من صفر.',
+  [ErrorCode.CHANGE_REQUEST_NOT_EDITABLE]:
+    'لا يمكن تعديل طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_SENDABLE]:
+    'لا يمكن إرسال طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVABLE]:
+    'لا يمكن قبول طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_DECLINABLE]:
+    'لا يمكن رفض طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVED]:
+    'يجب قبول طلب التغيير قبل تمويله.',
+  [ErrorCode.PAYMENT_NOT_FUNDABLE]:
+    'لا يمكن تمويل الدفعة في حالتها الحالية.',
+  [ErrorCode.AI_REVIEW_NOT_ELIGIBLE_FOR_CHANGE_REQUEST]:
+    'لا يمكن إنشاء طلب تغيير من مراجعة الذكاء الاصطناعي هذه.',
   [ErrorCode.EMAIL_SEND_FAILED]: 'فشل إرسال البريد الإلكتروني',
   [ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]:
     'تعذر العثور على قالب البريد الإلكتروني',
+  [ErrorCode.EMAIL_RENDER_FAILED]: 'تعذر إنشاء محتوى البريد الإلكتروني',
   [ErrorCode.EMAIL_RECIPIENT_REQUIRED]: 'البريد الإلكتروني للمستلم مطلوب',
+  [ErrorCode.CLIENT_EMAIL_MISSING]: 'بريد العميل الإلكتروني غير موجود',
+  [ErrorCode.EMAIL_TYPE_NOT_SUPPORTED]: 'نوع إشعار البريد الإلكتروني غير مدعوم',
+  [ErrorCode.EMAIL_CONTEXT_INCOMPLETE]: 'بيانات البريد الإلكتروني غير مكتملة',
+  [ErrorCode.EMAIL_NOTIFICATIONS_DISABLED]:
+    'تم تعطيل إشعارات البريد الإلكتروني لهذا المستخدم',
+  [ErrorCode.AGREEMENT_NOT_INVITABLE]:
+    'لا يمكن إرسال دعوة لهذا الاتفاق في حالته الحالية',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'تعذر العثور على الإعدادات',
+  [ErrorCode.SETTINGS_CREATE_FAILED]: 'تعذر إنشاء الإعدادات الافتراضية.',
+  [ErrorCode.SETTINGS_UPDATE_FAILED]: 'تعذر تحديث الإعدادات.',
+  [ErrorCode.SETTINGS_INVALID_AI_STRICTNESS]:
+    'قيمة مستوى صرامة الذكاء الاصطناعي غير صالحة.',
+  [ErrorCode.SETTINGS_INVALID_CURRENCY]: 'العملة الافتراضية غير صالحة.',
+  [ErrorCode.SETTINGS_POLICY_INVALID]: 'سياسة الاتفاق الافتراضية غير صالحة.',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'قيمة الإعدادات غير صالحة',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'نطاق التاريخ للوحة التحكم غير صالح.',
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]: 'تعذر حساب بيانات لوحة التحكم.',
+  [ErrorCode.TIMELINE_EVENT_TYPE_INVALID]: 'نوع حدث السجل الزمني غير صالح.',
+  [ErrorCode.TIMELINE_METADATA_INVALID]: 'بيانات حدث السجل الزمني غير صالحة.',
 };

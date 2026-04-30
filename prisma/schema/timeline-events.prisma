@@ -3,16 +3,25 @@ enum TimelineEventType {
   AGREEMENT_SENT
   AGREEMENT_APPROVED
   AGREEMENT_COMPLETED
+  AGREEMENT_CHANGES_REQUESTED
   MILESTONE_CREATED
   MILESTONE_UPDATED
   MILESTONE_DELETED
   MILESTONES_REORDERED
   PAYMENT_RESERVED
+  PAYMENT_CLIENT_REVIEW
   PAYMENT_RELEASED
+  PAYMENT_STATUS_CHANGED
+  PAYMENT_ESCALATED_TO_AI
+  PAYMENT_READY_TO_RELEASE
+  PAYMENT_ON_HOLD
   DELIVERY_SUBMITTED
+  DELIVERY_ACCEPTED
+  DELIVERY_CHANGES_REQUESTED
   CHANGE_REQUEST_CREATED
   CHANGE_REQUEST_APPROVED
   CHANGE_REQUEST_DECLINED
+  CHANGE_REQUEST_FUNDED
   AI_REVIEW_REQUESTED
   AI_REVIEW_COMPLETED
   AI_REVIEW_RECOMMENDATION_ACCEPTED
@@ -22,16 +31,18 @@ enum TimelineEventType {
 }
 
 model TimelineEvent {
-  id          String            @id @default(uuid())
-  agreementId String
-  milestoneId String?
-  actorRole   TimelineActorRole
-  actorId     String?
-  type        TimelineEventType
-  title       String
-  description String
-  metadata    Json?
-  createdAt   DateTime          @default(now())
+  id            String            @id @default(uuid())
+  agreementId   String
+  milestoneId   String?
+  actorRole     TimelineActorRole
+  actorId       String?
+  type          TimelineEventType
+  title         String
+  description   String
+  metadata      Json?
+  requestId     String?
+  correlationId String?
+  createdAt     DateTime          @default(now())
 
   agreement Agreement  @relation(fields: [agreementId], references: [id])
   milestone Milestone? @relation(fields: [milestoneId], references: [id])
@@ -41,4 +52,5 @@ model TimelineEvent {
   @@index([milestoneId])
   @@index([actorId])
   @@index([type])
+  @@index([createdAt])
 }

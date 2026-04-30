@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PortalActionDto } from './dto/client-portal.dto';
+import { PortalDeclineChangeRequestDto } from '../change-requests/dto/portal-decline-change-request.dto';
+import { PortalFundPaymentDto } from '../payments/dto/payments.dto';
 
 /**
  * Module responsibility:
@@ -42,6 +44,18 @@ export class ClientPortalService {
 
   getDelivery(token: string, deliveryId: string) {
     return this.placeholder('getDelivery', { token, deliveryId });
+  }
+
+  approveChangeRequest(token: string, changeRequestId: string) {
+    return this.placeholder('approveChangeRequest', { token, changeRequestId });
+  }
+
+  declineChangeRequest(token: string, changeRequestId: string, dto: PortalDeclineChangeRequestDto) {
+    return this.placeholder('declineChangeRequest', { token, changeRequestId, dto });
+  }
+
+  fundChangeRequest(token: string, changeRequestId: string, dto: PortalFundPaymentDto) {
+    return this.placeholder('fundChangeRequest', { token, changeRequestId, dto });
   }
 
   private placeholder(action: string, details?: Record<string, unknown>) {

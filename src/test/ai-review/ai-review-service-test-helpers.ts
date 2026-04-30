@@ -66,6 +66,8 @@ export function createService(
   const cls = createClsMock(locale);
   const paymentsService = new PaymentsService(prisma);
   const timelineEventsService = new TimelineEventsService(prisma, cls);
+  const timelineEventsService = new TimelineEventsService(prisma, cls);
+  const paymentsService = new PaymentsService(prisma, timelineEventsService, cls);
   const emailNotificationsService = new EmailNotificationsService(prisma);
   const mockGeminiService = geminiService ?? createGeminiServiceMock();
 

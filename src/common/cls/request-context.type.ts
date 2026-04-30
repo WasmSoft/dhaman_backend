@@ -9,6 +9,7 @@ export type RequestContext = {
   userRole?: UserRole;
   actorType: ActorType;
   portalTokenId?: string;
+  portalTokenType?: string;
   agreementId?: string;
   locale: Locale;
   startedAt: Date;
