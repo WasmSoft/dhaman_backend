@@ -82,7 +82,15 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.EMAIL_SEND_FAILED]: 'فشل إرسال البريد الإلكتروني',
   [ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]:
     'تعذر العثور على قالب البريد الإلكتروني',
+  [ErrorCode.EMAIL_RENDER_FAILED]: 'تعذر إنشاء محتوى البريد الإلكتروني',
   [ErrorCode.EMAIL_RECIPIENT_REQUIRED]: 'البريد الإلكتروني للمستلم مطلوب',
+  [ErrorCode.CLIENT_EMAIL_MISSING]: 'بريد العميل الإلكتروني غير موجود',
+  [ErrorCode.EMAIL_TYPE_NOT_SUPPORTED]: 'نوع إشعار البريد الإلكتروني غير مدعوم',
+  [ErrorCode.EMAIL_CONTEXT_INCOMPLETE]: 'بيانات البريد الإلكتروني غير مكتملة',
+  [ErrorCode.EMAIL_NOTIFICATIONS_DISABLED]:
+    'تم تعطيل إشعارات البريد الإلكتروني لهذا المستخدم',
+  [ErrorCode.AGREEMENT_NOT_INVITABLE]:
+    'لا يمكن إرسال دعوة لهذا الاتفاق في حالته الحالية',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'تعذر العثور على الإعدادات',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'قيمة الإعدادات غير صالحة',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'نطاق التاريخ للوحة التحكم غير صالح.',

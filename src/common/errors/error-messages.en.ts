@@ -43,8 +43,7 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.PAYMENT_INVALID_AMOUNT]: 'Invalid payment amount',
   [ErrorCode.PAYMENT_DEMO_MODE_ONLY]:
     'Operation is available in demo mode only',
-  [ErrorCode.PAYMENT_INVALID_TRANSITION]:
-    'Invalid payment state transition',
+  [ErrorCode.PAYMENT_INVALID_TRANSITION]: 'Invalid payment state transition',
   [ErrorCode.PAYMENT_MILESTONE_REQUIRED]:
     'Milestone is required for this payment operation',
   [ErrorCode.DELIVERY_NOT_FOUND]: 'Delivery not found',
@@ -79,7 +78,16 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.CHANGE_REQUEST_INVALID_SCOPE]: 'Change request scope is invalid',
   [ErrorCode.EMAIL_SEND_FAILED]: 'Email send failed',
   [ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]: 'Email template not found',
+  [ErrorCode.EMAIL_RENDER_FAILED]: 'Email template could not be rendered',
   [ErrorCode.EMAIL_RECIPIENT_REQUIRED]: 'Recipient email is required',
+  [ErrorCode.CLIENT_EMAIL_MISSING]: 'Client email address is missing',
+  [ErrorCode.EMAIL_TYPE_NOT_SUPPORTED]:
+    'Email notification type is not supported',
+  [ErrorCode.EMAIL_CONTEXT_INCOMPLETE]: 'Email context is incomplete',
+  [ErrorCode.EMAIL_NOTIFICATIONS_DISABLED]:
+    'Email notifications are disabled for this user',
+  [ErrorCode.AGREEMENT_NOT_INVITABLE]:
+    'Agreement cannot be invited in its current state',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'Settings not found',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'Settings value is invalid',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'Dashboard date range is invalid.',
