@@ -95,4 +95,6 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'قيمة الإعدادات غير صالحة',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'نطاق التاريخ للوحة التحكم غير صالح.',
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]: 'تعذر حساب بيانات لوحة التحكم.',
+  [ErrorCode.TIMELINE_EVENT_TYPE_INVALID]: 'نوع حدث السجل الزمني غير صالح.',
+  [ErrorCode.TIMELINE_METADATA_INVALID]: 'بيانات حدث السجل الزمني غير صالحة.',
 };

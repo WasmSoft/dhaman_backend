@@ -93,4 +93,6 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'Dashboard date range is invalid.',
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]:
     'Dashboard analytics could not be calculated.',
+  [ErrorCode.TIMELINE_EVENT_TYPE_INVALID]: 'Timeline event type is invalid.',
+  [ErrorCode.TIMELINE_METADATA_INVALID]: 'Timeline metadata is invalid.',
 };

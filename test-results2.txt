@@ -1,0 +1,16 @@
+node.exe : testPathPattern:
+At C:\Program Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (testPathPattern::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+  Option "testPathPattern" was replaced by "--testPathPatterns". "--testPathPatterns" is only available as a 
+command-line option.
+  
+  Please update your configuration.
+
+  CLI Options Documentation:
+  https://jestjs.io/docs/cli
+
