@@ -1,0 +1,28 @@
+node.exe : D:\projects\Dhaman\backend\src\modules\timeline-events\timeline-events.service.ts:309
+At C:\Program Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\projects\Dha....service.ts:309:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+                throw new app_exception_1.AppException({ code: error_code_enum_1.ErrorCode.TIMELINE_METADATA_INVALID 
+});
+                      ^
+
+[AppException: App Exception] {
+  response: {
+    code: 'TIMELINE_METADATA_INVALID',
+    details: {},
+    fieldErrors: [],
+    localizedMessage: undefined,
+    message: undefined
+  },
+  status: 400,
+  options: undefined,
+  code: 'TIMELINE_METADATA_INVALID',
+  localizedMessage: undefined,
+  details: {},
+  fieldErrors: []
+}
+
+Node.js v22.15.0

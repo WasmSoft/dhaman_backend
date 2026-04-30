@@ -116,7 +116,19 @@ The tables below define implementation-time expectations for success behavior, c
 
 | Endpoint | Success | Possible Errors | Side Effects | Testing Cases |
 | --- | --- | --- | --- | --- |
-| `GET /api/v1/agreements/:agreementId/timeline` | Returns agreement timeline | `UNAUTHORIZED`, `AGREEMENT_NOT_FOUND` | none | timeline fetch |
+| `GET /api/v1/agreements/:agreementId/timeline` | Returns paginated agreement timeline for authenticated freelancer | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `AGREEMENT_NOT_FOUND`, `TIMELINE_EVENT_TYPE_INVALID` | none | owned agreement timeline fetch, invalid query filters, reversed date range, missing auth, wrong owner |
+| `GET /api/v1/portal/:token/timeline` | Returns client-safe paginated portal timeline | `VALIDATION_ERROR`, `PORTAL_TOKEN_INVALID`, `PORTAL_TOKEN_EXPIRED`, `PORTAL_TOKEN_REVOKED`, `TIMELINE_EVENT_TYPE_INVALID` | none | valid portal token fetch, invalid token, expired token, revoked token, filtered metadata |
+| _(internal)_ `TimelineEventsService.createEvent` | Creates append-only timeline event with CLS traceability | `TIMELINE_EVENT_TYPE_INVALID`, `TIMELINE_METADATA_INVALID` | Creates timeline record with safe metadata | valid creation, invalid event type, forbidden metadata keys (nested, mixed-case, array), CLS requestId/correlationId persistence |
+
+### Phase 5 Verified Behaviors
+
+- **Event creation safety**: Unapproved event types rejected; metadata with forbidden keys (password, secret, token, credential, etc.) rejected recursively with case-insensitive matching.
+- **Append-only**: Timeline reads never invoke create/update/delete operations.
+- **CLS traceability**: `requestId` and `correlationId` stored in event metadata when present in request context; empty values discarded.
+- **Dashboard ownership**: Freelancer-verified agreement scope enforced; missing auth and non-owned agreements produce stable errors.
+- **Portal scoping**: Token-based agreement scope enforced; invalid, revoked, and expired tokens produce distinct error codes.
+- **Portal-safe metadata**: Client-facing responses recursively filter forbidden keys from top-level, nested, and array-of-object metadata values.
+- **Reversed date range**: `from > to` queries produce `VALIDATION_ERROR` rather than silent empty results.
 
 ## Email Notifications
 
