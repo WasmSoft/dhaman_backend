@@ -15,10 +15,10 @@ export interface GeneratedPlanWithoutId {
     revisionLimit: number;
   }>;
   policies: {
-    delayPolicy: string;
-    cancellationPolicy: string;
-    extraRequestPolicy: string;
-    reviewPolicy: string;
+    delayPolicy: string | null;
+    cancellationPolicy: string | null;
+    extraRequestPolicy: string | null;
+    reviewPolicy: string | null;
   };
   ambiguityWarnings: string[];
   clarityScore: number;

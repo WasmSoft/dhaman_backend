@@ -104,10 +104,10 @@ type ReviewDeliveryRecord = {
     serviceType: string | null;
     currency: string;
     policy: {
-      delayPolicy: string;
-      cancellationPolicy: string;
-      extraRequestPolicy: string;
-      reviewPolicy: string;
+      delayPolicy: string | null;
+      cancellationPolicy: string | null;
+      extraRequestPolicy: string | null;
+      reviewPolicy: string | null;
       clientReviewPeriodDays: number;
       freelancerDelayGraceDays: number;
     } | null;

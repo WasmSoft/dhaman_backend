@@ -10,7 +10,7 @@ export type ReviewPolicyType =
 
 export type ReviewPolicyContext = {
   type: ReviewPolicyType;
-  clause: string;
+  clause: string | null;
   rules?: {
     clientReviewPeriodDays?: number;
     freelancerDelayGraceDays?: number;
@@ -66,10 +66,10 @@ export type BuildReviewContextInput = {
     serviceType: string | null;
     currency: string;
     policy?: {
-      delayPolicy: string;
-      cancellationPolicy: string;
-      extraRequestPolicy: string;
-      reviewPolicy: string;
+      delayPolicy: string | null;
+      cancellationPolicy: string | null;
+      extraRequestPolicy: string | null;
+      reviewPolicy: string | null;
       clientReviewPeriodDays: number;
       freelancerDelayGraceDays: number;
     } | null;

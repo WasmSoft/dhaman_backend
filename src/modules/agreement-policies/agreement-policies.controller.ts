@@ -1,7 +1,15 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ParseUuidPipe } from '../../common/pipes/parse-uuid.pipe';
-import { UpdateAgreementPoliciesDto } from './dto/agreement-policies.dto';
+import { UpdateAgreementPolicyDto } from './dto/agreement-policies.dto';
 import { AgreementPoliciesService } from './agreement-policies.service';
 
 @ApiTags('Agreement Policies')
@@ -11,16 +19,18 @@ export class AgreementPoliciesController {
     private readonly agreementPoliciesService: AgreementPoliciesService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('agreements/:agreementId/policies')
-  getByAgreementId(@Param('agreementId', ParseUuidPipe) agreementId: string) {
-    return this.agreementPoliciesService.getByAgreementId(agreementId);
+  getPolicy(@Param('agreementId', ParseUuidPipe) agreementId: string) {
+    return this.agreementPoliciesService.getPolicy(agreementId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch('agreements/:agreementId/policies')
-  updateByAgreementId(
+  upsertPolicy(
     @Param('agreementId', ParseUuidPipe) agreementId: string,
-    @Body() dto: UpdateAgreementPoliciesDto,
+    @Body() dto: UpdateAgreementPolicyDto,
   ) {
-    return this.agreementPoliciesService.updateByAgreementId(agreementId, dto);
+    return this.agreementPoliciesService.upsertPolicy(agreementId, dto);
   }
 }
