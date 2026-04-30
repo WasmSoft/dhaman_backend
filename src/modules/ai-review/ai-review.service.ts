@@ -455,7 +455,7 @@ export class AiReviewService {
             amount: new Prisma.Decimal(0),
             currency: review.agreement.currency,
             acceptanceCriteria: {},
-            status: ChangeRequestStatus.PENDING,
+            status: ChangeRequestStatus.DRAFT,
             paymentStatus: PaymentStatus.WAITING,
           })),
         });

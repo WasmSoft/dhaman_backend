@@ -1,31 +1,44 @@
 enum ChangeRequestStatus {
-  PENDING
+  DRAFT
+  SENT
   APPROVED
   DECLINED
-  PAID
+  FUNDED
+  IN_PROGRESS
+  DELIVERED
+  COMPLETED
 }
 
 model ChangeRequest {
   id                     String              @id @default(uuid())
   agreementId            String
   milestoneId            String?
+  aiReviewId             String?
   requestedByRole        TimelineActorRole
   title                  String
   description            String
   amount                 Decimal             @db.Decimal(12, 2)
   currency               String
   additionalTimelineText String?
+  timelineDays           Int?
   acceptanceCriteria     Json
+  metadata               Json?
   status                 ChangeRequestStatus
   paymentStatus          PaymentStatus
+  approvedAt             DateTime?
+  declinedAt             DateTime?
+  fundedAt               DateTime?
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
 
   agreement Agreement  @relation(fields: [agreementId], references: [id])
   milestone Milestone? @relation(fields: [milestoneId], references: [id])
+  aiReview  AIReview?  @relation(fields: [aiReviewId], references: [id])
   payments  Payment[]
 
   @@index([agreementId])
   @@index([milestoneId])
+  @@index([aiReviewId])
   @@index([status])
+  @@index([paymentStatus])
 }

@@ -2,6 +2,7 @@ import {
   AIRecommendation,
   AIReviewStatus,
   AgreementStatus,
+  ChangeRequestStatus,
   DeliveryStatus,
   PaymentStatus,
   Prisma,
@@ -170,7 +171,7 @@ export class DashboardAnalyticsService {
               agreementSummary.active,
               clientCount,
               deliveriesInReviewCount,
-              changeRequestSummary.byStatus.PENDING ?? 0,
+              changeRequestSummary.byStatus.DRAFT ?? 0,
             )
           : [],
         paymentSummary,
@@ -255,7 +256,7 @@ export class DashboardAnalyticsService {
           ? this.prisma.changeRequest.findMany({
               where: {
                 requestedByRole: TimelineActorRole.CLIENT,
-                status: 'PENDING',
+                status: ChangeRequestStatus.DRAFT,
                 agreement: { freelancerId: userId },
               },
               orderBy: { createdAt: 'desc' },

@@ -74,11 +74,22 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
     'اكتملت مراجعة الذكاء الاصطناعي مسبقاً',
   [ErrorCode.AI_INVALID_RESPONSE]: 'استجابة الذكاء الاصطناعي غير صالحة',
   [ErrorCode.CHANGE_REQUEST_NOT_FOUND]: 'تعذر العثور على طلب التغيير',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_APPROVED]:
-    'تمت الموافقة على طلب التغيير مسبقاً',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_DECLINED]: 'تم رفض طلب التغيير مسبقاً',
-  [ErrorCode.CHANGE_REQUEST_PAYMENT_REQUIRED]: 'يتطلب طلب التغيير دفعة',
-  [ErrorCode.CHANGE_REQUEST_INVALID_SCOPE]: 'نطاق طلب التغيير غير صالح',
+  [ErrorCode.CHANGE_REQUEST_AMOUNT_INVALID]:
+    'يجب أن تكون قيمة طلب التغيير أكبر من صفر.',
+  [ErrorCode.CHANGE_REQUEST_NOT_EDITABLE]:
+    'لا يمكن تعديل طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_SENDABLE]:
+    'لا يمكن إرسال طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVABLE]:
+    'لا يمكن قبول طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_DECLINABLE]:
+    'لا يمكن رفض طلب التغيير في حالته الحالية.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVED]:
+    'يجب قبول طلب التغيير قبل تمويله.',
+  [ErrorCode.PAYMENT_NOT_FUNDABLE]:
+    'لا يمكن تمويل الدفعة في حالتها الحالية.',
+  [ErrorCode.AI_REVIEW_NOT_ELIGIBLE_FOR_CHANGE_REQUEST]:
+    'لا يمكن إنشاء طلب تغيير من مراجعة الذكاء الاصطناعي هذه.',
   [ErrorCode.EMAIL_SEND_FAILED]: 'فشل إرسال البريد الإلكتروني',
   [ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]:
     'تعذر العثور على قالب البريد الإلكتروني',

@@ -68,14 +68,23 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.AI_REVIEW_NOT_FOUND]: 'AI review not found',
   [ErrorCode.AI_REVIEW_ALREADY_COMPLETED]: 'AI review was already completed',
   [ErrorCode.AI_INVALID_RESPONSE]: 'AI provider returned an invalid response',
-  [ErrorCode.CHANGE_REQUEST_NOT_FOUND]: 'Change request not found',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_APPROVED]:
-    'Change request was already approved',
-  [ErrorCode.CHANGE_REQUEST_ALREADY_DECLINED]:
-    'Change request was already declined',
-  [ErrorCode.CHANGE_REQUEST_PAYMENT_REQUIRED]:
-    'Change request payment is required',
-  [ErrorCode.CHANGE_REQUEST_INVALID_SCOPE]: 'Change request scope is invalid',
+  [ErrorCode.CHANGE_REQUEST_NOT_FOUND]: 'Change request was not found.',
+  [ErrorCode.CHANGE_REQUEST_AMOUNT_INVALID]:
+    'Change request amount must be greater than zero.',
+  [ErrorCode.CHANGE_REQUEST_NOT_EDITABLE]:
+    'Change request cannot be edited in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_SENDABLE]:
+    'Change request cannot be sent in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVABLE]:
+    'Change request cannot be approved in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_DECLINABLE]:
+    'Change request cannot be declined in its current state.',
+  [ErrorCode.CHANGE_REQUEST_NOT_APPROVED]:
+    'Change request must be approved before funding.',
+  [ErrorCode.PAYMENT_NOT_FUNDABLE]:
+    'Payment cannot be funded in its current state.',
+  [ErrorCode.AI_REVIEW_NOT_ELIGIBLE_FOR_CHANGE_REQUEST]:
+    'AI review cannot create a change request.',
   [ErrorCode.EMAIL_SEND_FAILED]: 'Email send failed',
   [ErrorCode.EMAIL_TEMPLATE_NOT_FOUND]: 'Email template not found',
   [ErrorCode.EMAIL_RENDER_FAILED]: 'Email template could not be rendered',
