@@ -8,11 +8,15 @@ model UserSettings {
   defaultExtraRequestPolicy String?
   defaultReviewPolicy       String?
   aiStrictness              String   @default("balanced")
+  // MVP keeps email preferences as a single toggle instead of a JSON blob.
   emailNotificationsEnabled Boolean  @default(true)
+  // These profile fields are still used by the Users module and remain here
+  // until profile storage is intentionally separated from settings defaults.
   businessName              String?
   bio                       String?
   specialization            String?
   preferredCurrency         String   @default("SAR")
+  // Locale remains a Users profile concern for now; settings behavior uses CLS.
   locale                    String   @default("ar")
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
