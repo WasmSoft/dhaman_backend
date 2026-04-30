@@ -8,5 +8,6 @@ import { AgreementPoliciesService } from './agreement-policies.service';
   imports: [PrismaModule, AuthModule],
   controllers: [AgreementPoliciesController],
   providers: [AgreementPoliciesService],
+  exports: [AgreementPoliciesService],
 })
 export class AgreementPoliciesModule {}

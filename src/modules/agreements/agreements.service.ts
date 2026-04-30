@@ -12,6 +12,7 @@ import { ClsService } from '../../common/cls/cls.service';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { AppException } from '../../common/errors/app-exception';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { AgreementPoliciesService } from '../agreement-policies/agreement-policies.service';
 import { ClientsService } from '../clients/clients.service';
 import { EmailNotificationsService } from '../email-notifications/email-notifications.service';
 import { TimelineEventsService } from '../timeline-events/timeline-events.service';
@@ -52,6 +53,7 @@ export class AgreementsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cls: ClsService,
+    private readonly agreementPoliciesService: AgreementPoliciesService,
     private readonly clientsService: ClientsService,
     private readonly timelineEvents: TimelineEventsService,
     private readonly emailNotifications: EmailNotificationsService,
@@ -103,6 +105,11 @@ export class AgreementsService {
 
       return created;
     });
+
+    const copiedPolicy = await this.agreementPoliciesService.copyDefaultsToAgreement(
+      agreement.id,
+    );
+    agreement.policy = copiedPolicy as unknown as AgreementWithIncludes['policy'];
 
     return this.mapToResponse(agreement);
   }

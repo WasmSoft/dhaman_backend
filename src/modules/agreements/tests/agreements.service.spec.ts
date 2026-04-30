@@ -8,6 +8,7 @@ import {
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { ClsService } from '../../../common/cls/cls.service';
+import { AgreementPoliciesService } from '../../agreement-policies/agreement-policies.service';
 import { ClientsService } from '../../clients/clients.service';
 import { TimelineEventsService } from '../../timeline-events/timeline-events.service';
 import { EmailNotificationsService } from '../../email-notifications/email-notifications.service';
@@ -96,6 +97,10 @@ describe('AgreementsService.sendInvite', () => {
           useValue: {
             enqueueAgreementInvite: jest.fn().mockResolvedValue(undefined),
           },
+        },
+        {
+          provide: AgreementPoliciesService,
+          useValue: { copyDefaultsToAgreement: jest.fn() },
         },
       ],
     }).compile();
@@ -368,6 +373,10 @@ describe('AgreementsService.activate', () => {
               .fn()
               .mockResolvedValue(undefined),
           },
+        },
+        {
+          provide: AgreementPoliciesService,
+          useValue: { copyDefaultsToAgreement: jest.fn() },
         },
       ],
     }).compile();
@@ -736,6 +745,10 @@ describe('AgreementsService.archive', () => {
               .fn()
               .mockResolvedValue(undefined),
           },
+        },
+        {
+          provide: AgreementPoliciesService,
+          useValue: { copyDefaultsToAgreement: jest.fn() },
         },
       ],
     }).compile();
@@ -1109,6 +1122,10 @@ describe('AgreementsService helper methods', () => {
             enqueueAgreementCancelledForClient: jest.fn(),
           },
         },
+        {
+          provide: AgreementPoliciesService,
+          useValue: { copyDefaultsToAgreement: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -1344,6 +1361,10 @@ describe('AgreementsService.findAll', () => {
           provide: EmailNotificationsService,
           useValue: {},
         },
+        {
+          provide: AgreementPoliciesService,
+          useValue: { copyDefaultsToAgreement: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -1495,6 +1516,10 @@ describe('AgreementsService.findOne', () => {
           provide: EmailNotificationsService,
           useValue: {},
         },
+        {
+          provide: AgreementPoliciesService,
+          useValue: { copyDefaultsToAgreement: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -1587,6 +1612,10 @@ describe('AgreementsService.update', () => {
         {
           provide: EmailNotificationsService,
           useValue: {},
+        },
+        {
+          provide: AgreementPoliciesService,
+          useValue: { copyDefaultsToAgreement: jest.fn() },
         },
       ],
     }).compile();
@@ -1743,8 +1772,13 @@ describe('AgreementsService.create', () => {
   let prisma: jest.Mocked<PrismaService>;
   let clientsService: jest.Mocked<ClientsService>;
   let timelineEvents: jest.Mocked<TimelineEventsService>;
+  let agreementPoliciesService: { copyDefaultsToAgreement: jest.Mock };
 
   beforeEach(async () => {
+    agreementPoliciesService = {
+      copyDefaultsToAgreement: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AgreementsService,
@@ -1771,6 +1805,10 @@ describe('AgreementsService.create', () => {
         {
           provide: EmailNotificationsService,
           useValue: {},
+        },
+        {
+          provide: AgreementPoliciesService,
+          useValue: agreementPoliciesService,
         },
       ],
     }).compile();
@@ -1799,12 +1837,19 @@ describe('AgreementsService.create', () => {
       totalAmount: { toNumber: () => 0, valueOf: () => 0 },
     });
     setupCreateTransaction(created);
+    agreementPoliciesService.copyDefaultsToAgreement.mockResolvedValue(
+      mockPolicy as never,
+    );
 
     const result = await service.create({ title: 'New' });
 
     expect(result.status).toBe(AgreementStatus.DRAFT);
     expect(result.freelancerId).toBe(FREELANCER_ID);
     expect(result.totalAmount).toBe(0);
+    expect(agreementPoliciesService.copyDefaultsToAgreement).toHaveBeenCalledWith(
+      AGREEMENT_ID,
+    );
+    expect(result.policy).toEqual(expect.objectContaining({ id: mockPolicy.id }));
   });
 
   it('calls clientsService.getById when clientId is provided', async () => {

@@ -18,6 +18,7 @@ model UserSettings {
   preferredCurrency         String   @default("SAR")
   // Locale remains a Users profile concern for now; settings behavior uses CLS.
   locale                    String   @default("ar")
+  defaultPolicies           Json?
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 
