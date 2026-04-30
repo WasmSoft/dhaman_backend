@@ -44,6 +44,22 @@ const makeDraftAgreement = (
   ...overrides,
 });
 
+const makeDetailAgreement = makeDraftAgreement;
+
+const makeListItem = (overrides: Partial<Record<string, unknown>> = {}) => ({
+  id: AGREEMENT_ID,
+  title: 'Test Agreement',
+  clientId: mockClient.id,
+  client: { name: mockClient.name },
+  totalAmount: { toNumber: () => 1000, valueOf: () => 1000 },
+  currency: 'SAR',
+  status: AgreementStatus.DRAFT,
+  sentAt: null,
+  createdAt: new Date('2026-01-01'),
+  _count: { milestones: 2 },
+  ...overrides,
+});
+
 describe('AgreementsService.sendInvite', () => {
   let service: AgreementsService;
   let prisma: jest.Mocked<PrismaService>;
@@ -1284,5 +1300,604 @@ describe('AgreementsService helper methods', () => {
     ).rejects.toMatchObject({
       code: ErrorCode.AGREEMENT_NOT_FOUND,
     });
+  });
+});
+
+describe('AgreementsService.findAll', () => {
+  let service: AgreementsService;
+  let prisma: jest.Mocked<PrismaService>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AgreementsService,
+        {
+          provide: PrismaService,
+          useValue: {
+            agreement: {
+              count: jest.fn().mockResolvedValue(2),
+              findMany: jest
+                .fn()
+                .mockResolvedValue([
+                  makeListItem(),
+                  makeListItem({ id: 'agreement-002', title: 'Second' }),
+                ]),
+            },
+            $transaction: jest
+              .fn()
+              .mockImplementation((ops: unknown[]) => Promise.all(ops)),
+          },
+        },
+        {
+          provide: ClsService,
+          useValue: { get: jest.fn().mockReturnValue(FREELANCER_ID) },
+        },
+        {
+          provide: ClientsService,
+          useValue: { getById: jest.fn() },
+        },
+        {
+          provide: TimelineEventsService,
+          useValue: { createEvent: jest.fn() },
+        },
+        {
+          provide: EmailNotificationsService,
+          useValue: {},
+        },
+      ],
+    }).compile();
+
+    service = module.get<AgreementsService>(AgreementsService);
+    prisma = module.get(PrismaService);
+  });
+
+  it('uses default page=1 and limit=20', async () => {
+    const prismaCount = prisma.agreement.count as jest.Mock;
+    const prismaFindMany = prisma.agreement.findMany as jest.Mock;
+
+    await service.findAll({});
+
+    expect(prismaFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 20 }),
+    );
+  });
+
+  it('computes skip from page and limit', async () => {
+    const prismaFindMany = prisma.agreement.findMany as jest.Mock;
+
+    await service.findAll({ page: 2, limit: 10 });
+
+    expect(prismaFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 10, take: 10 }),
+    );
+  });
+
+  it('returns pagination metadata with totalPages', async () => {
+    (prisma.agreement.count as jest.Mock).mockResolvedValue(7);
+
+    const result = await service.findAll({ page: 1, limit: 3 });
+
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(3);
+    expect(result.total).toBe(7);
+    expect(result.totalPages).toBe(3); // Math.ceil(7/3)
+  });
+
+  it('scopes count and findMany to freelancerId', async () => {
+    const prismaCount = prisma.agreement.count as jest.Mock;
+    const prismaFindMany = prisma.agreement.findMany as jest.Mock;
+
+    await service.findAll({});
+
+    expect(prismaCount).toHaveBeenCalledWith({
+      where: { freelancerId: FREELANCER_ID },
+    });
+    expect(prismaFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { freelancerId: FREELANCER_ID },
+      }),
+    );
+  });
+
+  it('applies status filter when provided', async () => {
+    const prismaCount = prisma.agreement.count as jest.Mock;
+
+    await service.findAll({ status: AgreementStatus.SENT } as any);
+
+    expect(prismaCount).toHaveBeenCalledWith({
+      where: { freelancerId: FREELANCER_ID, status: AgreementStatus.SENT },
+    });
+  });
+
+  it('applies clientId filter when provided', async () => {
+    const prismaCount = prisma.agreement.count as jest.Mock;
+
+    await service.findAll({ clientId: 'client-xyz' });
+
+    expect(prismaCount).toHaveBeenCalledWith({
+      where: { freelancerId: FREELANCER_ID, clientId: 'client-xyz' },
+    });
+  });
+
+  it('applies case-insensitive search across title and client name', async () => {
+    const prismaCount = prisma.agreement.count as jest.Mock;
+
+    await service.findAll({ search: 'test' });
+
+    expect(prismaCount).toHaveBeenCalledWith({
+      where: {
+        freelancerId: FREELANCER_ID,
+        OR: [
+          { title: { contains: 'test', mode: 'insensitive' } },
+          {
+            client: {
+              name: { contains: 'test', mode: 'insensitive' },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('returns mapped list items with milestone counts', async () => {
+    const result = await service.findAll({});
+
+    expect(result.data).toHaveLength(2);
+    expect(result.data[0]).toMatchObject({
+      id: AGREEMENT_ID,
+      title: 'Test Agreement',
+      milestonesCount: 2,
+      totalAmount: 1000,
+    });
+  });
+
+  it('returns empty result when count is zero', async () => {
+    (prisma.agreement.count as jest.Mock).mockResolvedValue(0);
+    (prisma.agreement.findMany as jest.Mock).mockResolvedValue([]);
+
+    const result = await service.findAll({});
+
+    expect(result.data).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(result.totalPages).toBe(0);
+  });
+});
+
+describe('AgreementsService.findOne', () => {
+  let service: AgreementsService;
+  let prisma: jest.Mocked<PrismaService>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AgreementsService,
+        {
+          provide: PrismaService,
+          useValue: {
+            agreement: {
+              findFirst: jest.fn().mockResolvedValue(makeDetailAgreement()),
+            },
+          },
+        },
+        {
+          provide: ClsService,
+          useValue: { get: jest.fn().mockReturnValue(FREELANCER_ID) },
+        },
+        {
+          provide: ClientsService,
+          useValue: { getById: jest.fn() },
+        },
+        {
+          provide: TimelineEventsService,
+          useValue: { createEvent: jest.fn() },
+        },
+        {
+          provide: EmailNotificationsService,
+          useValue: {},
+        },
+      ],
+    }).compile();
+
+    service = module.get<AgreementsService>(AgreementsService);
+    prisma = module.get(PrismaService);
+  });
+
+  it('calls findFirst with agreement id and freelancerId', async () => {
+    await service.findOne(AGREEMENT_ID);
+
+    expect(prisma.agreement.findFirst).toHaveBeenCalledWith({
+      where: { id: AGREEMENT_ID, freelancerId: FREELANCER_ID },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+  });
+
+  it('returns mapped response with client, milestones, and policy', async () => {
+    const result = await service.findOne(AGREEMENT_ID);
+
+    expect(result.client).toBeDefined();
+    expect(result.client!.id).toBe(mockClient.id);
+    expect(result.milestones).toHaveLength(1);
+    expect(result.policy).toBeDefined();
+  });
+
+  it('converts Decimal totalAmount to number', async () => {
+    const result = await service.findOne(AGREEMENT_ID);
+
+    expect(typeof result.totalAmount).toBe('number');
+    expect(result.totalAmount).toBe(1000);
+  });
+
+  it('throws AGREEMENT_NOT_FOUND when agreement does not exist', async () => {
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(null);
+
+    await expect(service.findOne(AGREEMENT_ID)).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_NOT_FOUND,
+    });
+  });
+
+  it('throws AGREEMENT_NOT_FOUND for a foreign freelancer agreement', async () => {
+    // findFirst filters by freelancerId and returns null for foreign
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(null);
+
+    await expect(service.findOne('foreign-id')).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_NOT_FOUND,
+    });
+  });
+});
+
+describe('AgreementsService.update', () => {
+  let service: AgreementsService;
+  let prisma: jest.Mocked<PrismaService>;
+  let clientsService: jest.Mocked<ClientsService>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AgreementsService,
+        {
+          provide: PrismaService,
+          useValue: {
+            agreement: {
+              findFirst: jest.fn().mockResolvedValue(makeDetailAgreement()),
+              update: jest.fn().mockResolvedValue(makeDetailAgreement()),
+            },
+            milestone: {
+              aggregate: jest
+                .fn()
+                .mockResolvedValue({ _sum: { amount: 1000 } }),
+            },
+          },
+        },
+        {
+          provide: ClsService,
+          useValue: { get: jest.fn().mockReturnValue(FREELANCER_ID) },
+        },
+        {
+          provide: ClientsService,
+          useValue: { getById: jest.fn().mockResolvedValue(mockClient) },
+        },
+        {
+          provide: TimelineEventsService,
+          useValue: { createEvent: jest.fn() },
+        },
+        {
+          provide: EmailNotificationsService,
+          useValue: {},
+        },
+      ],
+    }).compile();
+
+    service = module.get<AgreementsService>(AgreementsService);
+    prisma = module.get(PrismaService);
+    clientsService = module.get(ClientsService);
+  });
+
+  it('updates allowed fields on a DRAFT agreement', async () => {
+    const updated = {
+      ...makeDetailAgreement(),
+      title: 'Updated Title',
+      description: 'New Desc',
+      serviceType: 'Web Dev',
+      currency: 'USD',
+      durationText: '2 weeks',
+      expectedDeliveryDate: new Date('2026-06-01'),
+      totalAmount: { toNumber: () => 1000, valueOf: () => 1000 },
+    };
+    (prisma.agreement.update as jest.Mock).mockResolvedValue(updated);
+
+    const result = await service.update(AGREEMENT_ID, {
+      title: 'Updated Title',
+      description: 'New Desc',
+      serviceType: 'Web Dev',
+      currency: 'USD',
+      durationText: '2 weeks',
+      expectedDeliveryDate: '2026-06-01',
+      totalAmount: 1000,
+    });
+
+    expect(result.title).toBe('Updated Title');
+    expect(result.description).toBe('New Desc');
+    expect(result.serviceType).toBe('Web Dev');
+    expect(result.currency).toBe('USD');
+    expect(result.durationText).toBe('2 weeks');
+  });
+
+  it('calls clientsService.getById when clientId changes', async () => {
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+      makeDetailAgreement({
+        clientId: 'old-client',
+        client: { id: 'old-client', name: 'Old', email: 'old@test.com' },
+      }),
+    );
+
+    await service.update(AGREEMENT_ID, { clientId: 'new-client' });
+
+    expect(clientsService.getById).toHaveBeenCalledWith('new-client');
+  });
+
+  it('does not call clientsService.getById when clientId is unchanged', async () => {
+    await service.update(AGREEMENT_ID, { clientId: mockClient.id });
+
+    expect(clientsService.getById).not.toHaveBeenCalled();
+  });
+
+  it('allows totalAmount matching the milestone sum', async () => {
+    (prisma.milestone.aggregate as jest.Mock).mockResolvedValue({
+      _sum: { amount: 1500 },
+    });
+
+    await service.update(AGREEMENT_ID, { totalAmount: 1500 });
+
+    expect(prisma.agreement.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ totalAmount: 1500 }),
+      }),
+    );
+  });
+
+  it('throws AGREEMENT_NOT_FOUND when agreement does not exist', async () => {
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(null);
+
+    await expect(
+      service.update(AGREEMENT_ID, { title: 'X' }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_NOT_FOUND,
+    });
+  });
+
+  it('throws AGREEMENT_CANNOT_BE_MODIFIED for SENT agreement', async () => {
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+      makeDetailAgreement({ status: AgreementStatus.SENT }),
+    );
+
+    await expect(
+      service.update(AGREEMENT_ID, { title: 'X' }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED,
+    });
+  });
+
+  it('throws AGREEMENT_CANNOT_BE_MODIFIED for ACTIVE agreement', async () => {
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+      makeDetailAgreement({ status: AgreementStatus.ACTIVE }),
+    );
+
+    await expect(
+      service.update(AGREEMENT_ID, { title: 'X' }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED,
+    });
+  });
+
+  it('throws CLIENT_NOT_FOUND when changing to an invalid clientId', async () => {
+    (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(
+      makeDetailAgreement({
+        clientId: 'old-client',
+        client: { id: 'old-client', name: 'Old', email: 'old@test.com' },
+      }),
+    );
+    (clientsService.getById as jest.Mock).mockRejectedValue({
+      code: ErrorCode.CLIENT_NOT_FOUND,
+    });
+
+    await expect(
+      service.update(AGREEMENT_ID, { clientId: 'bad-client' }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.CLIENT_NOT_FOUND,
+    });
+  });
+
+  it('throws PAYMENT_INVALID_AMOUNT when totalAmount mismatches milestone sum', async () => {
+    (prisma.milestone.aggregate as jest.Mock).mockResolvedValue({
+      _sum: { amount: 1000 },
+    });
+
+    await expect(
+      service.update(AGREEMENT_ID, { totalAmount: 500 }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.PAYMENT_INVALID_AMOUNT,
+    });
+  });
+
+  it('allows any totalAmount when milestone _sum.amount is null', async () => {
+    (prisma.milestone.aggregate as jest.Mock).mockResolvedValue({
+      _sum: { amount: null },
+    });
+
+    await service.update(AGREEMENT_ID, { totalAmount: 5000 });
+
+    expect(prisma.agreement.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ totalAmount: 5000 }),
+      }),
+    );
+  });
+});
+
+describe('AgreementsService.create', () => {
+  let service: AgreementsService;
+  let prisma: jest.Mocked<PrismaService>;
+  let clientsService: jest.Mocked<ClientsService>;
+  let timelineEvents: jest.Mocked<TimelineEventsService>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AgreementsService,
+        {
+          provide: PrismaService,
+          useValue: {
+            agreement: { create: jest.fn() },
+            userSettings: { findFirst: jest.fn() },
+            $transaction: jest.fn(),
+          },
+        },
+        {
+          provide: ClsService,
+          useValue: { get: jest.fn().mockReturnValue(FREELANCER_ID) },
+        },
+        {
+          provide: ClientsService,
+          useValue: { getById: jest.fn().mockResolvedValue(mockClient) },
+        },
+        {
+          provide: TimelineEventsService,
+          useValue: { createEvent: jest.fn().mockResolvedValue({}) },
+        },
+        {
+          provide: EmailNotificationsService,
+          useValue: {},
+        },
+      ],
+    }).compile();
+
+    service = module.get<AgreementsService>(AgreementsService);
+    prisma = module.get(PrismaService);
+    clientsService = module.get(ClientsService);
+    timelineEvents = module.get(TimelineEventsService);
+  });
+
+  function setupCreateTransaction(returnedAgreement: unknown) {
+    (prisma.$transaction as jest.Mock).mockImplementation(
+      async (fn: (tx: unknown) => Promise<unknown>) => {
+        const tx = {
+          agreement: {
+            create: jest.fn().mockResolvedValue(returnedAgreement),
+          },
+        };
+        return await fn(tx);
+      },
+    );
+  }
+
+  it('creates DRAFT agreement with freelancerId and totalAmount 0', async () => {
+    const created = makeDetailAgreement({
+      totalAmount: { toNumber: () => 0, valueOf: () => 0 },
+    });
+    setupCreateTransaction(created);
+
+    const result = await service.create({ title: 'New' });
+
+    expect(result.status).toBe(AgreementStatus.DRAFT);
+    expect(result.freelancerId).toBe(FREELANCER_ID);
+    expect(result.totalAmount).toBe(0);
+  });
+
+  it('calls clientsService.getById when clientId is provided', async () => {
+    const created = makeDetailAgreement();
+    setupCreateTransaction(created);
+
+    await service.create({ title: 'With Client', clientId: mockClient.id });
+
+    expect(clientsService.getById).toHaveBeenCalledWith(mockClient.id);
+  });
+
+  it('does not call clientsService.getById when clientId is absent', async () => {
+    const created = makeDetailAgreement({ clientId: null, client: null });
+    setupCreateTransaction(created);
+
+    await service.create({ title: 'No Client' });
+
+    expect(clientsService.getById).not.toHaveBeenCalled();
+  });
+
+  it('uses provided currency when DTO includes currency', async () => {
+    const created = makeDetailAgreement({ currency: 'USD' });
+    setupCreateTransaction(created);
+
+    const result = await service.create({
+      title: 'USD Agreement',
+      currency: 'USD',
+    });
+
+    expect(result.currency).toBe('USD');
+  });
+
+  it('uses preferred currency from userSettings when DTO currency is absent', async () => {
+    const created = makeDetailAgreement({ currency: 'EUR' });
+    setupCreateTransaction(created);
+    (prisma.userSettings.findFirst as jest.Mock).mockResolvedValue({
+      preferredCurrency: 'EUR',
+    });
+
+    const result = await service.create({ title: 'EUR Agreement' });
+
+    expect(result.currency).toBe('EUR');
+    expect(prisma.userSettings.findFirst).toHaveBeenCalledWith({
+      where: { userId: FREELANCER_ID },
+      select: { preferredCurrency: true },
+    });
+  });
+
+  it('defaults currency to SAR when no preferred currency exists', async () => {
+    const created = makeDetailAgreement({ currency: 'SAR' });
+    setupCreateTransaction(created);
+    (prisma.userSettings.findFirst as jest.Mock).mockResolvedValue(null);
+
+    const result = await service.create({ title: 'Default Currency' });
+
+    expect(result.currency).toBe('SAR');
+  });
+
+  it('creates AGREEMENT_CREATED timeline event with actor FREELANCER_ID', async () => {
+    const created = makeDetailAgreement();
+    setupCreateTransaction(created);
+
+    await service.create({ title: 'Timeline Test' });
+
+    expect(timelineEvents.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agreementId: AGREEMENT_ID,
+        type: TimelineEventType.AGREEMENT_CREATED,
+        actorRole: TimelineActorRole.FREELANCER,
+        actorId: FREELANCER_ID,
+      }),
+      expect.anything(),
+    );
+  });
+
+  it('rejects with CLIENT_NOT_FOUND when clientsService.getById throws', async () => {
+    const appError = { code: ErrorCode.CLIENT_NOT_FOUND };
+    (clientsService.getById as jest.Mock).mockRejectedValue(appError);
+
+    await expect(
+      service.create({ title: 'Bad Client', clientId: 'invalid-client' }),
+    ).rejects.toMatchObject({ code: ErrorCode.CLIENT_NOT_FOUND });
+  });
+
+  it('does not execute transaction when client validation fails', async () => {
+    (clientsService.getById as jest.Mock).mockRejectedValue(
+      new Error('Client not found'),
+    );
+
+    await expect(
+      service.create({ title: 'Bad Client', clientId: 'invalid-client' }),
+    ).rejects.toBeDefined();
+
+    expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 });
