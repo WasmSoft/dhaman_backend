@@ -1086,6 +1086,28 @@ export class PaymentsService {
     });
   }
 
+  async createPaymentForChangeRequest(
+    tx: TransactionClient,
+    input: {
+      agreementId: string;
+      amount: Prisma.Decimal | string;
+      currency: string;
+      changeRequestId: string;
+    },
+  ) {
+    return tx.payment.create({
+      data: {
+        agreementId: input.agreementId,
+        amount: input.amount,
+        currency: input.currency,
+        demoMode: true,
+        changeRequestId: input.changeRequestId,
+        operationType: PaymentOperationType.CHANGE_REQUEST_PAYMENT,
+        status: PaymentStatus.WAITING,
+      },
+    });
+  }
+
   async syncMilestonePaymentAmount(
     tx: TransactionClient,
     input: {

@@ -166,6 +166,14 @@ const TEMPLATE_REGISTRY: Record<NotificationType, TemplateDefinition> = {
     arBody: 'وافق العميل على طلب التغيير.',
     enBody: 'The client approved the change request.',
   },
+  [NotificationType.CHANGE_REQUEST_DECLINED]: {
+    arSubject: 'تم رفض طلب التغيير',
+    enSubject: 'Change request declined',
+    arTitle: 'تم رفض طلب التغيير',
+    enTitle: 'Change request declined',
+    arBody: 'رفض العميل طلب التغيير.',
+    enBody: 'The client declined the change request.',
+  },
   [NotificationType.PAYMENT_RESERVED]: {
     arSubject: 'تم حجز دفعة ضمان',
     enSubject: 'Dhaman payment reserved',
@@ -681,7 +689,61 @@ export class EmailNotificationsService {
     });
   }
 
-  private placeholder(action: string, details?: Record<string, unknown>) {
+  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بأن طلب تغيير جديد تم إرساله.
+  // EN: Creates a pending notification record to inform the client that a change request was sent.
+  async enqueueChangeRequestSentForClient(input: {
+    agreementId: string;
+    changeRequestId: string;
+    title: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.CHANGE_REQUEST_CREATED,
+        subject: `Change request sent: "${input.title}"`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل وافق على طلب التغيير.
+  // EN: Creates a pending notification record to inform the freelancer that the client approved the change request.
+  async enqueueChangeRequestApprovedForFreelancer(input: {
+    agreementId: string;
+    changeRequestId: string;
+    title: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.CHANGE_REQUEST_APPROVED,
+        subject: `Change request approved: "${input.title}"`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل رفض طلب التغيير.
+  // EN: Creates a pending notification record to inform the freelancer that the client declined the change request.
+  async enqueueChangeRequestDeclinedForFreelancer(input: {
+    agreementId: string;
+    changeRequestId: string;
+    title: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.CHANGE_REQUEST_DECLINED,
+        subject: `Change request declined: "${input.title}"`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+
   private async createResendTimelineEvidence(
     agreementId: string,
     notification: EmailNotificationResponseDto,
