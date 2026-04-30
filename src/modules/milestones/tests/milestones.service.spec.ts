@@ -1,4 +1,8 @@
-import { AgreementStatus, MilestoneStatus, PaymentStatus } from '@prisma/client';
+import {
+  AgreementStatus,
+  MilestoneStatus,
+  PaymentStatus,
+} from '@prisma/client';
 import { MilestonesService } from '../milestones.service';
 
 describe('MilestonesService agreement coordination', () => {
@@ -16,7 +20,9 @@ describe('MilestonesService agreement coordination', () => {
     createEvent: jest.fn().mockResolvedValue({}),
   };
   const agreementsService: any = {
-    recalculateTotalAmount: jest.fn().mockResolvedValue({ agreementId, totalAmount: 250 }),
+    recalculateTotalAmount: jest
+      .fn()
+      .mockResolvedValue({ agreementId, totalAmount: 250 }),
   };
 
   function buildService() {
@@ -63,7 +69,9 @@ describe('MilestonesService agreement coordination', () => {
       status: AgreementStatus.DRAFT,
       totalAmount: { toFixed: () => '0' },
     });
-    jest.spyOn(service as any, 'assertOrderAvailable').mockResolvedValue(undefined);
+    jest
+      .spyOn(service as any, 'assertOrderAvailable')
+      .mockResolvedValue(undefined);
     jest.spyOn(service as any, 'calculateAmountSummary').mockResolvedValue({
       agreementTotalAmount: '250.00',
       amountMatch: true,
@@ -80,11 +88,14 @@ describe('MilestonesService agreement coordination', () => {
         amount: '250.00',
         acceptanceCriteria: [],
         orderIndex: 1,
-      } as any,
+      },
       userId,
     );
 
-    expect(agreementsService.recalculateTotalAmount).toHaveBeenCalledWith(tx, agreementId);
+    expect(agreementsService.recalculateTotalAmount).toHaveBeenCalledWith(
+      tx,
+      agreementId,
+    );
   });
 
   it('recalculates totals after milestone amount updates', async () => {
@@ -111,29 +122,31 @@ describe('MilestonesService agreement coordination', () => {
       },
     };
 
-    jest.spyOn(service as any, 'findOwnedMilestoneWithAgreement').mockResolvedValue({
-      id: milestoneId,
-      title: 'M1',
-      amount: '250.00',
-      currency: 'SAR',
-      order: 1,
-      status: MilestoneStatus.DRAFT,
-      paymentStatus: PaymentStatus.WAITING,
-      deliveryStatus: 'NOT_SUBMITTED',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      dueDate: null,
-      description: null,
-      revisionLimit: 3,
-      agreement: {
-        id: agreementId,
+    jest
+      .spyOn(service as any, 'findOwnedMilestoneWithAgreement')
+      .mockResolvedValue({
+        id: milestoneId,
+        title: 'M1',
+        amount: '250.00',
         currency: 'SAR',
-        freelancerId: userId,
-        status: AgreementStatus.DRAFT,
-        totalAmount: { toFixed: () => '0' },
-      },
-      acceptanceCriteria: [],
-    });
+        order: 1,
+        status: MilestoneStatus.DRAFT,
+        paymentStatus: PaymentStatus.WAITING,
+        deliveryStatus: 'NOT_SUBMITTED',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        dueDate: null,
+        description: null,
+        revisionLimit: 3,
+        agreement: {
+          id: agreementId,
+          currency: 'SAR',
+          freelancerId: userId,
+          status: AgreementStatus.DRAFT,
+          totalAmount: { toFixed: () => '0' },
+        },
+        acceptanceCriteria: [],
+      });
     jest.spyOn(service as any, 'calculateAmountSummary').mockResolvedValue({
       agreementTotalAmount: '300.00',
       amountMatch: true,
@@ -143,9 +156,12 @@ describe('MilestonesService agreement coordination', () => {
     });
     prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
 
-    await service.updateMilestone(milestoneId, { amount: '300.00' } as any, userId);
+    await service.updateMilestone(milestoneId, { amount: '300.00' }, userId);
 
-    expect(agreementsService.recalculateTotalAmount).toHaveBeenCalledWith(tx, agreementId);
+    expect(agreementsService.recalculateTotalAmount).toHaveBeenCalledWith(
+      tx,
+      agreementId,
+    );
   });
 
   it('recalculates totals after milestone deletion', async () => {
@@ -154,33 +170,38 @@ describe('MilestonesService agreement coordination', () => {
       milestone: { delete: jest.fn().mockResolvedValue({}) },
     };
 
-    jest.spyOn(service as any, 'findOwnedMilestoneWithAgreement').mockResolvedValue({
-      id: milestoneId,
-      title: 'M1',
-      amount: '250.00',
-      currency: 'SAR',
-      order: 1,
-      status: MilestoneStatus.DRAFT,
-      paymentStatus: PaymentStatus.WAITING,
-      deliveryStatus: 'NOT_SUBMITTED',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      dueDate: null,
-      description: null,
-      revisionLimit: 3,
-      agreement: {
-        id: agreementId,
+    jest
+      .spyOn(service as any, 'findOwnedMilestoneWithAgreement')
+      .mockResolvedValue({
+        id: milestoneId,
+        title: 'M1',
+        amount: '250.00',
         currency: 'SAR',
-        freelancerId: userId,
-        status: AgreementStatus.DRAFT,
-        totalAmount: { toFixed: () => '0' },
-      },
-      acceptanceCriteria: [],
-    });
+        order: 1,
+        status: MilestoneStatus.DRAFT,
+        paymentStatus: PaymentStatus.WAITING,
+        deliveryStatus: 'NOT_SUBMITTED',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        dueDate: null,
+        description: null,
+        revisionLimit: 3,
+        agreement: {
+          id: agreementId,
+          currency: 'SAR',
+          freelancerId: userId,
+          status: AgreementStatus.DRAFT,
+          totalAmount: { toFixed: () => '0' },
+        },
+        acceptanceCriteria: [],
+      });
     prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
 
     await service.deleteMilestone(milestoneId, userId);
 
-    expect(agreementsService.recalculateTotalAmount).toHaveBeenCalledWith(tx, agreementId);
+    expect(agreementsService.recalculateTotalAmount).toHaveBeenCalledWith(
+      tx,
+      agreementId,
+    );
   });
 });

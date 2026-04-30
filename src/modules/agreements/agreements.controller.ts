@@ -12,11 +12,15 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { AgreementStatus } from '../../common/enums/agreement-status.enum';
 import { AgreementQueryDto } from './dto/agreement-query.dto';
+import { AgreementListResponseDto } from './dto/agreement-list.dto';
+import { AgreementResponseDto } from './dto/agreement-response.dto';
 import { CreateAgreementDto } from './dto/create-agreement.dto';
 import { UpdateAgreementDto } from './dto/update-agreement.dto';
 import { AgreementsService } from './agreements.service';
@@ -27,21 +31,167 @@ export class AgreementsController {
   constructor(private readonly agreementsService: AgreementsService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List freelancer agreements',
+    description:
+      'Returns a paginated list of all agreements owned by the authenticated freelancer. ' +
+      'Supports filtering by lifecycle status and client, text search across title and client name, ' +
+      'and pagination controls. Always scoped to the current freelancer — no cross-freelancer data is returned.',
+  })
+  @ApiQuery({
+    name: 'status',
+    enum: AgreementStatus,
+    required: false,
+    description: 'Filter by lifecycle status',
+  })
+  @ApiQuery({
+    name: 'search',
+    type: String,
+    required: false,
+    description: 'Search title and client name',
+    example: 'موقع',
+  })
+  @ApiQuery({
+    name: 'clientId',
+    type: String,
+    required: false,
+    description: 'Filter by linked client ID',
+  })
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Page number (1-based)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Items per page — max 100',
+    example: 20,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of agreements',
+    type: AgreementListResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'VALIDATION_ERROR: Invalid filter or pagination values',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT',
+  })
   list(@Query() query: AgreementQueryDto) {
     return this.agreementsService.list(query);
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create a new agreement',
+    description:
+      'Creates a new agreement in DRAFT status owned by the authenticated freelancer. ' +
+      'An optional clientId links an existing client at creation time. ' +
+      "Currency defaults to the freelancer's preferred currency when not provided. " +
+      'Records an AGREEMENT_CREATED timeline event.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Agreement created in DRAFT status',
+    type: AgreementResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'VALIDATION_ERROR: Required fields missing or invalid',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT',
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'CLIENT_NOT_FOUND: Provided clientId does not exist or belongs to another freelancer',
+  })
   create(@Body() dto: CreateAgreementDto) {
     return this.agreementsService.create(dto);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get agreement details',
+    description:
+      'Returns the full agreement record including linked client, milestones ordered by position, ' +
+      'and attached policy. Used by the agreement detail, builder, and workspace screens. ' +
+      'Returns 404 for agreements not owned by the authenticated freelancer.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Agreement ID owned by the authenticated freelancer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Full agreement details with all relations',
+    type: AgreementResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT',
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'AGREEMENT_NOT_FOUND: Agreement does not exist or belongs to another freelancer',
+  })
   getById(@Param('id') id: string) {
     return this.agreementsService.getById(id);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update a draft agreement',
+    description:
+      'Partially updates a DRAFT agreement. Only agreements in DRAFT status can be edited; ' +
+      'any other status returns 409. If clientId is changed, the new client must exist and belong ' +
+      'to the freelancer. If totalAmount is provided, it must match the current sum of milestone amounts.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Agreement ID owned by the authenticated freelancer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Agreement updated successfully',
+    type: AgreementResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'VALIDATION_ERROR or PAYMENT_INVALID_AMOUNT: Invalid input or totalAmount does not match milestone sum',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED: Missing or invalid JWT',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'AGREEMENT_NOT_FOUND or CLIENT_NOT_FOUND',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'AGREEMENT_CANNOT_BE_MODIFIED: Agreement is not in DRAFT status',
+  })
   update(@Param('id') id: string, @Body() dto: UpdateAgreementDto) {
     return this.agreementsService.update(id, dto);
   }
@@ -64,6 +214,7 @@ export class AgreementsController {
   @ApiResponse({
     status: 200,
     description: 'Invite sent — agreement is now SENT',
+    type: AgreementResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -105,6 +256,7 @@ export class AgreementsController {
   @ApiResponse({
     status: 200,
     description: 'Agreement activated successfully.',
+    type: AgreementResponseDto,
   })
   @ApiResponse({
     status: 401,
@@ -143,6 +295,7 @@ export class AgreementsController {
   @ApiResponse({
     status: 200,
     description: 'Agreement archived successfully.',
+    type: AgreementResponseDto,
   })
   @ApiResponse({
     status: 401,

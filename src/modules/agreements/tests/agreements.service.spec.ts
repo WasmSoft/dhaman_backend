@@ -322,7 +322,11 @@ describe('AgreementsService.activate', () => {
           provide: PrismaService,
           useValue: {
             agreement: { findFirst: jest.fn(), update: jest.fn() },
-            milestone: { aggregate: jest.fn(), findFirst: jest.fn(), updateMany: jest.fn() },
+            milestone: {
+              aggregate: jest.fn(),
+              findFirst: jest.fn(),
+              updateMany: jest.fn(),
+            },
             payment: { findMany: jest.fn(), updateMany: jest.fn() },
             userSettings: { findFirst: jest.fn() },
             $transaction: jest.fn(),
@@ -344,7 +348,9 @@ describe('AgreementsService.activate', () => {
           provide: EmailNotificationsService,
           useValue: {
             enqueueAgreementInvite: jest.fn().mockResolvedValue(undefined),
-            enqueueAgreementActivatedForClient: jest.fn().mockResolvedValue(undefined),
+            enqueueAgreementActivatedForClient: jest
+              .fn()
+              .mockResolvedValue(undefined),
           },
         },
       ],
@@ -460,11 +466,16 @@ describe('AgreementsService.activate', () => {
         update: jest.fn().mockResolvedValue(activatedAgreement),
       },
       milestone: {
-        findFirst: jest.fn().mockResolvedValue({ ...draftMilestone, order: 1, id: 'm1' }),
+        findFirst: jest
+          .fn()
+          .mockResolvedValue({ ...draftMilestone, order: 1, id: 'm1' }),
         update: jest.fn().mockResolvedValue(activeMilestone),
       },
     };
-    setupActivateTransaction({ mockTx: tx, updatedAgreement: activatedAgreement });
+    setupActivateTransaction({
+      mockTx: tx,
+      updatedAgreement: activatedAgreement,
+    });
 
     const result = await service.activate(AGREEMENT_ID);
 
@@ -502,9 +513,15 @@ describe('AgreementsService.activate', () => {
 
     const tx = {
       agreement: { update: jest.fn().mockResolvedValue(activatedAgreement) },
-      milestone: { findFirst: jest.fn().mockResolvedValue(null), update: jest.fn() },
+      milestone: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        update: jest.fn(),
+      },
     };
-    setupActivateTransaction({ mockTx: tx, updatedAgreement: activatedAgreement });
+    setupActivateTransaction({
+      mockTx: tx,
+      updatedAgreement: activatedAgreement,
+    });
 
     const result = await service.activate(AGREEMENT_ID);
 
@@ -525,9 +542,15 @@ describe('AgreementsService.activate', () => {
 
     const tx = {
       agreement: { update: jest.fn().mockResolvedValue(activatedAgreement) },
-      milestone: { findFirst: jest.fn().mockResolvedValue(null), update: jest.fn() },
+      milestone: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        update: jest.fn(),
+      },
     };
-    setupActivateTransaction({ mockTx: tx, updatedAgreement: activatedAgreement });
+    setupActivateTransaction({
+      mockTx: tx,
+      updatedAgreement: activatedAgreement,
+    });
 
     await service.activate(AGREEMENT_ID);
 
@@ -564,13 +587,21 @@ describe('AgreementsService.activate', () => {
 
     const tx = {
       agreement: { update: jest.fn().mockResolvedValue(activatedAgreement) },
-      milestone: { findFirst: jest.fn().mockResolvedValue(null), update: jest.fn() },
+      milestone: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        update: jest.fn(),
+      },
     };
-    setupActivateTransaction({ mockTx: tx, updatedAgreement: activatedAgreement });
+    setupActivateTransaction({
+      mockTx: tx,
+      updatedAgreement: activatedAgreement,
+    });
 
     await service.activate(AGREEMENT_ID);
 
-    expect(emailNotifications.enqueueAgreementActivatedForClient).toHaveBeenCalledWith(
+    expect(
+      emailNotifications.enqueueAgreementActivatedForClient,
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         agreementId: AGREEMENT_ID,
         recipientEmail: 'client@test.com',
@@ -592,12 +623,18 @@ describe('AgreementsService.activate', () => {
 
     const tx = {
       agreement: { update: jest.fn().mockResolvedValue(activatedAgreement) },
-      milestone: { findFirst: jest.fn().mockResolvedValue(null), update: jest.fn() },
+      milestone: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        update: jest.fn(),
+      },
     };
-    setupActivateTransaction({ mockTx: tx, updatedAgreement: activatedAgreement });
-    (emailNotifications.enqueueAgreementActivatedForClient as jest.Mock).mockRejectedValue(
-      new Error('SMTP unavailable'),
-    );
+    setupActivateTransaction({
+      mockTx: tx,
+      updatedAgreement: activatedAgreement,
+    });
+    (
+      emailNotifications.enqueueAgreementActivatedForClient as jest.Mock
+    ).mockRejectedValue(new Error('SMTP unavailable'));
 
     const result = await service.activate(AGREEMENT_ID);
 
@@ -618,13 +655,21 @@ describe('AgreementsService.activate', () => {
 
     const tx = {
       agreement: { update: jest.fn().mockResolvedValue(activatedAgreement) },
-      milestone: { findFirst: jest.fn().mockResolvedValue(null), update: jest.fn() },
+      milestone: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        update: jest.fn(),
+      },
     };
-    setupActivateTransaction({ mockTx: tx, updatedAgreement: activatedAgreement });
+    setupActivateTransaction({
+      mockTx: tx,
+      updatedAgreement: activatedAgreement,
+    });
 
     await service.activate(AGREEMENT_ID);
 
-    expect(emailNotifications.enqueueAgreementActivatedForClient).not.toHaveBeenCalled();
+    expect(
+      emailNotifications.enqueueAgreementActivatedForClient,
+    ).not.toHaveBeenCalled();
   });
 });
 
@@ -642,7 +687,11 @@ describe('AgreementsService.archive', () => {
           provide: PrismaService,
           useValue: {
             agreement: { findFirst: jest.fn(), update: jest.fn() },
-            milestone: { aggregate: jest.fn(), findFirst: jest.fn(), updateMany: jest.fn() },
+            milestone: {
+              aggregate: jest.fn(),
+              findFirst: jest.fn(),
+              updateMany: jest.fn(),
+            },
             payment: { findMany: jest.fn(), updateMany: jest.fn() },
             userSettings: { findFirst: jest.fn() },
             $transaction: jest.fn(),
@@ -664,8 +713,12 @@ describe('AgreementsService.archive', () => {
           provide: EmailNotificationsService,
           useValue: {
             enqueueAgreementInvite: jest.fn().mockResolvedValue(undefined),
-            enqueueAgreementActivatedForClient: jest.fn().mockResolvedValue(undefined),
-            enqueueAgreementCancelledForClient: jest.fn().mockResolvedValue(undefined),
+            enqueueAgreementActivatedForClient: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            enqueueAgreementCancelledForClient: jest
+              .fn()
+              .mockResolvedValue(undefined),
           },
         },
       ],
@@ -697,7 +750,10 @@ describe('AgreementsService.archive', () => {
   statusesAllowed.forEach((status) => {
     it(`returns CANCELLED for ${status} agreement`, async () => {
       const agreement = makeDraftAgreement({ status });
-      const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+      const cancelledAgreement = {
+        ...agreement,
+        status: AgreementStatus.CANCELLED,
+      };
 
       (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -746,7 +802,10 @@ describe('AgreementsService.archive', () => {
         { ...mockMilestone, id: 'm3', status: 'DRAFT', order: 3 },
       ],
     });
-    const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+    const cancelledAgreement = {
+      ...agreement,
+      status: AgreementStatus.CANCELLED,
+    };
 
     (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -781,7 +840,10 @@ describe('AgreementsService.archive', () => {
         { ...mockMilestone, id: 'm2', status: 'ACTIVE', order: 2 },
       ],
     });
-    const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+    const cancelledAgreement = {
+      ...agreement,
+      status: AgreementStatus.CANCELLED,
+    };
 
     (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -813,7 +875,15 @@ describe('AgreementsService.archive', () => {
       where: {
         agreementId: AGREEMENT_ID,
         milestoneId: { in: ['m2'] },
-        status: { in: ['RESERVED', 'CLIENT_REVIEW', 'AI_REVIEW', 'READY_TO_RELEASE', 'ON_HOLD'] },
+        status: {
+          in: [
+            'RESERVED',
+            'CLIENT_REVIEW',
+            'AI_REVIEW',
+            'READY_TO_RELEASE',
+            'ON_HOLD',
+          ],
+        },
       },
       data: { status: 'REFUNDED' },
     });
@@ -823,7 +893,10 @@ describe('AgreementsService.archive', () => {
     const agreement = makeDraftAgreement({
       status: AgreementStatus.SENT,
     });
-    const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+    const cancelledAgreement = {
+      ...agreement,
+      status: AgreementStatus.CANCELLED,
+    };
 
     (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -844,7 +917,10 @@ describe('AgreementsService.archive', () => {
     const agreement = makeDraftAgreement({
       status: AgreementStatus.ACTIVE,
     });
-    const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+    const cancelledAgreement = {
+      ...agreement,
+      status: AgreementStatus.CANCELLED,
+    };
 
     (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -894,7 +970,10 @@ describe('AgreementsService.archive', () => {
     for (const status of visibleStatuses) {
       jest.clearAllMocks();
       const agreement = makeDraftAgreement({ status });
-      const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+      const cancelledAgreement = {
+        ...agreement,
+        status: AgreementStatus.CANCELLED,
+      };
 
       (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -912,7 +991,9 @@ describe('AgreementsService.archive', () => {
 
       await service.archive(AGREEMENT_ID);
 
-      expect(emailNotifications.enqueueAgreementCancelledForClient).toHaveBeenCalledWith(
+      expect(
+        emailNotifications.enqueueAgreementCancelledForClient,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           agreementId: AGREEMENT_ID,
           recipientEmail: 'client@test.com',
@@ -925,7 +1006,10 @@ describe('AgreementsService.archive', () => {
     const agreement = makeDraftAgreement({
       status: AgreementStatus.DRAFT,
     });
-    const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+    const cancelledAgreement = {
+      ...agreement,
+      status: AgreementStatus.CANCELLED,
+    };
 
     (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -939,14 +1023,19 @@ describe('AgreementsService.archive', () => {
 
     await service.archive(AGREEMENT_ID);
 
-    expect(emailNotifications.enqueueAgreementCancelledForClient).not.toHaveBeenCalled();
+    expect(
+      emailNotifications.enqueueAgreementCancelledForClient,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns CANCELLED agreement even when notification enqueue fails', async () => {
     const agreement = makeDraftAgreement({
       status: AgreementStatus.SENT,
     });
-    const cancelledAgreement = { ...agreement, status: AgreementStatus.CANCELLED };
+    const cancelledAgreement = {
+      ...agreement,
+      status: AgreementStatus.CANCELLED,
+    };
 
     (prisma.agreement.findFirst as jest.Mock).mockResolvedValue(agreement);
 
@@ -961,9 +1050,9 @@ describe('AgreementsService.archive', () => {
       },
     };
     setupArchiveTransaction(tx);
-    (emailNotifications.enqueueAgreementCancelledForClient as jest.Mock).mockRejectedValue(
-      new Error('SMTP unavailable'),
-    );
+    (
+      emailNotifications.enqueueAgreementCancelledForClient as jest.Mock
+    ).mockRejectedValue(new Error('SMTP unavailable'));
 
     const result = await service.archive(AGREEMENT_ID);
 
@@ -992,7 +1081,10 @@ describe('AgreementsService helper methods', () => {
         },
         { provide: ClsService, useValue: clsService },
         { provide: ClientsService, useValue: { getById: jest.fn() } },
-        { provide: TimelineEventsService, useValue: { createEvent: jest.fn() } },
+        {
+          provide: TimelineEventsService,
+          useValue: { createEvent: jest.fn() },
+        },
         {
           provide: EmailNotificationsService,
           useValue: {
@@ -1016,9 +1108,16 @@ describe('AgreementsService helper methods', () => {
 
   it('recalculates draft totals from milestone sums', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.DRAFT });
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.DRAFT,
+    });
     tx.milestone.aggregate.mockResolvedValue({ _sum: { amount: 1250 } });
-    tx.agreement.update.mockResolvedValue({ id: AGREEMENT_ID, totalAmount: 1250 });
+    tx.agreement.update.mockResolvedValue({
+      id: AGREEMENT_ID,
+      totalAmount: 1250,
+    });
 
     const result = await service.recalculateTotalAmount(tx, AGREEMENT_ID);
 
@@ -1031,7 +1130,11 @@ describe('AgreementsService helper methods', () => {
 
   it('recalculates zero totals when no milestones exist', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.DRAFT });
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.DRAFT,
+    });
     tx.milestone.aggregate.mockResolvedValue({ _sum: { amount: null } });
     tx.agreement.update.mockResolvedValue({ id: AGREEMENT_ID, totalAmount: 0 });
 
@@ -1042,9 +1145,15 @@ describe('AgreementsService helper methods', () => {
 
   it('rejects recalculation for non-draft agreements', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.ACTIVE,
+    });
 
-    await expect(service.recalculateTotalAmount(tx, AGREEMENT_ID)).rejects.toMatchObject({
+    await expect(
+      service.recalculateTotalAmount(tx, AGREEMENT_ID),
+    ).rejects.toMatchObject({
       code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED,
     });
   });
@@ -1053,7 +1162,9 @@ describe('AgreementsService helper methods', () => {
     clsService.get.mockReturnValueOnce(null);
     const tx = makeTx();
 
-    await expect(service.recalculateTotalAmount(tx, AGREEMENT_ID)).rejects.toMatchObject({
+    await expect(
+      service.recalculateTotalAmount(tx, AGREEMENT_ID),
+    ).rejects.toMatchObject({
       code: ErrorCode.UNAUTHORIZED,
     });
   });
@@ -1062,19 +1173,28 @@ describe('AgreementsService helper methods', () => {
     const tx = makeTx();
     tx.agreement.findFirst.mockResolvedValue(null);
 
-    await expect(service.recalculateTotalAmount(tx, AGREEMENT_ID)).rejects.toMatchObject({
+    await expect(
+      service.recalculateTotalAmount(tx, AGREEMENT_ID),
+    ).rejects.toMatchObject({
       code: ErrorCode.AGREEMENT_NOT_FOUND,
     });
   });
 
   it('completes active agreements when all milestones are accepted and released', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.ACTIVE,
+    });
     tx.milestone.findMany.mockResolvedValue([
       { status: 'ACCEPTED', paymentStatus: PrismaPaymentStatus.RELEASED },
       { status: 'ACCEPTED', paymentStatus: PrismaPaymentStatus.RELEASED },
     ]);
-    tx.agreement.update.mockResolvedValue({ id: AGREEMENT_ID, status: AgreementStatus.COMPLETED });
+    tx.agreement.update.mockResolvedValue({
+      id: AGREEMENT_ID,
+      status: AgreementStatus.COMPLETED,
+    });
 
     const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
 
@@ -1088,8 +1208,14 @@ describe('AgreementsService helper methods', () => {
 
   it('returns a no-op for pending milestones', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
-    tx.milestone.findMany.mockResolvedValue([{ status: 'ACTIVE', paymentStatus: PrismaPaymentStatus.RELEASED }]);
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.ACTIVE,
+    });
+    tx.milestone.findMany.mockResolvedValue([
+      { status: 'ACTIVE', paymentStatus: PrismaPaymentStatus.RELEASED },
+    ]);
 
     const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
 
@@ -1103,8 +1229,14 @@ describe('AgreementsService helper methods', () => {
 
   it('returns a no-op for unpaid milestones', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
-    tx.milestone.findMany.mockResolvedValue([{ status: 'ACCEPTED', paymentStatus: PrismaPaymentStatus.WAITING }]);
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.ACTIVE,
+    });
+    tx.milestone.findMany.mockResolvedValue([
+      { status: 'ACCEPTED', paymentStatus: PrismaPaymentStatus.WAITING },
+    ]);
 
     const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
 
@@ -1113,7 +1245,11 @@ describe('AgreementsService helper methods', () => {
 
   it('returns a no-op for agreements without milestones', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.ACTIVE });
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.ACTIVE,
+    });
     tx.milestone.findMany.mockResolvedValue([]);
 
     const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
@@ -1123,7 +1259,11 @@ describe('AgreementsService helper methods', () => {
 
   it('returns a no-op for completed agreements', async () => {
     const tx = makeTx();
-    tx.agreement.findFirst.mockResolvedValue({ id: AGREEMENT_ID, freelancerId: FREELANCER_ID, status: AgreementStatus.COMPLETED });
+    tx.agreement.findFirst.mockResolvedValue({
+      id: AGREEMENT_ID,
+      freelancerId: FREELANCER_ID,
+      status: AgreementStatus.COMPLETED,
+    });
 
     const result = await service.checkCompletionStatus(tx, AGREEMENT_ID);
 
@@ -1139,7 +1279,9 @@ describe('AgreementsService helper methods', () => {
     const tx = makeTx();
     tx.agreement.findFirst.mockResolvedValue(null);
 
-    await expect(service.checkCompletionStatus(tx, AGREEMENT_ID)).rejects.toMatchObject({
+    await expect(
+      service.checkCompletionStatus(tx, AGREEMENT_ID),
+    ).rejects.toMatchObject({
       code: ErrorCode.AGREEMENT_NOT_FOUND,
     });
   });

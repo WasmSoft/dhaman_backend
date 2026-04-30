@@ -1,4 +1,10 @@
-import { AgreementStatus, MilestoneStatus, PaymentStatus, TimelineActorRole, TimelineEventType } from '@prisma/client';
+import {
+  AgreementStatus,
+  MilestoneStatus,
+  PaymentStatus,
+  TimelineActorRole,
+  TimelineEventType,
+} from '@prisma/client';
 import { ErrorCode } from '../../../common/enums/error-code.enum';
 import { AgreementsService } from '../../agreements/agreements.service';
 import { TimelineEventsService } from '../../timeline-events/timeline-events.service';
@@ -19,10 +25,16 @@ describe('PaymentsService release', () => {
       timelineEventCreated: true,
     }),
   };
-  const timelineEventsService: any = { createEvent: jest.fn().mockResolvedValue({}) };
+  const timelineEventsService: any = {
+    createEvent: jest.fn().mockResolvedValue({}),
+  };
 
   function buildService() {
-    return new PaymentsService(prisma as PrismaService, agreementsService as AgreementsService, timelineEventsService as TimelineEventsService);
+    return new PaymentsService(
+      prisma as PrismaService,
+      agreementsService as AgreementsService,
+      timelineEventsService as TimelineEventsService,
+    );
   }
 
   beforeEach(() => {
@@ -39,17 +51,22 @@ describe('PaymentsService release', () => {
           milestoneId,
           status: PaymentStatus.READY_TO_RELEASE,
         }),
-        update: jest.fn().mockResolvedValue({ id: paymentId, status: PaymentStatus.RELEASED }),
+        update: jest
+          .fn()
+          .mockResolvedValue({ id: paymentId, status: PaymentStatus.RELEASED }),
       },
       milestone: { update: jest.fn().mockResolvedValue({}) },
     };
     prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
 
-    const result = await service.release({ paymentId } as any);
+    const result = await service.release({ paymentId });
 
     expect(tx.milestone.update).toHaveBeenCalledWith({
       where: { id: milestoneId },
-      data: { paymentStatus: PaymentStatus.RELEASED, status: MilestoneStatus.ACCEPTED },
+      data: {
+        paymentStatus: PaymentStatus.RELEASED,
+        status: MilestoneStatus.ACCEPTED,
+      },
     });
     expect(timelineEventsService.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -60,13 +77,25 @@ describe('PaymentsService release', () => {
       }),
       tx,
     );
-    expect(agreementsService.checkCompletionStatus).toHaveBeenCalledWith(tx, agreementId);
-    expect(result).toEqual(expect.objectContaining({ paymentId, status: PaymentStatus.RELEASED, completed: true }));
+    expect(agreementsService.checkCompletionStatus).toHaveBeenCalledWith(
+      tx,
+      agreementId,
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        paymentId,
+        status: PaymentStatus.RELEASED,
+        completed: true,
+      }),
+    );
   });
 
   it('throws PAYMENT_NOT_FOUND for missing payments', async () => {
     const service = buildService();
-    const tx: any = { payment: { findFirst: jest.fn().mockResolvedValue(null) }, milestone: { update: jest.fn() } };
+    const tx: any = {
+      payment: { findFirst: jest.fn().mockResolvedValue(null) },
+      milestone: { update: jest.fn() },
+    };
     prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
 
     await expect(service.release({ paymentId } as any)).rejects.toMatchObject({

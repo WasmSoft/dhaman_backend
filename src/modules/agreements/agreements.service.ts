@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, TimelineActorRole, TimelineEventType, MilestoneStatus as PrismaMilestoneStatus, PaymentStatus as PrismaPaymentStatus, AgreementStatus as PrismaAgreementStatus } from '@prisma/client';
+import {
+  Prisma,
+  TimelineActorRole,
+  TimelineEventType,
+  MilestoneStatus as PrismaMilestoneStatus,
+  PaymentStatus as PrismaPaymentStatus,
+  AgreementStatus as PrismaAgreementStatus,
+} from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 import { ClsService } from '../../common/cls/cls.service';
 import { ErrorCode } from '../../common/enums/error-code.enum';
@@ -663,11 +670,13 @@ export class AgreementsService {
         actorRole: TimelineActorRole.FREELANCER,
         actorId: freelancerId,
         title: 'Agreement completed',
-        description: 'Agreement completed after all milestones were accepted and released.',
+        description:
+          'Agreement completed after all milestones were accepted and released.',
         metadata: {
           titleEn: 'Agreement completed',
           titleAr: 'تم إكمال الاتفاقية',
-          descriptionEn: 'Agreement completed after all milestones were accepted and released.',
+          descriptionEn:
+            'Agreement completed after all milestones were accepted and released.',
           descriptionAr: 'تم إكمال الاتفاقية بعد قبول وتحرير جميع المراحل.',
         },
       },

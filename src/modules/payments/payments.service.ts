@@ -81,7 +81,9 @@ export class PaymentsService {
       }
 
       if (payment.status !== PaymentStatus.READY_TO_RELEASE) {
-        throw new AppException({ code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE });
+        throw new AppException({
+          code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE,
+        });
       }
 
       if (!payment.milestoneId) {

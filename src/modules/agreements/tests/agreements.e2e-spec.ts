@@ -227,7 +227,10 @@ describe('POST /agreements/:id/activate (e2e)', () => {
     const clientRes = await request(app.getHttpServer())
       .post('/api/v1/clients')
       .set('Authorization', `Bearer ${freelancerJwt}`)
-      .send({ name: 'Activate Client', email: `client+${Date.now()}@test.com` });
+      .send({
+        name: 'Activate Client',
+        email: `client+${Date.now()}@test.com`,
+      });
     const clientId = clientRes.body.data?.id ?? clientRes.body.id;
 
     const agreementRes = await request(app.getHttpServer())
@@ -270,11 +273,15 @@ describe('POST /agreements/:id/activate (e2e)', () => {
     const inviteRes = await request(app.getHttpServer())
       .get(`/api/v1/agreements/${agreementId}`)
       .set('Authorization', `Bearer ${freelancerJwt}`);
-    const inviteToken = (inviteRes.body.data?.inviteToken ?? inviteRes.body.inviteToken) as string;
+    const inviteToken = (inviteRes.body.data?.inviteToken ??
+      inviteRes.body.inviteToken) as string;
 
     await request(app.getHttpServer())
       .post(`/api/v1/portal/approve/${inviteToken}`)
-      .send({ clientName: 'Activate Client', clientEmail: `client+${Date.now()}@test.com` });
+      .send({
+        clientName: 'Activate Client',
+        clientEmail: `client+${Date.now()}@test.com`,
+      });
 
     return agreementId;
   }
@@ -345,7 +352,11 @@ describe('POST /agreements/:id/activate (e2e)', () => {
     const body = res.body.data ?? res.body;
     expect(body.status).toBe('ACTIVE');
 
-    const milestones = body.milestones as Array<{ id: string; status: string; order: number }>;
+    const milestones = body.milestones as Array<{
+      id: string;
+      status: string;
+      order: number;
+    }>;
     expect(milestones.length).toBeGreaterThanOrEqual(1);
     const firstMilestone = milestones.find((m) => m.order === 1);
     expect(firstMilestone?.status).toBe('ACTIVE');
@@ -395,7 +406,10 @@ describe('POST /agreements/:id/archive (e2e)', () => {
     const clientRes = await request(app.getHttpServer())
       .post('/api/v1/clients')
       .set('Authorization', `Bearer ${freelancerJwt}`)
-      .send({ name: 'Archive Client', email: `archive+${Date.now()}@test.com` });
+      .send({
+        name: 'Archive Client',
+        email: `archive+${Date.now()}@test.com`,
+      });
     const clientId = clientRes.body.data?.id ?? clientRes.body.id;
 
     const agreementRes = await request(app.getHttpServer())
@@ -445,7 +459,11 @@ describe('POST /agreements/:id/archive (e2e)', () => {
     expect(res.status).toBe(200);
     const body = res.body.data ?? res.body;
     expect(body.status).toBe('CANCELLED');
-    const milestones = body.milestones as Array<{ id: string; status: string; order: number }>;
+    const milestones = body.milestones as Array<{
+      id: string;
+      status: string;
+      order: number;
+    }>;
     for (const m of milestones) {
       expect(m.status).toBe('CANCELLED');
     }
