@@ -13,6 +13,7 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.AUTH_TOKEN_EXPIRED]: 'Authentication token expired',
   [ErrorCode.AUTH_TOKEN_INVALID]: 'Authentication token is invalid',
   [ErrorCode.AUTH_USER_NOT_FOUND]: 'Authenticated user not found',
+  [ErrorCode.USER_NOT_FOUND]: 'User was not found',
   [ErrorCode.CLIENT_NOT_FOUND]: 'Client not found',
   [ErrorCode.CLIENT_EMAIL_ALREADY_EXISTS]: 'Client email already exists',
   [ErrorCode.CLIENT_SUMMARY_MIXED_CURRENCY]:
@@ -98,6 +99,13 @@ export const errorMessagesEn: Record<ErrorCode, string> = {
   [ErrorCode.AGREEMENT_NOT_INVITABLE]:
     'Agreement cannot be invited in its current state',
   [ErrorCode.SETTINGS_NOT_FOUND]: 'Settings not found',
+  [ErrorCode.SETTINGS_CREATE_FAILED]: 'Could not create default settings',
+  [ErrorCode.SETTINGS_UPDATE_FAILED]: 'Could not update settings',
+  [ErrorCode.SETTINGS_INVALID_AI_STRICTNESS]:
+    'AI strictness value is invalid',
+  [ErrorCode.SETTINGS_INVALID_CURRENCY]: 'Default currency is invalid',
+  [ErrorCode.SETTINGS_POLICY_INVALID]:
+    'Default agreement policy is invalid',
   [ErrorCode.SETTINGS_INVALID_VALUE]: 'Settings value is invalid',
   [ErrorCode.DASHBOARD_RANGE_INVALID]: 'Dashboard date range is invalid.',
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]:
