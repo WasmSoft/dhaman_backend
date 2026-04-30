@@ -67,7 +67,7 @@ export function createService(
   const paymentsService = new PaymentsService(prisma);
   const timelineEventsService = new TimelineEventsService(prisma, cls);
   const timelineEventsService = new TimelineEventsService(prisma, cls);
-  const paymentsService = new PaymentsService(prisma, timelineEventsService, cls);
+  const paymentsService = new PaymentsService(prisma, timelineEventsService, cls, cls);
   const emailNotificationsService = new EmailNotificationsService(prisma);
   const mockGeminiService = geminiService ?? createGeminiServiceMock();
 

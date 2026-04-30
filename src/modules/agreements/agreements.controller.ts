@@ -1,16 +1,3 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import type { AuthenticatedUser } from '../../common/types/authenticated-user.type';
-import { ParseUuidPipe } from '../../common/pipes/parse-uuid.pipe';
-import { EmailNotificationResponseDto } from '../email-notifications/dto/email-notifications.dto';
 import {
   Body,
   Controller,
@@ -30,7 +17,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user.type';
+import { ParseUuidPipe } from '../../common/pipes/parse-uuid.pipe';
 import { AgreementStatus } from '../../common/enums/agreement-status.enum';
+import { EmailNotificationResponseDto } from '../email-notifications/dto/email-notifications.dto';
 import { AgreementQueryDto } from './dto/agreement-query.dto';
 import { AgreementListResponseDto } from './dto/agreement-list.dto';
 import { AgreementResponseDto } from './dto/agreement-response.dto';
@@ -287,6 +278,9 @@ export class AgreementsController {
   })
   activate(@Param('id') id: string) {
     return this.agreementsService.activate(id);
+  }
+
+  @Post(':id/resend-invite')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
@@ -300,11 +294,16 @@ export class AgreementsController {
     description: 'Invite resend accepted and notification record returned.',
     type: EmailNotificationResponseDto,
   })
-  @ApiResponse({ status: 400, description: 'Client email missing or request validation failed.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Client email missing or request validation failed.',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 404, description: 'Agreement or template not found.' })
-  @ApiResponse({ status: 409, description: 'Agreement cannot be invited in its current state.' })
-  @Post(':id/resend-invite')
+  @ApiResponse({
+    status: 409,
+    description: 'Agreement cannot be invited in its current state.',
+  })
   resendInvite(
     @Param('id', ParseUuidPipe) id: string,
     @CurrentUser() user: AuthenticatedUser,
@@ -313,6 +312,23 @@ export class AgreementsController {
   }
 
   @Post(':id/approve')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Approve an agreement',
+    description: 'Approves an agreement after validating the agreement ID.',
+  })
+  @ApiParam({ name: 'id', description: 'Agreement ID', format: 'uuid' })
+  @ApiResponse({
+    status: 200,
+    description: 'Agreement approved successfully.',
+    type: AgreementResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Agreement not found or not owned by requester.',
+  })
   approve(@Param('id', ParseUuidPipe) id: string) {
     return this.agreementsService.approve(id);
   }
