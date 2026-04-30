@@ -6,6 +6,7 @@ import {
   TimelineEventType,
 } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { PortalTokenType } from '../../common/enums/portal-token-type.enum';
 import { AppException } from '../../common/errors/app-exception';
@@ -495,7 +496,7 @@ export class DeliveriesService {
     }
 
     const portalToken = await this.prisma.portalToken.findUnique({
-      where: { token },
+      where: { tokenHash: createHash('sha256').update(token).digest('hex') },
     });
     if (!portalToken) {
       throw new AppException({ code: ErrorCode.PORTAL_TOKEN_INVALID });

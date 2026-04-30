@@ -306,6 +306,7 @@ describe('ClientsService', () => {
       expect(result.agreements.byStatus).toEqual({
         DRAFT: 0,
         SENT: 0,
+        CHANGE_REQUESTED: 0,
         APPROVED: 0,
         ACTIVE: 0,
         COMPLETED: 0,

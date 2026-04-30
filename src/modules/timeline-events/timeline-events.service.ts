@@ -4,6 +4,7 @@ import {
   type Prisma,
 } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { ClsService } from '../../common/cls/cls.service';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { AppException } from '../../common/errors/app-exception';
@@ -142,7 +143,7 @@ export class TimelineEventsService {
     query: TimelineQueryDto,
   ): Promise<PaginatedTimelineEventsResponseDto> {
     const portalToken = await this.prisma.portalToken.findUnique({
-      where: { token: rawToken },
+      where: { tokenHash: createHash('sha256').update(rawToken).digest('hex') },
       select: {
         agreementId: true,
         expiresAt: true,

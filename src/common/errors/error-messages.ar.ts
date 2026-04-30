@@ -115,4 +115,11 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.DASHBOARD_AGGREGATION_FAILED]: 'تعذر حساب بيانات لوحة التحكم.',
   [ErrorCode.TIMELINE_EVENT_TYPE_INVALID]: 'نوع حدث السجل الزمني غير صالح.',
   [ErrorCode.TIMELINE_METADATA_INVALID]: 'بيانات حدث السجل الزمني غير صالحة.',
+  [ErrorCode.PORTAL_TOKEN_CREATE_FAILED]: 'تعذّر إنشاء رابط البوابة.',
+  [ErrorCode.AGREEMENT_NOT_APPROVABLE]:
+    'لا يمكن قبول الاتفاقية في حالتها الحالية.',
+  [ErrorCode.AGREEMENT_NOT_CHANGEABLE]:
+    'لا يمكن طلب تعديل الاتفاقية في حالتها الحالية.',
+  [ErrorCode.AGREEMENT_NOT_REJECTABLE]:
+    'لا يمكن رفض الاتفاقية في حالتها الحالية.',
 };

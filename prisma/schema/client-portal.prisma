@@ -3,18 +3,23 @@ enum PortalTokenType {
   AGREEMENT_APPROVAL
   DELIVERY_REVIEW
   PAYMENT_VIEW
+  CHANGE_REQUEST_REVIEW
 }
 
 model PortalToken {
-  id          String          @id @default(uuid())
-  agreementId String
-  token       String          @unique
-  type        PortalTokenType
-  expiresAt   DateTime?
-  revokedAt   DateTime?
-  createdAt   DateTime        @default(now())
+  id             String          @id @default(uuid())
+  agreementId    String
+  tokenHash      String          @unique
+  tokenPreview   String
+  type           PortalTokenType
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  lastAccessedAt DateTime?
+  createdAt      DateTime        @default(now())
 
   agreement Agreement @relation(fields: [agreementId], references: [id])
 
   @@index([agreementId])
+  @@index([type])
+  @@index([expiresAt])
 }
