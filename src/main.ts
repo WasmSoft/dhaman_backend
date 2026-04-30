@@ -10,11 +10,30 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const allowedOrigins = Array.from(
+    new Set([
+      'https://panel.dhaman.wasmsoft.com',
+      'http://localhost:3000',
+      'http://localhost:3083',
+      ...(process.env.FRONTEND_URL
+        ?.split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean) ?? []),
+    ]),
+  );
 
   app.use(helmet());
   app.enableCors({
     credentials: true,
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3001',
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Accept-Language',
+    ],
+    optionsSuccessStatus: 204,
   });
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
