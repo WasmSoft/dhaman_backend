@@ -80,7 +80,7 @@ export class AgreementsService {
           expectedDeliveryDate: dto.expectedDeliveryDate
             ? new Date(dto.expectedDeliveryDate)
             : null,
-          status: 'DRAFT',
+          status: PrismaAgreementStatus.DRAFT,
         },
         include: {
           client: true,
@@ -107,8 +107,13 @@ export class AgreementsService {
     return this.mapToResponse(agreement);
   }
 
+  list(query: AgreementQueryDto = {}): Promise<AgreementListResponseDto> {
+    return this.findAll(query);
+  }
 
-  async findAll(query: AgreementQueryDto): Promise<AgreementListResponseDto> {
+  async findAll(
+    query: AgreementQueryDto = {},
+  ): Promise<AgreementListResponseDto> {
     const freelancerId = this.getFreelancerId();
 
     const page = query.page ?? 1;
@@ -124,7 +129,6 @@ export class AgreementsService {
     if (query.clientId) {
       where.clientId = query.clientId;
     }
-  
 
     if (query.search) {
       where.OR = [
@@ -156,22 +160,12 @@ export class AgreementsService {
     ]);
 
     return {
-      data: agreements.map((a) => this.mapToListItem(a)),
+      data: agreements.map((agreement) => this.mapToListItem(agreement)),
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     };
-  }
-
-  // AR: يعيد إرسال دعوة الاتفاق للعميل بعد تمرير هوية المستخدم من الخادم.
-  // EN: Resends the agreement invite after passing server-owned user identity into the email service.
-  resendInvite(id: string, userId: string) {
-    return this.emailNotifications.resendAgreementInvite(id, userId);
-  }
-
-  list(query: AgreementQueryDto = {}): Promise<AgreementListResponseDto> {
-    return this.findAll(query);
   }
 
   async findOne(id: string): Promise<AgreementResponseDto> {
@@ -216,7 +210,7 @@ export class AgreementsService {
       throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
     }
 
-    if (existing.status !== 'DRAFT') {
+    if (existing.status !== PrismaAgreementStatus.DRAFT) {
       throw new AppException({ code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED });
     }
 
@@ -230,6 +224,7 @@ export class AgreementsService {
         _sum: { amount: true },
       });
       const sum = Number(milestoneSum._sum.amount ?? 0);
+
       if (sum > 0 && sum !== dto.totalAmount) {
         throw new AppException({ code: ErrorCode.PAYMENT_INVALID_AMOUNT });
       }
@@ -291,17 +286,14 @@ export class AgreementsService {
       throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
     }
 
-    // 1. Status must be DRAFT — check before all other readiness conditions
-    if (agreement.status !== 'DRAFT') {
+    if (agreement.status !== PrismaAgreementStatus.DRAFT) {
       throw new AppException({ code: ErrorCode.AGREEMENT_ALREADY_SENT });
     }
 
-    // 2. Client must be linked
     if (!agreement.clientId || !agreement.client) {
       throw new AppException({ code: ErrorCode.AGREEMENT_CLIENT_REQUIRED });
     }
 
-    // 3. At least one milestone must exist
     if (agreement.milestones.length === 0) {
       throw new AppException({
         code: ErrorCode.VALIDATION_ERROR,
@@ -309,31 +301,28 @@ export class AgreementsService {
       });
     }
 
-    // 4. Policy must exist
     if (!agreement.policy) {
       throw new AppException({ code: ErrorCode.AGREEMENT_POLICY_REQUIRED });
     }
 
-    // 5. totalAmount must equal the sum of milestone amounts (Decimal-safe)
     const milestoneAggregate = await this.prisma.milestone.aggregate({
       where: { agreementId: id },
       _sum: { amount: true },
     });
     const milestoneSum = milestoneAggregate._sum.amount ?? 0;
+
     if (Number(agreement.totalAmount) !== Number(milestoneSum)) {
       throw new AppException({ code: ErrorCode.PAYMENT_INVALID_AMOUNT });
     }
 
-    // Generate unique URL-safe 64-character tokens (48 bytes → 64 base64url chars)
     const inviteToken = randomBytes(48).toString('base64url');
     const portalToken = randomBytes(48).toString('base64url');
 
-    // Atomic: update agreement status/tokens/sentAt + record AGREEMENT_SENT timeline event
     const updated = await this.prisma.$transaction(async (tx) => {
       const updatedAgreement = await tx.agreement.update({
         where: { id },
         data: {
-          status: 'SENT',
+          status: PrismaAgreementStatus.SENT,
           sentAt: new Date(),
           inviteToken,
           portalToken,
@@ -360,7 +349,6 @@ export class AgreementsService {
       return updatedAgreement;
     });
 
-    // Dispatch invite email after commit — failure is logged, SENT state is preserved
     try {
       await this.emailNotifications.enqueueAgreementInvite({
         agreementId: id,
@@ -379,6 +367,48 @@ export class AgreementsService {
     return this.mapToResponse(updated);
   }
 
+  resendInvite(id: string, userId: string) {
+    return this.emailNotifications.resendAgreementInvite(id, userId);
+  }
+
+  async approve(id: string): Promise<AgreementResponseDto> {
+    const freelancerId = this.getFreelancerId();
+
+    const agreement = await this.prisma.agreement.findFirst({
+      where: { id, freelancerId },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    if (!agreement) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    if (
+      agreement.status !== PrismaAgreementStatus.DRAFT &&
+      agreement.status !== PrismaAgreementStatus.SENT
+    ) {
+      throw new AppException({ code: ErrorCode.AGREEMENT_CANNOT_BE_MODIFIED });
+    }
+
+    const updated = await this.prisma.agreement.update({
+      where: { id },
+      data: {
+        status: PrismaAgreementStatus.APPROVED,
+        approvedAt: new Date(),
+      },
+      include: {
+        client: true,
+        milestones: { orderBy: { order: 'asc' } },
+        policy: true,
+      },
+    });
+
+    return this.mapToResponse(updated);
+  }
 
   async activate(id: string): Promise<AgreementResponseDto> {
     const freelancerId = this.getFreelancerId();
@@ -483,7 +513,6 @@ export class AgreementsService {
     }
 
     const preArchiveStatus = agreement.status;
-
     const isVisibleForNotification =
       preArchiveStatus !== PrismaAgreementStatus.DRAFT;
 
@@ -508,8 +537,10 @@ export class AgreementsService {
 
       if (preArchiveStatus === PrismaAgreementStatus.ACTIVE) {
         const unfinishedMilestoneIds = agreement.milestones
-          .filter((m) => m.status !== PrismaMilestoneStatus.ACCEPTED)
-          .map((m) => m.id);
+          .filter(
+            (milestone) => milestone.status !== PrismaMilestoneStatus.ACCEPTED,
+          )
+          .map((milestone) => milestone.id);
 
         if (unfinishedMilestoneIds.length > 0) {
           await tx.payment.updateMany({
@@ -702,9 +733,11 @@ export class AgreementsService {
 
   private getFreelancerId(): string {
     const id = this.cls.get('userId');
+
     if (!id) {
       throw new AppException({ code: ErrorCode.UNAUTHORIZED });
     }
+
     return id;
   }
 
@@ -713,6 +746,7 @@ export class AgreementsService {
       where: { userId: freelancerId },
       select: { preferredCurrency: true },
     });
+
     return settings?.preferredCurrency ?? 'SAR';
   }
 

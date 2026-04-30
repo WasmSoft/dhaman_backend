@@ -19,6 +19,9 @@ import { AppException } from '../../common/errors/app-exception';
 import { ClsService } from '../../common/cls/cls.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { AgreementsService } from '../agreements/agreements.service';
+import { FundMilestonePaymentDto, ReleasePaymentDto } from './dto/payments.dto';
+import { TimelineEventsService } from '../timeline-events/timeline-events.service';
+import { TimelineEventsService } from '../timeline-events/timeline-events.service';
 import {
   FundMilestoneDto,
   PortalFundPaymentDto,
@@ -67,6 +70,11 @@ type PaymentWriteClient = Pick<
  */
 @Injectable()
 export class PaymentsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly agreementsService?: AgreementsService,
+    private readonly timelineEventsService?: TimelineEventsService,
+  ) {}
   private readonly validTransitions: Record<PrismaPaymentStatus, PrismaPaymentStatus[]> = {
     [PrismaPaymentStatus.WAITING]: [PrismaPaymentStatus.RESERVED],
     [PrismaPaymentStatus.RESERVED]: [PrismaPaymentStatus.CLIENT_REVIEW],
@@ -227,6 +235,79 @@ export class PaymentsService {
     };
   }
 
+  release(dto: ReleasePaymentDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.findFirst({
+        where: { id: dto.paymentId },
+      });
+
+      if (!payment) {
+        throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+      }
+
+      if (payment.status === PaymentStatus.RELEASED) {
+        throw new AppException({ code: ErrorCode.PAYMENT_ALREADY_RELEASED });
+      }
+
+      if (payment.status !== PaymentStatus.READY_TO_RELEASE) {
+        throw new AppException({
+          code: ErrorCode.PAYMENT_NOT_READY_TO_RELEASE,
+        });
+      }
+
+      if (!payment.milestoneId) {
+        throw new AppException({ code: ErrorCode.PAYMENT_NOT_FOUND });
+      }
+
+      const releasedAt = new Date();
+
+      const releasedPayment = await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: PaymentStatus.RELEASED,
+          releasedAt,
+        },
+      });
+
+      await tx.milestone.update({
+        where: { id: payment.milestoneId },
+        data: {
+          paymentStatus: PaymentStatus.RELEASED,
+          status: MilestoneStatus.ACCEPTED,
+        },
+      });
+
+      await this.timelineEventsService?.createEvent(
+        {
+          agreementId: payment.agreementId,
+          milestoneId: payment.milestoneId ?? undefined,
+          actorRole: TimelineActorRole.FREELANCER,
+          type: TimelineEventType.PAYMENT_RELEASED,
+          title: 'Payment released',
+          description: 'Milestone payment was released.',
+          metadata: {
+            titleEn: 'Payment released',
+            titleAr: 'تم تحرير الدفعة',
+            descriptionEn: 'Milestone payment was released.',
+            descriptionAr: 'تم تحرير دفعة المرحلة.',
+          },
+        },
+        tx,
+      );
+
+      const completion = await this.agreementsService?.checkCompletionStatus(
+        tx,
+        payment.agreementId,
+      );
+
+      return {
+        paymentId: releasedPayment.id,
+        status: releasedPayment.status,
+        completed: completion?.completed ?? false,
+        agreementStatus: completion?.status ?? null,
+        timelineEventCreated: completion?.timelineEventCreated ?? false,
+      };
+    });
   // ============================================================
   // Timeline Metadata Builder
   // ============================================================

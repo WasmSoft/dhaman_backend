@@ -27,8 +27,8 @@ type TemplateContext = {
   agreement?: {
     id: string;
     title: string;
-    description: string;
-    serviceType: string;
+    description: string | null;
+    serviceType: string | null;
     totalAmount: string;
     currency: string;
     status: string;
@@ -39,7 +39,7 @@ type TemplateContext = {
     companyName: string | null;
   };
   freelancer?: {
-    name: string;
+    name: string | null;
     email: string;
   };
   metadata: Record<string, unknown>;
@@ -80,12 +80,15 @@ const AGREEMENT_SCOPED_TYPES = new Set<NotificationType>([
   NotificationType.AGREEMENT_INVITE,
   NotificationType.AGREEMENT_APPROVED,
   NotificationType.AGREEMENT_CHANGE_REQUESTED,
+  NotificationType.AGREEMENT_ACTIVATED,
+  NotificationType.AGREEMENT_CANCELLED,
   NotificationType.DELIVERY_SUBMITTED,
   NotificationType.DELIVERY_CHANGES_REQUESTED,
   NotificationType.AI_REVIEW_READY,
   NotificationType.AI_REVIEW_RECOMMENDATION_ACCEPTED,
   NotificationType.CHANGE_REQUEST_CREATED,
   NotificationType.CHANGE_REQUEST_APPROVED,
+  NotificationType.CHANGE_REQUEST_DECLINED,
   NotificationType.PAYMENT_RESERVED,
   NotificationType.PAYMENT_READY_TO_RELEASE,
   NotificationType.PAYMENT_RELEASED,
@@ -116,6 +119,22 @@ const TEMPLATE_REGISTRY: Record<NotificationType, TemplateDefinition> = {
     enTitle: 'Client requested changes',
     arBody: 'راجع ملاحظات العميل وعدل الاتفاق عند الحاجة.',
     enBody: 'Review the client notes and update the agreement if needed.',
+  },
+  [NotificationType.AGREEMENT_ACTIVATED]: {
+    arSubject: 'تم تفعيل اتفاق ضمان',
+    enSubject: 'Dhaman agreement activated',
+    arTitle: 'تم تفعيل الاتفاق',
+    enTitle: 'Agreement activated',
+    arBody: 'تم تفعيل الاتفاق وبدأ العمل.',
+    enBody: 'The agreement has been activated and work has started.',
+  },
+  [NotificationType.AGREEMENT_CANCELLED]: {
+    arSubject: 'تم إلغاء اتفاق ضمان',
+    enSubject: 'Dhaman agreement cancelled',
+    arTitle: 'تم إلغاء الاتفاق',
+    enTitle: 'Agreement cancelled',
+    arBody: 'تم إلغاء الاتفاق وإيقاف العمل غير المكتمل.',
+    enBody: 'The agreement was cancelled and unfinished work was stopped.',
   },
   [NotificationType.DELIVERY_SUBMITTED]: {
     arSubject: 'تم تسليم مرحلة للمراجعة',
@@ -208,26 +227,6 @@ const TEMPLATE_REGISTRY: Record<NotificationType, TemplateDefinition> = {
   },
 };
 
-/**
- * Email Notifications Service
- *
- * Module responsibility:
- * - Prepare email previews and outbound notification orchestration.
- * Main entities touched:
- * - EmailNotification, Agreement.
- *
- * Business rules:
- * - Keep provider-specific logic behind a service boundary.
- * - Record send attempts and failures.
- * - Email send failures are non-blocking for internal callers.
- *
- * Implementation phases:
- * - Phase 2: DTOs and Swagger contracts (current).
- * - Phase 3: Service logic (template rendering, provider abstraction, send).
- * - Phase 4: Controller endpoint wiring.
- * - Phase 5: Tests and error cases.
- * - Final Phase: Frontend integration.
- */
 @Injectable()
 export class EmailNotificationsService {
   constructor(
@@ -290,6 +289,7 @@ export class EmailNotificationsService {
       );
       const rendered = this.renderTemplate(input.type, context, locale);
       const metadata = this.buildNotificationMetadata(input.metadata, locale);
+
       const pendingRecord = await this.prisma.emailNotification.create({
         data: {
           agreementId: input.agreementId ?? null,
@@ -307,6 +307,7 @@ export class EmailNotificationsService {
       });
 
       const providerResult = await this.sendWithProvider();
+
       const updatedRecord = await this.prisma.emailNotification.update({
         where: { id: pendingRecord.id },
         data: providerResult.ok
@@ -352,8 +353,6 @@ export class EmailNotificationsService {
     });
   }
 
-  // AR: يعيد إرسال دعوة الاتفاق للعميل بعد التحقق من الملكية والحالة.
-  // EN: Resends the agreement invitation after verifying ownership and invitable status.
   async resendAgreementInvite(
     agreementId: string,
     userId = this.clsService?.get('userId'),
@@ -393,6 +392,7 @@ export class EmailNotificationsService {
   ): Promise<PaginatedEmailNotificationsResponseDto> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
+
     const where: Prisma.EmailNotificationWhereInput = {
       ...(query.type ? { type: query.type } : {}),
       ...(query.status ? { status: query.status } : {}),
@@ -429,8 +429,6 @@ export class EmailNotificationsService {
     };
   }
 
-  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بفتح مراجعة ذكاء اصطناعي جديدة.
-  // EN: Creates a pending notification record to inform the freelancer that an AI review was opened.
   async enqueueAiReviewOpenedForFreelancer(input: {
     agreementId: string;
     recipientEmail: string;
@@ -454,8 +452,6 @@ export class EmailNotificationsService {
     });
   }
 
-  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بقبول التوصية.
-  // EN: Creates a pending notification record to inform the client that the recommendation was accepted.
   async enqueueAiReviewRecommendationAcceptedForClient(input: {
     agreementId: string;
     recipientEmail: string;
@@ -473,6 +469,173 @@ export class EmailNotificationsService {
       metadata: {
         paymentStatus: input.paymentStatus,
         recommendation: input.recommendation,
+      },
+    });
+  }
+
+  async enqueueDeliverySubmittedForClient(input: {
+    agreementId: string;
+    deliveryId: string;
+    milestoneId: string;
+    milestoneTitle: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.DELIVERY_SUBMITTED,
+        subject: `Delivery submitted for "${input.milestoneTitle}"`,
+        status: NotificationStatus.PENDING,
+        metadata: {
+          deliveryId: input.deliveryId,
+          milestoneId: input.milestoneId,
+        },
+      },
+    });
+  }
+
+  async enqueueDeliveryChangesRequestedForFreelancer(input: {
+    agreementId: string;
+    deliveryId: string;
+    milestoneId: string;
+    milestoneTitle: string;
+    reason: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.DELIVERY_CHANGES_REQUESTED,
+        subject: `Changes requested for "${input.milestoneTitle}"`,
+        status: NotificationStatus.PENDING,
+        metadata: {
+          deliveryId: input.deliveryId,
+          milestoneId: input.milestoneId,
+          reason: input.reason,
+        },
+      },
+    });
+  }
+
+  async enqueueChangeRequestSentForClient(input: {
+    agreementId: string;
+    changeRequestId: string;
+    title: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.CHANGE_REQUEST_CREATED,
+        subject: `Change request sent: "${input.title}"`,
+        status: NotificationStatus.PENDING,
+        metadata: {
+          changeRequestId: input.changeRequestId,
+        },
+      },
+    });
+  }
+
+  async enqueueChangeRequestApprovedForFreelancer(input: {
+    agreementId: string;
+    changeRequestId: string;
+    title: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.CHANGE_REQUEST_APPROVED,
+        subject: `Change request approved: "${input.title}"`,
+        status: NotificationStatus.PENDING,
+        metadata: {
+          changeRequestId: input.changeRequestId,
+        },
+      },
+    });
+  }
+
+  async enqueueChangeRequestDeclinedForFreelancer(input: {
+    agreementId: string;
+    changeRequestId: string;
+    title: string;
+  }): Promise<void> {
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: '',
+        type: NotificationType.CHANGE_REQUEST_DECLINED,
+        subject: `Change request declined: "${input.title}"`,
+        status: NotificationStatus.PENDING,
+        metadata: {
+          changeRequestId: input.changeRequestId,
+        },
+      },
+    });
+  }
+
+  async enqueueAgreementActivatedForClient(input: {
+    agreementId: string;
+    recipientEmail: string;
+    agreementTitle: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        type: NotificationType.AGREEMENT_ACTIVATED,
+        subject: `Agreement activated: ${input.agreementTitle}`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  async enqueueAgreementCancelledForClient(input: {
+    agreementId: string;
+    recipientEmail: string;
+    agreementTitle: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        type: NotificationType.AGREEMENT_CANCELLED,
+        subject: `Agreement cancelled: ${input.agreementTitle}`,
+        status: NotificationStatus.PENDING,
+      },
+    });
+  }
+
+  async enqueueAgreementInvite(input: {
+    agreementId: string;
+    recipientEmail: string;
+    clientName: string;
+    agreementTitle: string;
+    inviteToken: string;
+  }): Promise<void> {
+    if (!input.recipientEmail.trim()) {
+      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
+    }
+
+    await this.prisma.emailNotification.create({
+      data: {
+        agreementId: input.agreementId,
+        recipientEmail: input.recipientEmail,
+        recipientName: input.clientName,
+        type: NotificationType.AGREEMENT_INVITE,
+        subject: `Agreement invitation: ${input.agreementTitle}`,
+        status: NotificationStatus.PENDING,
+        metadata: {
+          inviteToken: input.inviteToken,
+        },
       },
     });
   }
@@ -584,6 +747,10 @@ export class EmailNotificationsService {
 
     if (!agreement) {
       throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
+    }
+
+    if (!agreement.client) {
+      throw new AppException({ code: ErrorCode.EMAIL_CONTEXT_INCOMPLETE });
     }
 
     return {
@@ -629,6 +796,7 @@ export class EmailNotificationsService {
     const safeError = this.sanitizeError(error);
     const fallbackTemplate =
       TEMPLATE_REGISTRY[input.type] ?? TEMPLATE_REGISTRY.SYSTEM_TEST;
+
     const record = await this.prisma.emailNotification.create({
       data: {
         agreementId: input.agreementId ?? null,
@@ -649,494 +817,6 @@ export class EmailNotificationsService {
 
     return this.toNotificationResponse(record);
   }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بأن التسليم تم إرساله للمراجعة.
-  // EN: Creates a pending notification record to inform the client that a delivery was submitted for review.
-  async enqueueDeliverySubmittedForClient(input: {
-    agreementId: string;
-    deliveryId: string;
-    milestoneId: string;
-    milestoneTitle: string;
-  }): Promise<void> {
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: '',
-        type: NotificationType.DELIVERY_SUBMITTED,
-        subject: `Delivery submitted for "${input.milestoneTitle}"`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل طلب تعديلات على التسليم.
-  // EN: Creates a pending notification record to inform the freelancer that changes were requested.
-  async enqueueDeliveryChangesRequestedForFreelancer(input: {
-    agreementId: string;
-    deliveryId: string;
-    milestoneId: string;
-    milestoneTitle: string;
-    reason: string;
-  }): Promise<void> {
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: '',
-        type: NotificationType.DELIVERY_CHANGES_REQUESTED,
-        subject: `Changes requested for "${input.milestoneTitle}"`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بأن طلب تغيير جديد تم إرساله.
-  // EN: Creates a pending notification record to inform the client that a change request was sent.
-  async enqueueChangeRequestSentForClient(input: {
-    agreementId: string;
-    changeRequestId: string;
-    title: string;
-  }): Promise<void> {
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: '',
-        type: NotificationType.CHANGE_REQUEST_CREATED,
-        subject: `Change request sent: "${input.title}"`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل وافق على طلب التغيير.
-  // EN: Creates a pending notification record to inform the freelancer that the client approved the change request.
-  async enqueueChangeRequestApprovedForFreelancer(input: {
-    agreementId: string;
-    changeRequestId: string;
-    title: string;
-  }): Promise<void> {
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: '',
-        type: NotificationType.CHANGE_REQUEST_APPROVED,
-        subject: `Change request approved: "${input.title}"`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل رفض طلب التغيير.
-  // EN: Creates a pending notification record to inform the freelancer that the client declined the change request.
-  async enqueueChangeRequestDeclinedForFreelancer(input: {
-    agreementId: string;
-    changeRequestId: string;
-    title: string;
-  }): Promise<void> {
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: '',
-        type: NotificationType.CHANGE_REQUEST_DECLINED,
-        subject: `Change request declined: "${input.title}"`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  async enqueueAgreementActivatedForClient(input: {
-    agreementId: string;
-    recipientEmail: string;
-    agreementTitle: string;
-  }): Promise<void> {
-    if (!input.recipientEmail.trim()) {
-      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
-    }
-
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: input.recipientEmail,
-        type: NotificationType.AGREEMENT_ACTIVATED,
-        subject: `Agreement activated: ${input.agreementTitle}`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  async enqueueAgreementCancelledForClient(input: {
-    agreementId: string;
-    recipientEmail: string;
-    agreementTitle: string;
-  }): Promise<void> {
-    if (!input.recipientEmail.trim()) {
-      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
-    }
-
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: input.recipientEmail,
-        type: NotificationType.AGREEMENT_CANCELLED,
-        subject: `Agreement cancelled: ${input.agreementTitle}`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  // EN: Creates a PENDING notification record for the client agreement invite.
-  // AR: ينشئ سجل إشعار معلق لدعوة العميل لمراجعة الاتفاقية.
-  async enqueueAgreementInvite(input: {
-    agreementId: string;
-    recipientEmail: string;
-    clientName: string;
-    agreementTitle: string;
-    inviteToken: string;
-  }): Promise<void> {
-    if (!input.recipientEmail.trim()) {
-      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
-    }
-
-    await this.sendNotification({
-      agreementId: input.agreementId,
-      recipientEmail: input.recipientEmail,
-      type: NotificationType.AI_REVIEW_RECOMMENDATION_ACCEPTED,
-      metadata: {
-        paymentStatus: input.paymentStatus,
-        recommendation: input.recommendation,
-      },
-    });
-  }
-
-  async buildTemplateContext(
-    type: NotificationType,
-    agreementId?: string,
-    metadata: Record<string, unknown> = {},
-    userId?: string,
-  ): Promise<TemplateContext> {
-    if (!TEMPLATE_REGISTRY[type]) {
-      throw new AppException({ code: ErrorCode.EMAIL_TYPE_NOT_SUPPORTED });
-    }
-
-    if (!this.requiresAgreement(type)) {
-      return {
-        metadata,
-        recipientEmail: null,
-        recipientName: null,
-      };
-    }
-
-    if (!agreementId) {
-      throw new AppException({ code: ErrorCode.EMAIL_CONTEXT_INCOMPLETE });
-    }
-
-    return this.ensureAgreementContext(agreementId, userId, metadata);
-  }
-
-  renderTemplate(
-    type: NotificationType,
-    context: TemplateContext,
-    locale: EmailLocale,
-  ): RenderedEmail {
-    const template = TEMPLATE_REGISTRY[type];
-
-    if (!template) {
-      throw new AppException({ code: ErrorCode.EMAIL_TEMPLATE_NOT_FOUND });
-    }
-
-    const isArabic = locale === Locale.AR;
-    const subject = isArabic ? template.arSubject : template.enSubject;
-    const title = isArabic ? template.arTitle : template.enTitle;
-    const body = isArabic ? template.arBody : template.enBody;
-    const agreementTitle =
-      context.agreement?.title ?? (isArabic ? 'ضمان' : 'Dhaman');
-    const recipientName =
-      context.recipientName ?? (isArabic ? 'عميل ضمان' : 'Dhaman user');
-    const direction = isArabic ? 'rtl' : 'ltr';
-    const language = isArabic ? 'ar' : 'en';
-
-    const previewText = [
-      subject,
-      title,
-      body,
-      agreementTitle,
-      recipientName,
-    ].join('\n');
-
-    const previewHtml = [
-      `<html lang="${language}" dir="${direction}">`,
-      '<body>',
-      `<h1>${this.escapeHtml(title)}</h1>`,
-      `<p>${this.escapeHtml(body)}</p>`,
-      `<p><strong>${this.escapeHtml(agreementTitle)}</strong></p>`,
-      `<p>${this.escapeHtml(recipientName)}</p>`,
-      '</body>',
-      '</html>',
-    ].join('');
-
-    return { subject, previewHtml, previewText };
-  }
-
-  private async ensureAgreementContext(
-    agreementId: string,
-    userId?: string,
-    metadata: Record<string, unknown> = {},
-  ): Promise<
-    TemplateContext & { client: NonNullable<TemplateContext['client']> }
-  > {
-    const agreement = await this.prisma.agreement.findFirst({
-      where: {
-        id: agreementId,
-        ...(userId ? { freelancerId: userId } : {}),
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        serviceType: true,
-        totalAmount: true,
-        currency: true,
-        status: true,
-        client: {
-          select: {
-            name: true,
-            email: true,
-            companyName: true,
-          },
-        },
-        freelancer: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    if (!agreement) {
-      throw new AppException({ code: ErrorCode.AGREEMENT_NOT_FOUND });
-    }
-
-    return {
-      agreement: {
-        id: agreement.id,
-        title: agreement.title,
-        description: agreement.description,
-        serviceType: agreement.serviceType,
-        totalAmount: agreement.totalAmount.toString(),
-        currency: agreement.currency,
-        status: agreement.status,
-      },
-      client: agreement.client,
-      freelancer: agreement.freelancer,
-      metadata,
-      recipientEmail: agreement.client.email,
-      recipientName: agreement.client.name,
-    };
-  }
-
-  // private async sendWithProvider(): Promise<
-  //   | { ok: true; providerMessageId: string }
-  //   | { ok: false; errorMessage: string }
-  // > {
-  //   if (!process.env.RESEND_API_KEY) {
-  //     return {
-  //       ok: false,
-  //       errorMessage: 'Email provider is not configured; preview stored.',
-  //     };
-  //   }
-
-  //   return {
-  //     ok: true,
-  //     providerMessageId: `demo_${Date.now()}`,
-  //   };
-  // }
-
-  // private async createFailedNotification(
-  //   input: SendNotificationInput,
-  //   error: unknown,
-  // ): Promise<EmailNotificationResponseDto> {
-  //   const locale = this.resolveLocale(input.locale);
-  //   const safeError = this.sanitizeError(error);
-  //   const fallbackTemplate =
-  //     TEMPLATE_REGISTRY[input.type] ?? TEMPLATE_REGISTRY.SYSTEM_TEST;
-  //   const record = await this.prisma.emailNotification.create({
-  //     data: {
-  //       agreementId: input.agreementId ?? null,
-  //       recipientEmail: input.recipientEmail,
-  //       recipientName: input.recipientName ?? null,
-  //       type: input.type,
-  //       subject:
-  //         locale === Locale.AR
-  //           ? fallbackTemplate.arSubject
-  //           : fallbackTemplate.enSubject,
-  //       status: NotificationStatus.FAILED,
-  //       errorMessage: safeError,
-  //       requestId: this.clsService?.get('requestId'),
-  //       correlationId: this.clsService?.get('correlationId'),
-  //       metadata: this.buildNotificationMetadata(input.metadata, locale),
-  //     },
-  //   });
-
-  //   return this.toNotificationResponse(record);
-  // }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بأن التسليم تم إرساله للمراجعة.
-  // EN: Creates a pending notification record to inform the client that a delivery was submitted for review.
-  // async enqueueDeliverySubmittedForClient(input: {
-  //   agreementId: string;
-  //   deliveryId: string;
-  //   milestoneId: string;
-  //   milestoneTitle: string;
-  // }): Promise<void> {
-  //   await this.prisma.emailNotification.create({
-  //     data: {
-  //       agreementId: input.agreementId,
-  //       recipientEmail: '',
-  //       type: NotificationType.DELIVERY_SUBMITTED,
-  //       subject: `Delivery submitted for "${input.milestoneTitle}"`,
-  //       status: NotificationStatus.PENDING,
-  //     },
-  //   });
-  // }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل طلب تعديلات على التسليم.
-  // EN: Creates a pending notification record to inform the freelancer that changes were requested.
-  // async enqueueDeliveryChangesRequestedForFreelancer(input: {
-  //   agreementId: string;
-  //   deliveryId: string;
-  //   milestoneId: string;
-  //   milestoneTitle: string;
-  //   reason: string;
-  // }): Promise<void> {
-  //   await this.prisma.emailNotification.create({
-  //     data: {
-  //       agreementId: input.agreementId,
-  //       recipientEmail: '',
-  //       type: NotificationType.DELIVERY_CHANGES_REQUESTED,
-  //       subject: `Changes requested for "${input.milestoneTitle}"`,
-  //       status: NotificationStatus.PENDING,
-  //     },
-  //   });
-  // }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ العميل بأن طلب تغيير جديد تم إرساله.
-  // EN: Creates a pending notification record to inform the client that a change request was sent.
-  // async enqueueChangeRequestSentForClient(input: {
-  //   agreementId: string;
-  //   changeRequestId: string;
-  //   title: string;
-  // }): Promise<void> {
-  //   await this.prisma.emailNotification.create({
-  //     data: {
-  //       agreementId: input.agreementId,
-  //       recipientEmail: '',
-  //       type: NotificationType.CHANGE_REQUEST_CREATED,
-  //       subject: `Change request sent: "${input.title}"`,
-  //       status: NotificationStatus.PENDING,
-  //     },
-  //   });
-  // }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل وافق على طلب التغيير.
-  // EN: Creates a pending notification record to inform the freelancer that the client approved the change request.
-  // async enqueueChangeRequestApprovedForFreelancer(input: {
-  //   agreementId: string;
-  //   changeRequestId: string;
-  //   title: string;
-  // }): Promise<void> {
-  //   await this.prisma.emailNotification.create({
-  //     data: {
-  //       agreementId: input.agreementId,
-  //       recipientEmail: '',
-  //       type: NotificationType.CHANGE_REQUEST_APPROVED,
-  //       subject: `Change request approved: "${input.title}"`,
-  //       status: NotificationStatus.PENDING,
-  //     },
-  //   });
-  // }
-
-  // AR: ينشئ سجل إشعار معلق لإبلاغ المستقل بأن العميل رفض طلب التغيير.
-  // EN: Creates a pending notification record to inform the freelancer that the client declined the change request.
-  async enqueueChangeRequestDeclinedForFreelancer(input: {
-    agreementId: string;
-    changeRequestId: string;
-    title: string;
-  }): Promise<void> {
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: input.recipientEmail,
-        type: NotificationType.AGREEMENT_INVITE,
-        subject: `Agreement invitation: ${input.agreementTitle}`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  async enqueueAgreementActivatedForClient(input: {
-    agreementId: string;
-    recipientEmail: string;
-    agreementTitle: string;
-  }): Promise<void> {
-    if (!input.recipientEmail.trim()) {
-      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
-    }
-
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: input.recipientEmail,
-        type: NotificationType.AGREEMENT_ACTIVATED,
-        subject: `Agreement activated: ${input.agreementTitle}`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  async enqueueAgreementCancelledForClient(input: {
-    agreementId: string;
-    recipientEmail: string;
-    agreementTitle: string;
-  }): Promise<void> {
-    if (!input.recipientEmail.trim()) {
-      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
-    }
-
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: input.recipientEmail,
-        type: NotificationType.AGREEMENT_CANCELLED,
-        subject: `Agreement cancelled: ${input.agreementTitle}`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
-  // EN: Creates a PENDING notification record for the client agreement invite.
-  // AR: ينشئ سجل إشعار معلق لدعوة العميل لمراجعة الاتفاقية.
-  async enqueueAgreementInvite(input: {
-    agreementId: string;
-    recipientEmail: string;
-    clientName: string;
-    agreementTitle: string;
-    inviteToken: string;
-  }): Promise<void> {
-    if (!input.recipientEmail.trim()) {
-      throw new AppException({ code: ErrorCode.EMAIL_RECIPIENT_REQUIRED });
-    }
-
-    await this.prisma.emailNotification.create({
-      data: {
-        agreementId: input.agreementId,
-        recipientEmail: input.recipientEmail,
-        type: NotificationType.AGREEMENT_INVITE,
-        subject: `Agreement invitation: ${input.agreementTitle}`,
-        status: NotificationStatus.PENDING,
-      },
-    });
-  }
-
 
   private async createResendTimelineEvidence(
     agreementId: string,
