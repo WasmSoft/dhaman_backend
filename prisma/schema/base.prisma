@@ -21,11 +21,14 @@ enum PaymentStatus {
 }
 
 enum DeliveryStatus {
+  DRAFT
   NOT_SUBMITTED
   SUBMITTED
+  CLIENT_REVIEW
   IN_REVIEW
   ACCEPTED
   CHANGES_REQUESTED
+  DISPUTED
 }
 
 enum TimelineActorRole {

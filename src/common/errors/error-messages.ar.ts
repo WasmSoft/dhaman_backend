@@ -49,6 +49,19 @@ export const errorMessagesAr: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.DELIVERY_URL_OR_FILE_REQUIRED]: 'يجب توفير رابط أو ملف للتسليم',
   [ErrorCode.DELIVERY_NOT_IN_REVIEW]: 'التسليم ليس قيد المراجعة',
   [ErrorCode.DELIVERY_ALREADY_ACCEPTED]: 'تم قبول التسليم مسبقاً',
+  [ErrorCode.DELIVERY_ALREADY_EXISTS]:
+    'يوجد تسليم قابل للتعديل لهذه المرحلة بالفعل',
+  [ErrorCode.DELIVERY_NOT_EDITABLE]:
+    'لا يمكن تعديل التسليم في حالته الحالية',
+  [ErrorCode.DELIVERY_NOT_SUBMITTABLE]:
+    'لا يمكن إرسال التسليم في حالته الحالية',
+  [ErrorCode.DELIVERY_EVIDENCE_REQUIRED]:
+    'يجب إضافة دليل أو رابط للتسليم',
+  [ErrorCode.DELIVERY_NOT_REVIEWABLE]:
+    'التسليم غير جاهز لمراجعة العميل',
+  [ErrorCode.AGREEMENT_NOT_ACTIVE]: 'الاتفاق غير نشط',
+  [ErrorCode.PAYMENT_NOT_RESERVED]:
+    'يجب حجز الدفعة قبل مراجعة التسليم',
   [ErrorCode.PORTAL_TOKEN_INVALID]: 'رمز بوابة العميل غير صالح',
   [ErrorCode.PORTAL_TOKEN_EXPIRED]: 'انتهت صلاحية رمز بوابة العميل',
   [ErrorCode.PORTAL_TOKEN_REVOKED]: 'تم إلغاء رمز بوابة العميل',
