@@ -191,6 +191,10 @@ src/modules/
 ├── timeline-events/         # Timeline records for important agreement, payment, delivery, and portal actions
 └── users/                   # User profile, freelancer account data, and user-related operations
 
+```
+
+---
+
 ## 🔁 System Flow
 
 The complete Dhaman backend workflow can be summarized as:
