@@ -1,11 +1,55 @@
-# Dhaman Backend
+<div align="center">
 
-A modular backend API for **Dhaman**, a fintech MVP designed to protect freelance payments through structured agreements, milestone-based payment contracts, protected payment flows, client portal access, delivery tracking, timeline evidence, and AI-powered dispute review.
+# ⚙️ Dhaman Backend
 
-The backend is built with **NestJS**, **Prisma**, and **PostgreSQL**, and it acts as the core business engine for the Dhaman platform. It manages authentication, clients, agreements, milestones, payments, deliveries, AI reviews, portal tokens, email invitations, dashboard analytics, and system state transitions.
+### Modular NestJS API — Structured Payment Protection Engine for Freelance Agreements
 
-> **Core Principle:**  
+[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)](https://neon.tech/)
+[![Passport](https://img.shields.io/badge/Passport-JWT-34E27A?logo=passport&logoColor=white)](http://www.passportjs.org/)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
+[![Resend](https://img.shields.io/badge/Resend-Email-000000?logo=resend&logoColor=white)](https://resend.com/)
+[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?logo=swagger&logoColor=white)](https://swagger.io/)
+[![Jest](https://img.shields.io/badge/Jest-30-C21325?logo=jest&logoColor=white)](https://jestjs.io/)
+[![License](https://img.shields.io/badge/License-Private-red)]()
+
+</div>
+
+---
+
+> **Core Principle:**
 > Dhaman creates balanced financial protection between clients and freelancers: clients pay with confidence, and freelancers work with secured payment assurance.
+
+---
+
+## 📚 Table of Contents
+
+- [🚧 Current Project Status](#-current-project-status)
+- [🧾 Overview](#-overview)
+- [🎯 Project Purpose](#-project-purpose)
+- [💡 Product Concept](#-product-concept)
+- [🧠 Backend Responsibilities](#-backend-responsibilities)
+- [🧩 Core Modules](#-core-modules)
+- [🔁 System Flow](#-system-flow)
+- [📌 Agreement and Payment States](#-agreement-and-payment-states)
+- [📖 API Documentation](#-api-documentation)
+- [🛠️ Technology Stack](#-technology-stack)
+- [📂 Project Structure](#-project-structure)
+- [🔑 Key Files](#-key-files)
+- [🔐 Environment Variables](#-environment-variables)
+- [🚀 Getting Started](#-getting-started)
+- [📜 Available Scripts](#-available-scripts)
+- [🌱 Seeding the Database](#-seeding-the-database)
+- [🧪 Testing](#-testing)
+- [🔌 API Integration](#-api-integration)
+- [🧪 Current Functional Status](#-current-functional-status)
+- [🚢 Deployment](#-deployment)
+- [🗺️ Roadmap](#-roadmap)
+- [🔗 Related Repositories](#-related-repositories)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
 ---
 
@@ -35,36 +79,10 @@ Some secondary frontend integrations may still be in progress, but the backend a
 
 You can explore and test all available backend routes here:
 
-**Swagger API Documentation:**  
+**Swagger API Documentation:**
 https://backend.dhaman.wasmsoft.com/docs
 
 From Swagger, you can view all modules, routes, request bodies, responses, authentication requirements, and test the available backend functionality directly.
-
----
-
-## 📚 Table of Contents
-
-- [Overview](#overview)
-- [Project Purpose](#project-purpose)
-- [Product Concept](#product-concept)
-- [Backend Responsibilities](#backend-responsibilities)
-- [Core Modules](#core-modules)
-- [System Flow](#system-flow)
-- [Agreement and Payment States](#agreement-and-payment-states)
-- [API Documentation](#api-documentation)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Database and Prisma](#database-and-prisma)
-- [Environment Variables](#environment-variables)
-- [Getting Started](#getting-started)
-- [Available Scripts](#available-scripts)
-- [Seeding the Database](#seeding-the-database)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Roadmap](#roadmap)
-- [Related Repositories](#related-repositories)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
@@ -170,8 +188,6 @@ The backend controls the system rules so the frontend does not directly decide s
 
 The backend is organized around domain-focused modules located inside `src/modules/`.
 
-Current backend modules include:
-
 ```text
 src/modules/
 ├── agreement-policies/      # Agreement rules, revision policies, delay rules, and default policy logic
@@ -190,7 +206,6 @@ src/modules/
 ├── settings/                # User settings, default preferences, and configurable platform options
 ├── timeline-events/         # Timeline records for important agreement, payment, delivery, and portal actions
 └── users/                   # User profile, freelancer account data, and user-related operations
-
 ```
 
 ---
@@ -200,15 +215,15 @@ src/modules/
 The complete Dhaman backend workflow can be summarized as:
 
 ```text
-1. Freelancer registers or logs in
-2. Backend authenticates freelancer and issues JWT
-3. Freelancer creates a client record
-4. Freelancer creates an agreement
-5. Freelancer adds milestones and acceptance criteria
-6. Backend creates or updates related payment records
-7. Freelancer sends invitation to the client
-8. Backend generates secure portal token
-9. Client opens invitation link
+1.  Freelancer registers or logs in
+2.  Backend authenticates freelancer and issues JWT
+3.  Freelancer creates a client record
+4.  Freelancer creates an agreement
+5.  Freelancer adds milestones and acceptance criteria
+6.  Backend creates or updates related payment records
+7.  Freelancer sends invitation to the client
+8.  Backend generates secure portal token
+9.  Client opens invitation link
 10. Client approves agreement or requests changes
 11. Agreement becomes active after approval
 12. Freelancer submits milestone delivery
@@ -229,37 +244,37 @@ Clear states are essential in Dhaman because the product is based on financial w
 
 ### Agreement States
 
-```text
-Draft              → Agreement is being created by the freelancer
-Sent               → Agreement invitation has been sent to the client
-Change Requested   → Client requested edits before approval
-Active             → Client approved and project execution started
-Disputed           → A milestone or payment is under dispute
-Completed          → All milestones are completed and payments released
-Archived           → Agreement is no longer active
-```
+| State             | Description                                        |
+| ----------------- | -------------------------------------------------- |
+| Draft             | Agreement is being created by the freelancer       |
+| Sent              | Agreement invitation has been sent to the client   |
+| Change Requested  | Client requested edits before approval             |
+| Active            | Client approved and project execution started      |
+| Disputed          | A milestone or payment is under dispute            |
+| Completed         | All milestones are completed and payments released  |
+| Archived          | Agreement is no longer active                      |
 
 ### Payment States
 
-```text
-Waiting            → Payment is not yet reserved
-Reserved           → Payment is protected or reserved for the milestone
-Client Review      → Delivery was submitted and is waiting for client review
-AI Review          → Dispute is being analyzed by AI
-Ready to Release   → Payment can be released
-Released           → Payment has been released
-On Hold            → Payment is temporarily blocked due to dispute or issue
-```
+| State              | Description                                              |
+| ------------------- | -------------------------------------------------------- |
+| Waiting             | Payment is not yet reserved                              |
+| Reserved            | Payment is protected or reserved for the milestone       |
+| Client Review       | Delivery was submitted and is waiting for client review   |
+| AI Review           | Dispute is being analyzed by AI                           |
+| Ready to Release    | Payment can be released                                  |
+| Released            | Payment has been released                                |
+| On Hold             | Payment is temporarily blocked due to dispute or issue   |
 
 ### Delivery States
 
-```text
-Draft              → Delivery is being prepared
-Submitted          → Delivery was submitted to the client
-Accepted           → Client accepted the delivery
-Changes Requested  → Client requested modifications
-Disputed           → Delivery is under dispute review
-```
+| State              | Description                                   |
+| ------------------- | --------------------------------------------- |
+| Draft               | Delivery is being prepared                    |
+| Submitted           | Delivery was submitted to the client          |
+| Accepted            | Client accepted the delivery                  |
+| Changes Requested   | Client requested modifications               |
+| Disputed            | Delivery is under dispute review              |
 
 ---
 
@@ -278,12 +293,9 @@ Swagger allows developers and testers to:
 - View all backend modules
 - Inspect available endpoints
 - Test authentication routes
-- Create agreements
-- Create milestones
-- Send client invitations
+- Create agreements, milestones, and invitations
 - Test client portal routes
-- Test payment workflows
-- Test delivery workflows
+- Test payment and delivery workflows
 - Trigger AI-related routes
 - Inspect request and response schemas
 
@@ -295,91 +307,174 @@ This is the recommended place to test backend functionality directly, especially
 
 ### Backend Framework
 
-- NestJS
-- TypeScript
-- Node.js
+| Technology          | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| NestJS 11           | Progressive Node.js framework             |
+| TypeScript 5        | Type-safe server-side development         |
+| Node.js             | Runtime environment                      |
 
-### Database and ORM
+### Database & ORM
 
-- PostgreSQL
-- Neon PostgreSQL
-- Prisma ORM
+| Technology          | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| PostgreSQL / Neon   | Managed PostgreSQL database               |
+| Prisma 6            | Type-safe database ORM                    |
 
-### Authentication and Access Control
+### Authentication & Access Control
 
-- JWT authentication for freelancers
-- Secure portal tokens for clients
-- Protected routes and guards
+| Technology          | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| JWT                 | Freelancer authentication                 |
+| Passport.js         | Authentication middleware                 |
+| Portal Tokens       | Secure client access                      |
+| bcrypt              | Password hashing                          |
 
 ### AI Integration
 
-- Google Gemini API
-- AI plan generation
-- AI dispute review
+| Technology          | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| Google Gemini API   | AI-assisted planning and dispute review   |
 
-### Email and Notifications
+### Email & Notifications
 
-- Resend
-- Email invitation flow
-- Email logs or preview support
+| Technology          | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| Resend              | Email delivery and invitations            |
 
-### Documentation and Testing
+### Documentation & Testing
 
-- Swagger / OpenAPI
-- Jest
-- Supertest
-- Testing utilities
+| Technology          | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| Swagger / OpenAPI   | Interactive API documentation             |
+| Jest 30             | Unit and integration testing              |
+| Supertest           | HTTP assertion testing                    |
 
-### Tooling
+### Security & Tooling
 
-- ESLint
-- Prettier
-- Nest CLI
-- Prisma CLI
-- TypeScript build configuration
+| Technology          | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| Helmet              | HTTP security headers                     |
+| ESLint              | Code linting and quality                  |
+| Prettier            | Code formatting                           |
+| Nest CLI            | Scaffolding and development               |
+| Prisma CLI          | Database migrations and management        |
 
 ---
 
 ## 📂 Project Structure
 
-The repository follows a modular NestJS backend architecture with dedicated folders for documentation, Prisma database configuration, application source code, and testing.
-
 ```text
 dhaman_backend/
-├── docs/                       # Internal backend module plans and implementation documentation
-├── prisma/                     # Prisma schema, migrations, and database seed files
-├── src/                        # Main NestJS application source code
-│   ├── common/                 # Shared decorators, guards, filters, pipes, utilities, and constants
-│   ├── config/                 # Application configuration and environment setup
+├── docs/                        # Internal backend module plans and implementation documentation
+├── prisma/                      # Prisma schema, migrations, and database seed files
+│   ├── migrations/              # Database migration history
+│   ├── schema/                  # Prisma schema files
+│   ├── seed.ts                  # Database seeding entry point
+│   └── seed/                    # Seed data modules
+├── src/                         # Main NestJS application source code
+│   ├── common/                  # Shared decorators, guards, filters, pipes, utilities, and constants
+│   ├── config/                  # Application configuration and environment setup
 │   ├── infrastructure/
-│   │   └── prisma/             # Prisma service, database provider, and Prisma infrastructure layer
-│   ├── modules/                # Domain-based backend modules
-│   ├── test/                   # Source-level test helpers or module-specific test utilities
-│   ├── app.controller.spec.ts  # Root controller test file
-│   ├── app.controller.ts       # Root application controller
-│   ├── app.module.ts           # Root NestJS module
-│   ├── app.service.ts          # Root application service
-│   └── main.ts                 # Application bootstrap file
-├── test/                       # End-to-end tests and external test setup
-├── .gitignore                  # Git ignored files and folders
-├── .prettierignore             # Files ignored by Prettier
-├── .prettierrc                 # Prettier formatting configuration
-├── AGENTS_BACKEND.md           # Backend-specific AI agent or collaboration instructions
-├── README.md                   # Project documentation
-├── eslint.config.mjs           # ESLint configuration
-├── nest-cli.json               # NestJS CLI configuration
-├── opencode.json               # OpenCode configuration
-├── package-lock.json           # Locked npm dependency versions
-├── package.json                # Project dependencies, metadata, and available scripts
-├── prisma.config.ts            # Prisma configuration
-├── test-output-final.txt       # Test output log
-├── test-output.txt             # Test output log
-├── test-results.txt            # Test result log
-├── test-result2.txt            # Test result log
-├── test-result3.txt            # Test result log
-├── tsconfig.build.json         # TypeScript build configuration
-└── tsconfig.json               # TypeScript compiler configuration
+│   │   └── prisma/              # Prisma service, database provider, and Prisma infrastructure layer
+│   ├── modules/                 # Domain-based backend modules
+│   │   ├── agreement-policies/  # Agreement rules and policies
+│   │   ├── agreements/          # Agreement lifecycle management
+│   │   ├── ai-plan/             # AI-assisted agreement planning
+│   │   ├── ai-review/           # AI-powered dispute review
+│   │   ├── auth/                # Authentication and JWT handling
+│   │   ├── change-requests/     # Change request management
+│   │   ├── client-portal/       # Token-based client portal access
+│   │   ├── clients/             # Client records management
+│   │   ├── dashboard-analytics/ # Dashboard statistics and overview
+│   │   ├── deliveries/          # Delivery submissions and review
+│   │   ├── email-notifications/ # Email invitations and notifications
+│   │   ├── milestones/          # Milestone creation and tracking
+│   │   ├── payments/            # Payment states and transactions
+│   │   ├── settings/            # User settings and preferences
+│   │   ├── timeline-events/     # Timeline records and evidence
+│   │   └── users/               # User profile and account management
+│   ├── test/                    # Source-level test helpers
+│   ├── app.controller.ts        # Root application controller
+│   ├── app.module.ts            # Root NestJS module
+│   ├── app.service.ts           # Root application service
+│   └── main.ts                  # Application bootstrap file
+├── test/                         # End-to-end tests and external test setup
+├── .env                          # Environment variables (gitignored)
+├── .gitignore                    # Git ignored files and folders
+├── AGENTS_BACKEND.md             # Backend-specific agent instructions
+├── eslint.config.mjs             # ESLint configuration
+├── nest-cli.json                 # NestJS CLI configuration
+├── package.json                  # Dependencies and scripts
+├── prisma.config.ts              # Prisma configuration
+├── tsconfig.build.json          # TypeScript build configuration
+└── tsconfig.json                 # TypeScript compiler configuration
 ```
+
+---
+
+## 🔑 Key Files
+
+| File                          | Purpose                                                 |
+| ----------------------------- | ------------------------------------------------------- |
+| `src/main.ts`                 | Application bootstrap, CORS, Swagger, and global pipes  |
+| `src/app.module.ts`           | Root NestJS module                                       |
+| `prisma/schema/`              | Prisma database schema definitions                       |
+| `prisma/seed.ts`              | Database seeding entry point                             |
+| `src/common/`                  | Shared guards, filters, interceptors, and pipes          |
+| `src/config/`                  | Application configuration and environment setup           |
+| `src/infrastructure/prisma/`  | Prisma service and database provider                     |
+| `prisma.config.ts`             | Prisma configuration file                                |
+| `nest-cli.json`                | NestJS CLI configuration                                 |
+| `.env`                         | Environment variables (gitignored, use .env.example)      |
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file in the root directory and configure the required environment variables.
+
+```env
+# Database
+DATABASE_URL="YOUR_DATABASE_URL"
+
+# Authentication
+JWT_SECRET="YOUR_JWT_SECRET"
+JWT_EXPIRES_IN="7d"
+
+# Client Portal
+CLIENT_PORTAL_TOKEN_SECRET="YOUR_CLIENT_PORTAL_TOKEN_SECRET"
+
+# Server
+PORT=8080
+APP_URL="http://localhost:8080"
+FRONTEND_URL="http://localhost:3032"
+
+# Localization
+DEFAULT_LOCALE="ar"
+
+# Payment
+PAYMENT_MODE="demo"
+
+# Email
+EMAIL_FROM="no-reply@your-domain.com"
+RESEND_API_KEY="YOUR_RESEND_API_KEY"
+
+# AI
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+GEMINI_MODEL="gemini-1.5-flash"
+GEMINI_TIMEOUT_MS="30000"
+
+# Storage
+STORAGE_DRIVER="local"
+
+# Logging
+ENABLE_REQUEST_LOGGING="true"
+
+# CORS
+# FRONTEND_URL can be a comma-separated list of allowed origins
+```
+
+> Never commit real secrets to version control. Always use `.env` locally and `.env.example` as a template.
 
 ---
 
@@ -389,18 +484,16 @@ dhaman_backend/
 
 Make sure you have the following installed:
 
-- Node.js 18+
-- npm
-- PostgreSQL database or Neon PostgreSQL
-- Git
+- **Node.js** 18+
+- **npm**
+- **PostgreSQL** database or Neon PostgreSQL
+- **Git**
 
 Optional but recommended:
 
 - Prisma CLI
 - A REST client such as Postman or Insomnia
 - Access to the Swagger documentation
-
----
 
 ### Installation
 
@@ -430,8 +523,6 @@ cp .env.example .env
 
 Update the `.env` file with your database URL, JWT secret, AI key, email key, and other required configuration values.
 
----
-
 ### Prisma Setup
 
 Generate Prisma client:
@@ -446,13 +537,11 @@ Run database migrations:
 npx prisma migrate dev
 ```
 
-Optional: open Prisma Studio:
+Optional — open Prisma Studio:
 
 ```bash
 npx prisma studio
 ```
-
----
 
 ### Run the Development Server
 
@@ -463,68 +552,33 @@ npm run start:dev
 The backend should run locally at:
 
 ```text
-http://localhost:3000
+http://localhost:8080
 ```
 
 Swagger may be available locally at:
 
 ```text
-http://localhost:3000/docs
+http://localhost:8080/docs
 ```
 
 ---
 
 ## 📜 Available Scripts
 
-### Start Development Server
-
-```bash
-npm run start:dev
-```
-
-### Start Production Server
-
-```bash
-npm run start:prod
-```
-
-### Build the Project
-
-```bash
-npm run build
-```
-
-### Run Linting
-
-```bash
-npm run lint
-```
-
-### Format Code
-
-```bash
-npm run format
-```
-
-### Run Tests
-
-```bash
-npm run test
-```
-
-### Run End-to-End Tests
-
-```bash
-npm run test:e2e
-```
-
-### Run Test Coverage
-
-```bash
-npm run test:cov
-```
-
-Depending on the final `package.json`, some script names may differ.
+| Command                    | Description                          |
+| ------------------------- | ------------------------------------ |
+| `npm run start:dev`       | Start development server (watch mode) |
+| `npm run start:prod`     | Start production server              |
+| `npm run build`           | Build the project                    |
+| `npm run lint`            | Run ESLint                           |
+| `npm run format`          | Format code with Prettier            |
+| `npm run test`            | Run unit and integration tests        |
+| `npm run test:e2e`        | Run end-to-end tests                 |
+| `npm run test:cov`         | Run tests with coverage              |
+| `npm run prisma:generate` | Generate Prisma client               |
+| `npm run prisma:migrate`  | Run Prisma migrations                |
+| `npm run prisma:studio`   | Open Prisma Studio                   |
+| `npm run prisma:seed`     | Seed the database                    |
 
 ---
 
@@ -542,10 +596,10 @@ Seeding may create sample records such as:
 - Demo deliveries
 - Demo timeline events
 
-Run seed command if configured:
+Run seed command:
 
 ```bash
-npx prisma db seed
+npm run prisma:seed
 ```
 
 Or use the project-specific seed script from `package.json` if available.
@@ -556,7 +610,7 @@ Or use the project-specific seed script from `package.json` if available.
 
 The backend includes testing support through NestJS testing tools.
 
-Testing may cover:
+Testing coverage includes:
 
 - Unit tests
 - Service tests
@@ -564,16 +618,6 @@ Testing may cover:
 - Integration tests
 - End-to-end tests
 - API workflow tests
-
-Test result files may be stored in the repository for development tracking, including:
-
-```text
-test-output.txt
-test-output-final.txt
-test-results.txt
-test-result2.txt
-test-result3.txt
-```
 
 Run tests with:
 
@@ -585,6 +629,12 @@ Run end-to-end tests with:
 
 ```bash
 npm run test:e2e
+```
+
+Run coverage report:
+
+```bash
+npm run test:cov
 ```
 
 ---
@@ -611,7 +661,7 @@ The dashboard frontend communicates with the backend for:
 - AI review actions
 - Timeline events
 
-During development, some frontend modules may still be under integration. In that case, use Swagger to directly test the backend routes:
+During development, some frontend modules may still be under integration. Use Swagger to directly test the backend routes:
 
 ```text
 https://backend.dhaman.wasmsoft.com/docs
@@ -621,7 +671,7 @@ https://backend.dhaman.wasmsoft.com/docs
 
 ## 🧪 Current Functional Status
 
-### Ready
+### ✅ Ready
 
 The backend already supports the main Dhaman system capabilities:
 
@@ -644,11 +694,9 @@ The backend already supports the main Dhaman system capabilities:
 - Database seeding
 - Swagger documentation
 
-### Partially Connected from Frontend
+### 🔄 Partially Connected from Frontend
 
-Some secondary features may already exist in the backend but may not be fully integrated in the frontend yet.
-
-Examples may include:
+Some secondary features may already exist in the backend but may not be fully integrated in the frontend yet, including:
 
 - Advanced dashboard analytics
 - Some payment history views
@@ -657,11 +705,9 @@ Examples may include:
 - Some timeline visualizations
 - Some settings and policy management screens
 
-### Testable Through Swagger
+### 📡 Testable Through Swagger
 
 Even when a frontend screen is not fully connected yet, the backend API route may already be available.
-
-Use Swagger to test:
 
 ```text
 https://backend.dhaman.wasmsoft.com/docs
@@ -675,14 +721,14 @@ The backend can be deployed to any Node.js-compatible hosting platform.
 
 Possible deployment targets include:
 
-- Render
-- Railway
-- Fly.io
-- DigitalOcean
-- AWS
-- Google Cloud
-- Azure
-- VPS hosting
+- **Render**
+- **Railway**
+- **Fly.io**
+- **DigitalOcean**
+- **AWS**
+- **Google Cloud**
+- **Azure**
+- **VPS hosting**
 
 ### Production Build
 
@@ -741,11 +787,11 @@ Planned backend improvements may include:
 
 Dhaman is organized into multiple repositories:
 
-```text
-dhaman_landing_page   # Public product landing page
-dhaman_dashboard      # Freelancer dashboard and client portal frontend
-dhaman_backend        # NestJS backend API with Prisma and PostgreSQL
-```
+| Repository              | Description                                              |
+| ----------------------- | -------------------------------------------------------- |
+| `dhaman_landing_page`  | Public product landing page                             |
+| `dhaman_dashboard`     | Freelancer dashboard and client portal frontend          |
+| `dhaman_backend`        | NestJS backend API with Prisma and PostgreSQL            |
 
 ---
 
@@ -801,12 +847,8 @@ License details can be added based on the final project decision.
 
 ---
 
-## 👥 Team Note
+<div align="center">
 
-Dhaman Backend is the core system engine for a focused fintech MVP:
+**Dhaman Backend** — *A financial protection layer for freelance payments.*
 
-```text
-A financial protection layer for freelance payments.
-```
-
-The goal of this repository is to provide a reliable, modular, and scalable backend API that supports structured agreements, milestone-based payments, secure client access, delivery review, payment state control, and AI-assisted dispute resolution.
+</div>
