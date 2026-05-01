@@ -942,7 +942,6 @@ export class PaymentsService {
 
       await this.timelineEventsService.createEvent(
         {
-          actorId: ctx.portalTokenId,
           actorRole: PrismaTimelineActorRole.CLIENT,
           agreementId: payment.agreementId,
           milestoneId: payment.milestoneId ?? undefined,
@@ -1032,7 +1031,6 @@ export class PaymentsService {
 
       await this.timelineEventsService.createEvent(
         {
-          actorId: ctx.portalTokenId,
           actorRole: PrismaTimelineActorRole.CLIENT,
           agreementId: payment.agreementId,
           milestoneId: payment.milestoneId ?? undefined,

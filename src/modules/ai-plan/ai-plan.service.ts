@@ -1,8 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { GeneratePlanDto } from './dto/ai-plan.dto';
-import { GeneratePlanForAgreementDto } from './dto/ai-plan.dto';
-import { GeneratedPlanResponseDto } from './dto/ai-plan.dto';
+import {
+  GenerateAgreementDraftDto,
+  GeneratePlanDto,
+  GeneratePlanForAgreementDto,
+  GeneratedAgreementDraftResponseDto,
+  GeneratedPlanResponseDto,
+} from './dto/ai-plan.dto';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { GeminiProvider } from './gemini.provider';
 
@@ -42,6 +46,15 @@ export interface AiPlanGenerationInput {
   agreementId?: string;
   source?: 'standalone' | 'agreement';
 }
+
+type GeneratedAgreementDraftWithoutId = GeneratedPlanWithoutId & {
+  title: string;
+  description: string;
+  serviceType: string | null;
+  durationText: string | null;
+  expectedDeliveryDate: string | null;
+  currency: string;
+};
 
 const AI_INVALID_RESPONSE_MESSAGE =
   'AI returned an invalid response format. The generated plan could not be parsed or validated.';
@@ -260,6 +273,70 @@ export class AiPlanService {
     ].join('\n');
   }
 
+  buildAgreementDraftPrompt(input: {
+    projectTitle?: string;
+    projectDescription: string;
+    clientName?: string;
+    serviceType?: string;
+    durationText?: string;
+    expectedDeliveryDate?: string;
+    language: string;
+    totalBudget?: number;
+    currency: string;
+  }): string {
+    const outputLanguage = input.language === 'en' ? 'English' : 'Arabic';
+
+    return [
+      'Task:',
+      'You are an expert freelance agreement planner. Build a clean agreement draft and payment plan from the project context below.',
+      '',
+      'Rules:',
+      '- Return JSON only. Do not return markdown or explanation outside the JSON object.',
+      `- All text fields must be written in ${outputLanguage}.`,
+      '- Keep the title concise and professional.',
+      '- The description must be clear enough for a client-facing agreement draft.',
+      '- Generate between 2 and 5 milestones that cover the full project lifecycle.',
+      '- Include practical policies for delay, cancellation, extra requests, and review handling.',
+      '- Assign a clarity score from 0 to 100.',
+      '',
+      `Project title: ${input.projectTitle ?? 'N/A'}`,
+      `Project description: ${input.projectDescription}`,
+      `Client name: ${input.clientName ?? 'N/A'}`,
+      `Service type: ${input.serviceType ?? 'N/A'}`,
+      `Duration text: ${input.durationText ?? 'N/A'}`,
+      `Expected delivery date: ${input.expectedDeliveryDate ?? 'N/A'}`,
+      `Budget hint: ${input.totalBudget ?? 'N/A'}`,
+      `Currency: ${input.currency}`,
+      '',
+      'Output JSON shape:',
+      '{',
+      '  "title": "string",',
+      '  "description": "string",',
+      '  "serviceType": "string",',
+      '  "durationText": "string",',
+      '  "expectedDeliveryDate": "YYYY-MM-DD or null",',
+      '  "currency": "string",',
+      '  "milestones": [',
+      '    {',
+      '      "title": "string",',
+      '      "amount": number,',
+      '      "dueInDays": number,',
+      '      "acceptanceCriteria": ["string"],',
+      '      "revisionLimit": number',
+      '    }',
+      '  ],',
+      '  "policies": {',
+      '    "delayPolicy": "string",',
+      '    "cancellationPolicy": "string",',
+      '    "extraRequestPolicy": "string",',
+      '    "reviewPolicy": "string"',
+      '  },',
+      '  "ambiguityWarnings": ["string"],',
+      '  "clarityScore": number',
+      '}',
+    ].join('\n');
+  }
+
   parseAiResponse(rawResponse: string): GeneratedPlanWithoutId {
     let parsed: unknown;
 
@@ -381,6 +458,140 @@ export class AiPlanService {
       },
       ambiguityWarnings: obj.ambiguityWarnings,
       clarityScore: clarityScore,
+    };
+  }
+
+  private buildMockAgreementDraft(
+    dto: GenerateAgreementDraftDto,
+    language: 'ar' | 'en',
+    currency: string,
+  ): GeneratedAgreementDraftWithoutId {
+    const projectDescription =
+      dto.projectDescription?.trim() ||
+      dto.projectTitle?.trim() ||
+      (language === 'en' ? 'New freelance project' : 'مشروع عمل حر جديد');
+    const plan = this.generateMockPlan(
+      projectDescription,
+      language,
+      dto.totalBudget,
+    );
+    const fallbackTitle =
+      dto.projectTitle?.trim() ||
+      (language === 'en'
+        ? 'Freelance Service Agreement'
+        : 'اتفاق تقديم خدمة مستقلة');
+
+    return {
+      title:
+        language === 'en'
+          ? fallbackTitle
+          : fallbackTitle.startsWith('اتفاق')
+            ? fallbackTitle
+            : `اتفاق ${fallbackTitle}`,
+      description:
+        dto.projectDescription?.trim() ||
+        (language === 'en'
+          ? `Provide ${dto.serviceType ?? 'freelance services'} for ${dto.clientName ?? 'the client'} with clear milestones and acceptance criteria.`
+          : `تنفيذ ${dto.serviceType ?? 'خدمة مستقلة'} لصالح ${dto.clientName ?? 'العميل'} مع مراحل واضحة ومعايير قبول محددة.`),
+      serviceType:
+        dto.serviceType?.trim() ||
+        (language === 'en' ? 'Freelance Services' : 'خدمة مستقلة'),
+      durationText:
+        dto.durationText?.trim() ||
+        `${Math.max(...plan.milestones.map((milestone) => milestone.dueInDays))} ${
+          language === 'en' ? 'days' : 'يوم'
+        }`,
+      expectedDeliveryDate: dto.expectedDeliveryDate?.trim() || null,
+      currency,
+      milestones: plan.milestones,
+      policies: plan.policies,
+      ambiguityWarnings: plan.ambiguityWarnings,
+      clarityScore: plan.clarityScore,
+    };
+  }
+
+  private parseAgreementDraftAiResponse(
+    rawResponse: string,
+  ): GeneratedAgreementDraftWithoutId {
+    const parsedPlan = this.parseAiResponse(rawResponse);
+    let parsed: unknown;
+
+    try {
+      parsed = JSON.parse(rawResponse);
+    } catch {
+      throw new AiInvalidResponseError();
+    }
+
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      throw new AiInvalidResponseError();
+    }
+
+    const obj = parsed as Record<string, unknown>;
+
+    if (typeof obj.title !== 'string' || obj.title.trim().length === 0) {
+      throw new AiInvalidResponseError();
+    }
+
+    if (
+      typeof obj.description !== 'string' ||
+      obj.description.trim().length === 0
+    ) {
+      throw new AiInvalidResponseError();
+    }
+
+    if (typeof obj.currency !== 'string' || obj.currency.trim().length === 0) {
+      throw new AiInvalidResponseError();
+    }
+
+    if (
+      obj.serviceType !== undefined &&
+      obj.serviceType !== null &&
+      typeof obj.serviceType !== 'string'
+    ) {
+      throw new AiInvalidResponseError();
+    }
+
+    if (
+      obj.durationText !== undefined &&
+      obj.durationText !== null &&
+      typeof obj.durationText !== 'string'
+    ) {
+      throw new AiInvalidResponseError();
+    }
+
+    if (
+      obj.expectedDeliveryDate !== undefined &&
+      obj.expectedDeliveryDate !== null &&
+      typeof obj.expectedDeliveryDate !== 'string'
+    ) {
+      throw new AiInvalidResponseError();
+    }
+
+    return {
+      title: obj.title.trim(),
+      description: obj.description.trim(),
+      serviceType:
+        typeof obj.serviceType === 'string' && obj.serviceType.trim().length > 0
+          ? obj.serviceType.trim()
+          : null,
+      durationText:
+        typeof obj.durationText === 'string' && obj.durationText.trim().length > 0
+          ? obj.durationText.trim()
+          : null,
+      expectedDeliveryDate:
+        typeof obj.expectedDeliveryDate === 'string' &&
+        obj.expectedDeliveryDate.trim().length > 0
+          ? obj.expectedDeliveryDate.trim()
+          : null,
+      currency: obj.currency.trim(),
+      milestones: parsedPlan.milestones,
+      policies: parsedPlan.policies,
+      ambiguityWarnings: parsedPlan.ambiguityWarnings,
+      clarityScore: parsedPlan.clarityScore,
     };
   }
 
@@ -536,6 +747,78 @@ export class AiPlanService {
 
     return {
       id: draft.id,
+      milestones: validatedOutput.milestones,
+      policies: validatedOutput.policies,
+      ambiguityWarnings: validatedOutput.ambiguityWarnings,
+      clarityScore: validatedOutput.clarityScore,
+    };
+  }
+
+  async generateAgreementDraft(
+    dto: GenerateAgreementDraftDto,
+    userId: string,
+  ): Promise<GeneratedAgreementDraftResponseDto> {
+    const language = dto.language ?? DEFAULT_AI_PLAN_LANGUAGE;
+    const currency = dto.currency ?? DEFAULT_AI_PLAN_CURRENCY;
+    const projectDescription =
+      dto.projectDescription?.trim() ||
+      dto.projectTitle?.trim() ||
+      (language === 'en' ? 'New freelance project' : 'مشروع عمل حر جديد');
+
+    let validatedOutput: GeneratedAgreementDraftWithoutId;
+    let rawResponseObj: object | null = null;
+
+    if (this.geminiProvider.isEnabled) {
+      try {
+        const prompt = this.buildAgreementDraftPrompt({
+          projectTitle: dto.projectTitle,
+          projectDescription,
+          clientName: dto.clientName,
+          serviceType: dto.serviceType,
+          durationText: dto.durationText,
+          expectedDeliveryDate: dto.expectedDeliveryDate,
+          language,
+          totalBudget: dto.totalBudget,
+          currency,
+        });
+        const rawText = await this.geminiProvider.generateWithRetry(prompt);
+        validatedOutput = this.parseAgreementDraftAiResponse(rawText);
+        rawResponseObj = { text: rawText };
+      } catch {
+        validatedOutput = this.buildMockAgreementDraft(dto, language, currency);
+      }
+    } else {
+      validatedOutput = this.buildMockAgreementDraft(dto, language, currency);
+    }
+
+    const input: AiPlanGenerationInput = {
+      projectDescription,
+      language,
+      totalBudget: dto.totalBudget,
+      currency,
+      source: 'standalone',
+    };
+
+    const draft = await this.storeDraft(
+      userId,
+      input,
+      {
+        milestones: validatedOutput.milestones,
+        policies: validatedOutput.policies,
+        ambiguityWarnings: validatedOutput.ambiguityWarnings,
+        clarityScore: validatedOutput.clarityScore,
+      },
+      rawResponseObj,
+    );
+
+    return {
+      id: draft.id,
+      title: validatedOutput.title,
+      description: validatedOutput.description,
+      serviceType: validatedOutput.serviceType,
+      durationText: validatedOutput.durationText,
+      expectedDeliveryDate: validatedOutput.expectedDeliveryDate,
+      currency: validatedOutput.currency,
       milestones: validatedOutput.milestones,
       policies: validatedOutput.policies,
       ambiguityWarnings: validatedOutput.ambiguityWarnings,

@@ -53,6 +53,46 @@ export interface DashboardMoneyAndCountSummary {
   amountsByCurrency?: Record<CurrencyCode, MoneyString>;
 }
 
+export interface DashboardChartPoint {
+  bucketStart: IsoTimestampString;
+  bucketEnd: IsoTimestampString;
+  count: number;
+}
+
+export interface DashboardChartSummary {
+  metric: 'protected_payments_count';
+  points: DashboardChartPoint[];
+}
+
+export interface DashboardAgreementHighlight {
+  id: string;
+  title: string;
+  totalAmount: MoneyString;
+  currency: CurrencyCode;
+  status: string;
+  updatedAt: IsoTimestampString;
+}
+
+export interface DashboardAiReviewHighlight {
+  id: string;
+  agreementId: string;
+  agreementTitle?: string | null;
+  status: string;
+  recommendation: string;
+  matchScore?: number | null;
+  createdAt: IsoTimestampString;
+}
+
+export interface DashboardRecentPayment {
+  id: string;
+  agreementId: string;
+  agreementTitle?: string | null;
+  amount: MoneyString;
+  currency: CurrencyCode;
+  status: string;
+  createdAt: IsoTimestampString;
+}
+
 export interface DashboardGeneratedMeta {
   generatedAt: IsoTimestampString;
 }

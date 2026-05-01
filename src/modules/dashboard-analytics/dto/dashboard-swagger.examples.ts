@@ -70,6 +70,48 @@ export const DASHBOARD_OVERVIEW_POPULATED_EXAMPLE = {
         USD: '300.00',
       },
     },
+    chart: {
+      metric: 'protected_payments_count',
+      points: [
+        {
+          bucketStart: '2026-04-01T00:00:00.000Z',
+          bucketEnd: '2026-04-02T00:00:00.000Z',
+          count: 1,
+        },
+      ],
+    },
+    recentAgreements: [
+      {
+        id: '8d1a58a2-e89f-4a21-9b6e-becce6a1e985',
+        title: 'Landing page redesign',
+        totalAmount: '1250.00',
+        currency: 'USD',
+        status: 'ACTIVE',
+        updatedAt: '2026-04-29T12:00:00.000Z',
+      },
+    ],
+    recentAiReviews: [
+      {
+        id: '3c27f53a-839a-4e2b-aa3e-76883ed3a535',
+        agreementId: '8d1a58a2-e89f-4a21-9b6e-becce6a1e985',
+        agreementTitle: 'Landing page redesign',
+        status: 'COMPLETED',
+        recommendation: 'ACCEPT',
+        matchScore: 92,
+        createdAt: '2026-04-29T10:30:00.000Z',
+      },
+    ],
+    recentPayments: [
+      {
+        id: '44f8b0c8-3d35-4fc2-b7df-a7660d824afe',
+        agreementId: '8d1a58a2-e89f-4a21-9b6e-becce6a1e985',
+        agreementTitle: 'Landing page redesign',
+        amount: '250.00',
+        currency: 'USD',
+        status: 'READY_TO_RELEASE',
+        createdAt: '2026-04-29T11:00:00.000Z',
+      },
+    ],
     generatedAt: '2026-04-29T12:00:00.000Z',
   },
   meta: {
@@ -102,6 +144,13 @@ export const DASHBOARD_OVERVIEW_EMPTY_EXAMPLE = {
       byStatus: {},
       amountsByCurrency: {},
     },
+    chart: {
+      metric: 'protected_payments_count',
+      points: [],
+    },
+    recentAgreements: [],
+    recentAiReviews: [],
+    recentPayments: [],
     generatedAt: '2026-04-29T12:00:00.000Z',
   },
   meta: {

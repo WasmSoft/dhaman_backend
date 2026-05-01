@@ -21,6 +21,10 @@ describe('dashboard response contracts', () => {
       'agreementSummary',
       'aiReviewSummary',
       'changeRequestSummary',
+      'chart',
+      'recentAgreements',
+      'recentAiReviews',
+      'recentPayments',
       'generatedAt',
     ]);
   });

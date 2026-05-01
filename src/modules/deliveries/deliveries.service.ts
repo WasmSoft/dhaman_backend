@@ -224,6 +224,23 @@ export class DeliveriesService {
   //  UI 2 — Portal Review
   // ──────────────────────────────────────────────────────────
 
+  async getDeliveryFromPortal(
+    token: string,
+    deliveryId: string,
+  ): Promise<DeliveryResponseDto> {
+    await this.resolvePortalToken(token, deliveryId);
+
+    const delivery = await this.prisma.delivery.findUnique({
+      where: { id: deliveryId },
+      include: { milestone: true },
+    });
+    if (!delivery) {
+      throw new AppException({ code: ErrorCode.DELIVERY_NOT_FOUND });
+    }
+
+    return this.toDeliveryResponse(delivery, delivery.milestone || undefined);
+  }
+
   async acceptDeliveryFromPortal(
     token: string,
     deliveryId: string,
@@ -510,7 +527,10 @@ export class DeliveriesService {
     if (portalToken.expiresAt && portalToken.expiresAt < new Date()) {
       throw new AppException({ code: ErrorCode.PORTAL_TOKEN_INVALID });
     }
-    if (portalToken.type !== PortalTokenType.DELIVERY_REVIEW) {
+    if (
+      portalToken.type !== PortalTokenType.DELIVERY_REVIEW &&
+      portalToken.type !== PortalTokenType.AGREEMENT_APPROVAL
+    ) {
       throw new AppException({ code: ErrorCode.PORTAL_TOKEN_INVALID });
     }
     if (portalToken.agreementId !== delivery.agreementId) {

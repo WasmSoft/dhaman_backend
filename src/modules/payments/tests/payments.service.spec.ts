@@ -9,6 +9,10 @@ import { PaymentsService } from '../payments.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClsService } from '../../../common/cls/cls.service';
 import { PaymentOperationType } from '@prisma/client';
+import { ErrorCode } from '../../../common/enums/error-code.enum';
+import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
+import { TimelineEventsService } from '../../timeline-events/timeline-events.service';
+import { AgreementsService } from '../../agreements/agreements.service';
 
 function makeMockPayment(overrides: Record<string, unknown> = {}) {
   return {
@@ -80,6 +84,7 @@ describe('PaymentsService', () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: TimelineEventsService, useValue: mockTimeline },
         { provide: ClsService, useValue: clsServiceMock },
+        { provide: AgreementsService, useValue: {} },
       ],
     }).compile();
 
@@ -1244,6 +1249,7 @@ describe('PaymentsService', () => {
         }),
         mockPrisma,
       );
+      expect(mockTimeline.createEvent.mock.calls[0][0].actorId).toBeUndefined();
     });
   });
 
@@ -1293,6 +1299,7 @@ describe('PaymentsService', () => {
         }),
         mockPrisma,
       );
+      expect(mockTimeline.createEvent.mock.calls[0][0].actorId).toBeUndefined();
     });
   });
 });

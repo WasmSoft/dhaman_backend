@@ -6,8 +6,9 @@ import {
   MilestoneStatus as PrismaMilestoneStatus,
   PaymentStatus as PrismaPaymentStatus,
   AgreementStatus as PrismaAgreementStatus,
+  PortalTokenType,
 } from '@prisma/client';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { ClsService } from '../../common/cls/cls.service';
 import { ErrorCode } from '../../common/enums/error-code.enum';
 import { AppException } from '../../common/errors/app-exception';
@@ -339,6 +340,23 @@ export class AgreementsService {
           milestones: { orderBy: { order: 'asc' } },
           policy: true,
         },
+      });
+
+      await tx.portalToken.createMany({
+        data: [
+          {
+            agreementId: id,
+            tokenHash: createHash('sha256').update(inviteToken).digest('hex'),
+            tokenPreview: inviteToken.substring(0, 8),
+            type: PortalTokenType.AGREEMENT_INVITE,
+          },
+          {
+            agreementId: id,
+            tokenHash: createHash('sha256').update(portalToken).digest('hex'),
+            tokenPreview: portalToken.substring(0, 8),
+            type: PortalTokenType.AGREEMENT_APPROVAL,
+          },
+        ],
       });
 
       await this.timelineEvents.createEvent(

@@ -249,6 +249,24 @@ export class DeliveriesController {
   }
 
   @ApiOperation({
+    summary: 'Get a delivery via client portal token',
+    description: 'Fetches delivery details using a portal token (AGREEMENT_APPROVAL or DELIVERY_REVIEW type).',
+  })
+  @UseGuards(PortalTokenGuard)
+  @ApiParam({ name: 'token', type: String, description: 'Client portal access token' })
+  @ApiParam({ name: 'id', type: String, description: 'Delivery UUID' })
+  @ApiResponse({ status: 200, description: 'Delivery returned.', type: DeliveryResponseDto })
+  @ApiResponse({ status: 401, description: 'PORTAL_TOKEN_INVALID', type: ErrorResponseDto })
+  @ApiResponse({ status: 404, description: 'DELIVERY_NOT_FOUND', type: ErrorResponseDto })
+  @Get('portal/:token/deliveries/:id')
+  getFromPortal(
+    @Param('token') token: string,
+    @Param('id', ParseUuidPipe) id: string,
+  ) {
+    return this.deliveriesService.getDeliveryFromPortal(token, id);
+  }
+
+  @ApiOperation({
     summary: 'Accept a delivery from the client portal',
     description:
       'Accepts a submitted delivery using a portal token. The contract documents that the accept flow creates a delivery timeline event and requests the payment transition from CLIENT_REVIEW to READY_TO_RELEASE through PaymentsService.',

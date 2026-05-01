@@ -115,6 +115,91 @@ export class DashboardMoneyAndCountSummaryDto {
   amountsByCurrency?: Record<string, string>;
 }
 
+export class DashboardChartPointDto {
+  @ApiProperty({ example: '2026-04-01T00:00:00.000Z' })
+  bucketStart!: string;
+
+  @ApiProperty({ example: '2026-04-02T00:00:00.000Z' })
+  bucketEnd!: string;
+
+  @ApiProperty({ example: 3 })
+  count!: number;
+}
+
+export class DashboardChartSummaryDto {
+  @ApiProperty({ example: 'protected_payments_count' })
+  metric!: 'protected_payments_count';
+
+  @ApiProperty({ type: () => DashboardChartPointDto, isArray: true })
+  points!: DashboardChartPointDto[];
+}
+
+export class DashboardAgreementHighlightDto {
+  @ApiProperty({ example: '8d1a58a2-e89f-4a21-9b6e-becce6a1e985' })
+  id!: string;
+
+  @ApiProperty({ example: 'Landing page redesign' })
+  title!: string;
+
+  @ApiProperty({ example: '1250.00' })
+  totalAmount!: string;
+
+  @ApiProperty({ example: 'USD' })
+  currency!: string;
+
+  @ApiProperty({ example: 'ACTIVE' })
+  status!: string;
+
+  @ApiProperty({ example: '2026-04-29T12:00:00.000Z' })
+  updatedAt!: string;
+}
+
+export class DashboardAiReviewHighlightDto {
+  @ApiProperty({ example: '3c27f53a-839a-4e2b-aa3e-76883ed3a535' })
+  id!: string;
+
+  @ApiProperty({ example: '8d1a58a2-e89f-4a21-9b6e-becce6a1e985' })
+  agreementId!: string;
+
+  @ApiPropertyOptional({ example: 'Landing page redesign', nullable: true })
+  agreementTitle?: string | null;
+
+  @ApiProperty({ example: 'COMPLETED' })
+  status!: string;
+
+  @ApiProperty({ example: 'ACCEPT' })
+  recommendation!: string;
+
+  @ApiPropertyOptional({ example: 92, nullable: true })
+  matchScore?: number | null;
+
+  @ApiProperty({ example: '2026-04-29T12:00:00.000Z' })
+  createdAt!: string;
+}
+
+export class DashboardRecentPaymentDto {
+  @ApiProperty({ example: '44f8b0c8-3d35-4fc2-b7df-a7660d824afe' })
+  id!: string;
+
+  @ApiProperty({ example: '8d1a58a2-e89f-4a21-9b6e-becce6a1e985' })
+  agreementId!: string;
+
+  @ApiPropertyOptional({ example: 'Landing page redesign', nullable: true })
+  agreementTitle?: string | null;
+
+  @ApiProperty({ example: '250.00' })
+  amount!: string;
+
+  @ApiProperty({ example: 'USD' })
+  currency!: string;
+
+  @ApiProperty({ example: 'READY_TO_RELEASE' })
+  status!: string;
+
+  @ApiProperty({ example: '2026-04-29T11:00:00.000Z' })
+  createdAt!: string;
+}
+
 export class DashboardOverviewResponseDto {
   @ApiProperty({ enum: DASHBOARD_RANGE_VALUES, example: '30d' })
   range!: DashboardRange;
@@ -136,6 +221,18 @@ export class DashboardOverviewResponseDto {
 
   @ApiProperty({ type: () => DashboardMoneyAndCountSummaryDto })
   changeRequestSummary!: DashboardMoneyAndCountSummaryDto;
+
+  @ApiProperty({ type: () => DashboardChartSummaryDto })
+  chart!: DashboardChartSummaryDto;
+
+  @ApiProperty({ type: () => DashboardAgreementHighlightDto, isArray: true })
+  recentAgreements!: DashboardAgreementHighlightDto[];
+
+  @ApiProperty({ type: () => DashboardAiReviewHighlightDto, isArray: true })
+  recentAiReviews!: DashboardAiReviewHighlightDto[];
+
+  @ApiProperty({ type: () => DashboardRecentPaymentDto, isArray: true })
+  recentPayments!: DashboardRecentPaymentDto[];
 
   @ApiProperty({ example: '2026-04-29T12:00:00.000Z' })
   generatedAt!: string;

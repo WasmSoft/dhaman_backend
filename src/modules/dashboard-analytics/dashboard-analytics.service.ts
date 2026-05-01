@@ -76,6 +76,10 @@ export class DashboardAnalyticsService {
         changeRequestAmountRows,
         clientCount,
         deliveriesInReviewCount,
+        chartPaymentRows,
+        recentAgreementRows,
+        recentAiReviewRows,
+        recentPaymentRows,
       ] = await Promise.all([
         this.prisma.agreement.groupBy({
           by: ['status'],
@@ -141,6 +145,71 @@ export class DashboardAnalyticsService {
             ...(createdAt ? { createdAt } : {}),
           },
         }),
+        this.prisma.payment.findMany({
+          where: {
+            demoMode: true,
+            agreement: { freelancerId: userId },
+            status: { in: [...PROTECTED_PAYMENT_STATUSES] },
+            ...(currency ? { currency } : {}),
+            ...(createdAt ? { createdAt } : {}),
+          },
+          orderBy: { createdAt: 'asc' },
+          select: {
+            createdAt: true,
+          },
+        }),
+        this.prisma.agreement.findMany({
+          where: {
+            freelancerId: userId,
+            ...(createdAt ? { createdAt } : {}),
+          },
+          orderBy: { updatedAt: 'desc' },
+          take: 4,
+          select: {
+            id: true,
+            title: true,
+            totalAmount: true,
+            currency: true,
+            status: true,
+            updatedAt: true,
+          },
+        }),
+        this.prisma.aIReview.findMany({
+          where: {
+            agreement: { freelancerId: userId },
+            ...(createdAt ? { createdAt } : {}),
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 3,
+          select: {
+            id: true,
+            agreementId: true,
+            status: true,
+            recommendation: true,
+            matchScore: true,
+            createdAt: true,
+            agreement: { select: { title: true } },
+          },
+        }),
+        this.prisma.payment.findMany({
+          where: {
+            demoMode: true,
+            agreement: { freelancerId: userId },
+            ...(currency ? { currency } : {}),
+            ...(createdAt ? { createdAt } : {}),
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 6,
+          select: {
+            id: true,
+            agreementId: true,
+            amount: true,
+            currency: true,
+            status: true,
+            createdAt: true,
+            agreement: { select: { title: true } },
+          },
+        }),
       ]);
 
       const agreementSummary = this.buildAgreementSummary(agreementRows);
@@ -178,6 +247,33 @@ export class DashboardAnalyticsService {
         agreementSummary,
         aiReviewSummary,
         changeRequestSummary,
+        chart: this.buildOverviewChart(chartPaymentRows, range),
+        recentAgreements: recentAgreementRows.map((agreement) => ({
+          id: agreement.id,
+          title: agreement.title,
+          totalAmount: serializeDashboardMoney(agreement.totalAmount),
+          currency: agreement.currency,
+          status: agreement.status,
+          updatedAt: agreement.updatedAt.toISOString(),
+        })),
+        recentAiReviews: recentAiReviewRows.map((review) => ({
+          id: review.id,
+          agreementId: review.agreementId,
+          agreementTitle: review.agreement.title,
+          status: review.status,
+          recommendation: review.recommendation,
+          matchScore: review.matchScore,
+          createdAt: review.createdAt.toISOString(),
+        })),
+        recentPayments: recentPaymentRows.map((payment) => ({
+          id: payment.id,
+          agreementId: payment.agreementId,
+          agreementTitle: payment.agreement.title,
+          amount: serializeDashboardMoney(payment.amount),
+          currency: payment.currency,
+          status: payment.status,
+          createdAt: payment.createdAt.toISOString(),
+        })),
         generatedAt: this.getGeneratedAt(),
       };
     });
@@ -618,6 +714,146 @@ export class DashboardAnalyticsService {
         trend: null,
       },
     ];
+  }
+
+  private buildOverviewChart(
+    rows: Array<{ createdAt: Date }>,
+    range: DashboardRange,
+  ): DashboardOverviewResponse['chart'] {
+    const buckets = this.createChartBuckets(range, new Date());
+    const countsByBucket = new Map(buckets.map((bucket) => [bucket.key, 0]));
+
+    for (const row of rows) {
+      const bucket = buckets.find(
+        (candidate) =>
+          row.createdAt >= candidate.start && row.createdAt < candidate.end,
+      );
+
+      if (!bucket) {
+        continue;
+      }
+
+      countsByBucket.set(bucket.key, (countsByBucket.get(bucket.key) ?? 0) + 1);
+    }
+
+    return {
+      metric: 'protected_payments_count',
+      points: buckets.map((bucket) => ({
+        bucketStart: bucket.start.toISOString(),
+        bucketEnd: bucket.end.toISOString(),
+        count: countsByBucket.get(bucket.key) ?? 0,
+      })),
+    };
+  }
+
+  private createChartBuckets(
+    range: DashboardRange,
+    now: Date,
+  ): Array<{ key: string; start: Date; end: Date }> {
+    if (range === 'all') {
+      return this.createMonthlyBuckets(now, 12);
+    }
+
+    if (range === '90d') {
+      return this.createRollingBuckets(now, 13, 7);
+    }
+
+    return this.createDailyBuckets(now, range === '7d' ? 7 : 30);
+  }
+
+  private createDailyBuckets(
+    now: Date,
+    days: number,
+  ): Array<{ key: string; start: Date; end: Date }> {
+    const end = this.startOfUtcDay(this.addUtcDays(now, 1));
+    const start = this.startOfUtcDay(this.addUtcDays(end, -days));
+    const buckets: Array<{ key: string; start: Date; end: Date }> = [];
+
+    for (let index = 0; index < days; index += 1) {
+      const bucketStart = this.addUtcDays(start, index);
+      const bucketEnd = this.addUtcDays(bucketStart, 1);
+      buckets.push({
+        key: bucketStart.toISOString(),
+        start: bucketStart,
+        end: bucketEnd,
+      });
+    }
+
+    return buckets;
+  }
+
+  private createRollingBuckets(
+    now: Date,
+    count: number,
+    daysPerBucket: number,
+  ): Array<{ key: string; start: Date; end: Date }> {
+    const end = this.startOfUtcDay(this.addUtcDays(now, 1));
+    const start = this.startOfUtcDay(
+      this.addUtcDays(end, -(count * daysPerBucket)),
+    );
+    const buckets: Array<{ key: string; start: Date; end: Date }> = [];
+
+    for (let index = 0; index < count; index += 1) {
+      const bucketStart = this.addUtcDays(start, index * daysPerBucket);
+      const bucketEnd = this.addUtcDays(bucketStart, daysPerBucket);
+      buckets.push({
+        key: bucketStart.toISOString(),
+        start: bucketStart,
+        end: bucketEnd,
+      });
+    }
+
+    return buckets;
+  }
+
+  private createMonthlyBuckets(
+    now: Date,
+    months: number,
+  ): Array<{ key: string; start: Date; end: Date }> {
+    const currentMonthStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+    );
+    const buckets: Array<{ key: string; start: Date; end: Date }> = [];
+
+    for (let index = months - 1; index >= 0; index -= 1) {
+      const bucketStart = new Date(
+        Date.UTC(
+          currentMonthStart.getUTCFullYear(),
+          currentMonthStart.getUTCMonth() - index,
+          1,
+        ),
+      );
+      const bucketEnd = new Date(
+        Date.UTC(
+          bucketStart.getUTCFullYear(),
+          bucketStart.getUTCMonth() + 1,
+          1,
+        ),
+      );
+      buckets.push({
+        key: bucketStart.toISOString(),
+        start: bucketStart,
+        end: bucketEnd,
+      });
+    }
+
+    return buckets;
+  }
+
+  private startOfUtcDay(value: Date): Date {
+    return new Date(
+      Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()),
+    );
+  }
+
+  private addUtcDays(value: Date, days: number): Date {
+    return new Date(
+      Date.UTC(
+        value.getUTCFullYear(),
+        value.getUTCMonth(),
+        value.getUTCDate() + days,
+      ),
+    );
   }
 
   private getRequiredUserId(): string {

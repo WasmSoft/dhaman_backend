@@ -109,6 +109,12 @@ export class PortalWorkspaceResponseDto {
   })
   freelancerName!: string;
 
+  @ApiPropertyOptional({
+    description: 'Client display name',
+    example: 'Sara Al-Rashid',
+  })
+  clientName?: string;
+
   @ApiProperty({
     description: 'Milestones list',
     type: [PortalMilestoneSummaryDto],

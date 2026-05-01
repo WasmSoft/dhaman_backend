@@ -18,8 +18,10 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ParseUuidPipe } from '../../common/pipes/parse-uuid.pipe';
 import type { AuthenticatedUser } from '../../common/types/authenticated-user.type';
 import {
+  GenerateAgreementDraftDto,
   GeneratePlanDto,
   GeneratePlanForAgreementDto,
+  GeneratedAgreementDraftResponseDto,
   GeneratedPlanResponseDto,
 } from './dto/ai-plan.dto';
 import { AiPlanService } from './ai-plan.service';
@@ -30,6 +32,37 @@ import { AiPlanService } from './ai-plan.service';
 @Controller()
 export class AiPlanController {
   constructor(private readonly aiPlanService: AiPlanService) {}
+
+  @Post('ai/generate-agreement-draft')
+  @HttpCode(201)
+  @ApiOperation({
+    summary: 'Generate agreement draft',
+    description:
+      'Generates suggested agreement fields, payment milestones, and policies from the current create-agreement inputs. Uses AI provider when available and deterministic fallback otherwise.',
+  })
+  @ApiResponse({
+    status: 201,
+    type: GeneratedAgreementDraftResponseDto,
+    description: 'Agreement draft generated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'VALIDATION_ERROR — invalid input fields',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'UNAUTHORIZED — missing or invalid JWT',
+  })
+  @ApiResponse({
+    status: 502,
+    description: 'AI_PLAN_GENERATION_FAILED | AI_INVALID_RESPONSE',
+  })
+  generateAgreementDraft(
+    @Body() dto: GenerateAgreementDraftDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<GeneratedAgreementDraftResponseDto> {
+    return this.aiPlanService.generateAgreementDraft(dto, user.id);
+  }
 
   @Post('ai/generate-payment-plan')
   @HttpCode(201)

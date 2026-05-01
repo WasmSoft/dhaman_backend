@@ -84,6 +84,96 @@ export class GeneratePlanForAgreementDto {
   language?: 'ar' | 'en';
 }
 
+export class GenerateAgreementDraftDto {
+  @ApiPropertyOptional({
+    description: 'اسم المشروع الحالي / Current project title',
+    example: 'تصميم صفحة هبوط لشركة ناشئة',
+    maxLength: 200,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  projectTitle?: string;
+
+  @ApiPropertyOptional({
+    description: 'وصف المشروع الحالي / Current project description',
+    example: 'تصميم صفحة هبوط متجاوبة مع نسخة Desktop وMobile',
+    maxLength: 5000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  projectDescription?: string;
+
+  @ApiPropertyOptional({
+    description: 'اسم العميل / Client name',
+    example: 'شركة المدار',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  clientName?: string;
+
+  @ApiPropertyOptional({
+    description: 'نوع الخدمة / Service category',
+    example: 'تصميم واجهات',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  serviceType?: string;
+
+  @ApiPropertyOptional({
+    description: 'مدة التنفيذ الحالية / Current duration text',
+    example: '14 يوم',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  durationText?: string;
+
+  @ApiPropertyOptional({
+    description: 'تاريخ التسليم المتوقع / Expected delivery date',
+    example: '2026-07-01',
+  })
+  @IsOptional()
+  @IsString()
+  expectedDeliveryDate?: string;
+
+  @ApiPropertyOptional({
+    description: 'لغة المخرجات / Output language',
+    example: 'ar',
+    enum: ['ar', 'en'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['ar', 'en'])
+  language?: 'ar' | 'en';
+
+  @ApiPropertyOptional({
+    description: 'الميزانية التقديرية / Total budget hint',
+    example: 5000,
+    minimum: 100,
+    maximum: 1000000,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(100)
+  @Max(1000000)
+  totalBudget?: number;
+
+  @ApiPropertyOptional({
+    description: 'رمز العملة / Currency code',
+    example: 'SAR',
+  })
+  @IsOptional()
+  @IsString()
+  currency?: string;
+}
+
 export class GeneratedMilestoneDto {
   @ApiProperty({
     description: 'عنوان المرحلة / Milestone title',
@@ -211,4 +301,57 @@ export class GeneratedPlanResponseDto {
   @Min(0)
   @Max(100)
   clarityScore!: number;
+}
+
+export class GeneratedAgreementDraftResponseDto extends GeneratedPlanResponseDto {
+  @ApiProperty({
+    description: 'عنوان الاتفاق المقترح / Suggested agreement title',
+    example: 'اتفاق تصميم صفحة هبوط لشركة ناشئة',
+  })
+  @IsString()
+  @IsNotEmpty()
+  title!: string;
+
+  @ApiProperty({
+    description: 'وصف الاتفاق المقترح / Suggested agreement description',
+    example: 'تصميم صفحة هبوط متجاوبة مع مخرجات واضحة وجدول دفع مرحلي.',
+  })
+  @IsString()
+  @IsNotEmpty()
+  description!: string;
+
+  @ApiPropertyOptional({
+    description: 'نوع الخدمة المقترح / Suggested service type',
+    example: 'تصميم واجهات',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  serviceType?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'المدة المقترحة / Suggested duration text',
+    example: '14 يوم',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  durationText?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'تاريخ التسليم المقترح / Suggested expected delivery date',
+    example: '2026-07-01',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  expectedDeliveryDate?: string | null;
+
+  @ApiProperty({
+    description: 'رمز العملة المقترح / Suggested currency code',
+    example: 'SAR',
+  })
+  @IsString()
+  @IsNotEmpty()
+  currency!: string;
 }

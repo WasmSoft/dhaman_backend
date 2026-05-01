@@ -459,6 +459,7 @@ export class ClientPortalService {
       where: { id: agreementId },
       include: {
         freelancer: { select: { name: true } },
+        client: { select: { name: true } },
         milestones: {
           orderBy: { order: 'asc' },
           select: {
@@ -543,6 +544,7 @@ export class ClientPortalService {
       totalAmount: String(agreement.totalAmount),
       currency: agreement.currency,
       freelancerName: agreement.freelancer.name,
+      clientName: agreement.client?.name ?? '',
       milestones: agreement.milestones.map((m) => ({
         id: m.id,
         order: m.order,
