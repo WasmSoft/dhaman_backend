@@ -509,10 +509,16 @@ Navigate into the project directory:
 cd dhaman_backend
 ```
 
-Install dependencies:
+Install project dependencies:
 
 ```bash
 npm install
+```
+
+Install Resend for email invitations and notifications:
+
+```bash
+npm install resend
 ```
 
 Create your environment file:
@@ -521,7 +527,7 @@ Create your environment file:
 cp .env.example .env
 ```
 
-Update the `.env` file with your database URL, JWT secret, AI key, email key, and other required configuration values.
+Update the `.env` file with your database URL, JWT secret, portal token secret, Resend API key, AI key, and other required configuration values.
 
 ### Prisma Setup
 
